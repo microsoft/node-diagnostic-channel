@@ -1,9 +1,9 @@
 /// <reference path="../IReplacement.d.ts" />
 
-import {ApplicationInsights} from "applicationinsights";
+import * as ApplicationInsights from "applicationinsights";
 
 const mongodbcorePatchFunction : PatchFunction = function (originalMongoCore) {
-    if (!ApplicationInsights.wrapCallback) {
+    if (!ApplicationInsights.wrapWithCorrelationContext) {
         return originalMongoCore;
     }
     const originalConnect = originalMongoCore.Server.prototype.connect;
@@ -17,7 +17,7 @@ const mongodbcorePatchFunction : PatchFunction = function (originalMongoCore) {
         this.s.pool.write = function contextPreservingWrite() {
             const cbidx = typeof arguments[1] === 'function' ? 1 : 2;
             if (typeof arguments[cbidx] === 'function') {
-                arguments[cbidx] = ApplicationInsights.wrapCallback(arguments[cbidx]);
+                arguments[cbidx] = ApplicationInsights.wrapWithCorrelationContext(arguments[cbidx]);
             }
             return originalWrite.apply(this, arguments);
         };
@@ -27,7 +27,7 @@ const mongodbcorePatchFunction : PatchFunction = function (originalMongoCore) {
         const originalLogout = this.s.pool.logout;
         this.s.pool.logout = function contextPreservingLogout() {
             if (typeof arguments[1] === 'function') {
-                arguments[1] = ApplicationInsights.wrapCallback(arguments[1]);
+                arguments[1] = ApplicationInsights.wrapWithCorrelationContext(arguments[1]);
             }
             return originalLogout.apply(this, arguments);
         };

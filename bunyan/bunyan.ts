@@ -1,6 +1,6 @@
 /// <reference path="../IReplacement.d.ts" />
 
-import {ApplicationInsights} from "applicationinsights";
+import * as ApplicationInsights from "applicationinsights";
 import {SeverityLevel} from "applicationinsights/Library/Contracts";
 
 const bunyanPatchFunction : PatchFunction = (originalBunyan) => {

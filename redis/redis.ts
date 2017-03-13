@@ -1,10 +1,15 @@
 /// <reference path="../IReplacement.d.ts" />
 
-import {ApplicationInsights} from "applicationinsights";
+import * as ApplicationInsights from "applicationinsights";
 
 const redisPatchFunction : PatchFunction = (originalRedis) => {
+    if (!ApplicationInsights.wrapWithCorrelationContext) {
+        return originalRedis;
+    }
+    
     const originalSend = originalRedis.RedisClient.prototype.internal_send_command;
 
+    // Note: This is mixing together both context tracking and dependency tracking
     originalRedis.RedisClient.prototype.internal_send_command = function (command_obj) {
         if (command_obj) {
             const cb = command_obj.callback;

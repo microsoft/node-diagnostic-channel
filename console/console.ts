@@ -1,6 +1,6 @@
 /// <reference path="../IReplacement.d.ts" />
 
-import {ApplicationInsights} from "applicationinsights";
+import * as ApplicationInsights from "applicationinsights";
 import {SeverityLevel} from "applicationinsights/Library/Contracts";
 import {Writable} from "stream";
 
@@ -41,7 +41,10 @@ const consolePatchFunction : PatchFunction = (originalConsole) => {
     const aiLoggingConsole : Console = new originalConsole.Console(aiLoggingOutStream, aiLoggingErrStream);
     aiLoggingConsole.Console = originalConsole.Console;
 
-    global.console = aiLoggingConsole;
+    const consolePropertyDescriptor = Object.getOwnPropertyDescriptor(global, 'console');
+    consolePropertyDescriptor.get = function () { return aiLoggingConsole; };
+    Object.defineProperty(global, 'console', consolePropertyDescriptor);
+
     return aiLoggingConsole;
 }
 

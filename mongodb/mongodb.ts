@@ -1,8 +1,12 @@
 /// <reference path="../IReplacement.d.ts" />
 
-import {ApplicationInsights} from 'applicationinsights';
+import * as ApplicationInsights from 'applicationinsights';
 
 const mongodbPatchFunction: PatchFunction = function (originalMongo) {
+    if (!ApplicationInsights.wrapWithCorrelationContext) {
+        return originalMongo;
+    }
+
     const listener = originalMongo.instrument({
         operationIdGenerator: {
             next: function () {
@@ -47,9 +51,11 @@ const mongodbPatchFunction: PatchFunction = function (originalMongo) {
         }
         delete eventMap[event.requestId];
     });
+    
+    return originalMongo;
 }
 
 export const mongo2: IModulePatcher = {
-    versionSpecifier: '>= 2.0.0 <= 2.2.0',
+    versionSpecifier: '>= 2.0.0 <= 2.3.0',
     patch: mongodbPatchFunction
 }
