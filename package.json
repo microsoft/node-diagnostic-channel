@@ -8,7 +8,8 @@
         "semver": "*"
     },
     "devDependencies": {
-        "typescript": "^2.2.1"
+        "typescript": "^2.2.1",
+        "applicationinsights": ">=0.19.0"
     },
     "peerDependencies": {
         "applicationinsights": ">=0.19.0"
