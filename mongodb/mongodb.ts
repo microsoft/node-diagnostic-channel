@@ -17,30 +17,45 @@ const mongodbPatchFunction: PatchFunction = function (originalMongo) {
     });
     const eventMap = {}
     listener.on('started', function (event) {
+        if (eventMap[event.requestId]) {
+            // Note: Mongo can generate 2 completely separate requests
+            // which share the same requestId, if a certain race condition is triggered.
+            // For now, we accept that this can happen and potentially miss or mislabel some events.
+            return;
+        }
         eventMap[event.requestId] = event;
     });
 
     listener.on('succeeded', function (event) {
+        let dbName = "unknown mongo db";
+        if (eventMap[event.requestId]) {
+            dbName = eventMap[event.requestId].databaseName;
+            delete eventMap[event.requestId];
+        }
         // TODO: expose this setting more naturally?
         if (ApplicationInsights._isDependencies && ApplicationInsights.client) {
             event.operationId(() => {
                 ApplicationInsights.client
                     .trackDependency(
-                        eventMap[event.requestId].databaseName,
+                        dbName,
                         event.commandName,
                         event.duration,
                         true,
                         'mongodb');
             });
         }
-        delete eventMap[event.requestId];
     });
     listener.on('failed', function (event) {
+        let dbName = "unknown mongo db";
+        if (eventMap[event.requestId]) {
+            dbName = eventMap[event.requestId].databaseName;
+            delete eventMap[event.requestId];
+        }
         if (ApplicationInsights._isDependencies && ApplicationInsights.client) {
             event.operationId(() => {
                 ApplicationInsights.client
                     .trackDependency(
-                        eventMap[event.requestId].databaseName,
+                        dbName,
                         event.commandName,
                         event.duration,
                         false,
@@ -49,7 +64,6 @@ const mongodbPatchFunction: PatchFunction = function (originalMongo) {
                     .trackException(event.failure);
             });
         }
-        delete eventMap[event.requestId];
     });
     
     return originalMongo;
