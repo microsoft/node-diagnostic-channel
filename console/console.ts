@@ -1,7 +1,7 @@
 /// <reference path="../IReplacement.d.ts" />
 
 import * as ApplicationInsights from "applicationinsights";
-import {SeverityLevel} from "applicationinsights/Library/Contracts";
+import {Contracts} from "applicationinsights/Library/Contracts";
 import {Writable} from "stream";
 
 const consolePatchFunction : PatchFunction = (originalConsole) => {
@@ -31,7 +31,7 @@ const consolePatchFunction : PatchFunction = (originalConsole) => {
         const data = chunk.toString();
 
         if (ApplicationInsights.client) {
-            ApplicationInsights.client.trackTrace(data, SeverityLevel.Warning);
+            ApplicationInsights.client.trackTrace(data, Contracts.SeverityLevel.Warning);
         }
 
         process.stderr.write(chunk);

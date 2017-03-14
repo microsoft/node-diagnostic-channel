@@ -1,18 +1,18 @@
 /// <reference path="../IReplacement.d.ts" />
 
 import * as ApplicationInsights from "applicationinsights";
-import {SeverityLevel} from "applicationinsights/Library/Contracts";
+import {Contracts} from "applicationinsights/Library/Contracts";
 
 const bunyanPatchFunction : PatchFunction = (originalBunyan) => {
     const originalEmit = originalBunyan.prototype._emit;
 
     const bunyanToAILevelMap = {};
-    bunyanToAILevelMap[originalBunyan.TRACE] = SeverityLevel.Verbose;
-    bunyanToAILevelMap[originalBunyan.DEBUG] = SeverityLevel.Verbose;
-    bunyanToAILevelMap[originalBunyan.INFO] = SeverityLevel.Information;
-    bunyanToAILevelMap[originalBunyan.WARN] = SeverityLevel.Warning;
-    bunyanToAILevelMap[originalBunyan.ERROR] = SeverityLevel.Error;
-    bunyanToAILevelMap[originalBunyan.FATAL] = SeverityLevel.Critical;
+    bunyanToAILevelMap[originalBunyan.TRACE] = Contracts.SeverityLevel.Verbose;
+    bunyanToAILevelMap[originalBunyan.DEBUG] = Contracts.SeverityLevel.Verbose;
+    bunyanToAILevelMap[originalBunyan.INFO] = Contracts.SeverityLevel.Information;
+    bunyanToAILevelMap[originalBunyan.WARN] = Contracts.SeverityLevel.Warning;
+    bunyanToAILevelMap[originalBunyan.ERROR] = Contracts.SeverityLevel.Error;
+    bunyanToAILevelMap[originalBunyan.FATAL] = Contracts.SeverityLevel.Critical;
 
     originalBunyan.prototype._emit = function (rec, noemit) {
         const ret = originalEmit.apply(this, arguments);
