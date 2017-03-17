@@ -42,7 +42,7 @@ export function makePatchingRequire(knownPatches: IModulePatchMap) {
             }
             const modulePatcher : IModulePatcher = knownPatches[moduleId].find((v) => semver.satisfies(moduleVersion, v.versionSpecifier))
             if (modulePatcher) {
-                return patchedModules[modulePath] = modulePatcher.patch(originalModule);
+                return patchedModules[modulePath] = modulePatcher.patch(originalModule, modulePath);
             }
         }
         return originalModule;
