@@ -8,35 +8,50 @@ const mysqlPatchFunction : PatchFunction = function (originalMysql, originalMysq
         return originalMysql;
     }
 
-    const patchClassFunction = (classObject) => {
+    const patchObjectFunction = (obj) => {
         return (func) => {
-            const originalFunc = classObject.prototype[func];
+            const originalFunc = obj[func];
             if (originalFunc) {
-                classObject.prototype[func] = function () {
-                    const cb = arguments[arguments.length -1];
+                obj[func] = function () {
+                    let cbidx = arguments.length -1;
+                    for(let i = arguments.length -1; i >= 0; --i) {
+                        if (typeof arguments[i] === 'function') {
+                            cbidx = i;
+                            break;
+                        } else if (typeof arguments[i] !== 'undefined') {
+                            break;
+                        }
+                    }
+                    const cb = arguments[cbidx];
                     if (typeof cb === 'function') {
-                        arguments[arguments.length -1] = ApplicationInsights.wrapWithCorrelationContext(cb);
+                        arguments[cbidx] = ApplicationInsights.wrapWithCorrelationContext(cb);
                     }
                     return originalFunc.apply(this,arguments);
                 }
             }
         }
+
+    }
+
+    const patchClassMemberFunction = (classObject) => {
+        return patchObjectFunction(classObject.prototype);
     }
 
     const connectionCallbackFunctions = [
-        'createQuery', 'connect', 'changeUser',
+        'connect', 'changeUser',
         'ping', 'statistics', 'end'
     ];
 
-    const connectionClass = require(`${originalMysqlPath}/lib/Connection`);
-    connectionCallbackFunctions.forEach(patchClassFunction(connectionClass));
+    const connectionClass = require(`${path.dirname(originalMysqlPath)}/lib/Connection`);
+    connectionCallbackFunctions.forEach(patchClassMemberFunction(connectionClass));
+    patchObjectFunction(connectionClass)('createQuery'); // Static method
     
     const poolCallbackFunctions = [
         '_enqueueCallback'
     ];
-    const poolClass = require(`${originalMysqlPath}/lib/Pool`);
+    const poolClass = require(`${path.dirname(originalMysqlPath)}/lib/Pool`);
 
-    poolCallbackFunctions.forEach(patchClassFunction(poolClass));
+    poolCallbackFunctions.forEach(patchClassMemberFunction(poolClass));
 
     return originalMysql;
 }
