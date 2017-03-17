@@ -11,12 +11,14 @@ const mysqlPatchFunction : PatchFunction = function (originalMysql, originalMysq
     const patchClassFunction = (classObject) => {
         return (func) => {
             const originalFunc = classObject.prototype[func];
-            classObject.prototype[func] = function () {
-                const cb = arguments[arguments.length -1];
-                if (typeof cb === 'function') {
-                    arguments[arguments.length -1] = ApplicationInsights.wrapWithCorrelationContext(cb);
+            if (originalFunc) {
+                classObject.prototype[func] = function () {
+                    const cb = arguments[arguments.length -1];
+                    if (typeof cb === 'function') {
+                        arguments[arguments.length -1] = ApplicationInsights.wrapWithCorrelationContext(cb);
+                    }
+                    return originalFunc.apply(this,arguments);
                 }
-                return originalFunc.apply(this,arguments);
             }
         }
     }

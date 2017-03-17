@@ -5,6 +5,7 @@ import {mongo2} from './mongodb/mongodb';
 import {console} from './console/console';
 import {bunyan} from './bunyan/bunyan';
 import {redis} from './redis/redis';
+import {mysql} from './mysql/mysql';
 
 export interface IModulePatchMap {
     [key: string] : IModulePatcher[]
@@ -24,5 +25,8 @@ export const knownPatches : IModulePatchMap = {
     ],
     'redis': [
         redis
+    ],
+    'mysql': [
+        mysql
     ]
 }
