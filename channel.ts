@@ -36,6 +36,11 @@ class ContextPreservingEventEmitter {
             }
         }
     }
+
+    // Used for tests
+    public reset(): void {
+        this.subscribers = {};
+    }
 }
 
 // TODO: Should this be a global object to avoid issues with multiple different versions of the package that defines it?

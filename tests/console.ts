@@ -1,17 +1,22 @@
 import {makePatchingRequire} from "../patchRequire";
 import * as assert from 'assert';
 
-import * as ApplicationInsights from "applicationinsights";
+import {console as consolePatch} from "../console/console.pub";
 
-import {console as consolePatch} from "../console/console";
+import {channel} from "../channel";
 
 
 describe('Console', function () {
+    afterEach(() => {
+        channel.reset();
+    })
+
     it('should intercept console.log', function () {
         const originalConsoleDescriptor = Object.getOwnPropertyDescriptor(global, 'console');        
         const moduleModule = require('module');
         const originalRequire = moduleModule.prototype.require;
-        const originalAIClient = ApplicationInsights.client;
+        let eventEmitted;
+        channel.subscribe('console', (event) => eventEmitted = event);
         try {
             moduleModule.prototype.require = makePatchingRequire({
                 'console': [
@@ -19,29 +24,21 @@ describe('Console', function () {
                 ]
             });
 
-            ApplicationInsights.client = {
-                trackTrace: function () {
-                    throw new Error('AI should not be tracking this yet');
-                }
-            };
             console.log("Before mocking");
+            assert(!eventEmitted, 'Nothing should be hooked up yet');
 
-            let testLogMessage = "After mocking";
-            let mockInvoked = false;
-            ApplicationInsights.client = {
-                trackTrace: function (data) {
-                    mockInvoked = true;
-                    assert.equal(data.replace('\n',''), testLogMessage);
-                }
-            };
+            const testLogMessage = "After mocking";
+
             require('console');
 
             console.log(testLogMessage);
-            assert(mockInvoked, 'AI tracking function was not invoked.');
+            assert(eventEmitted, 'Event not published');
+            assert.equal(eventEmitted.data.replace('\n',''), testLogMessage);
+            assert(!eventEmitted.stderr);
+
         } finally {
             Object.defineProperty(global, 'console', originalConsoleDescriptor);
             moduleModule.prototype.require = originalRequire;
-            ApplicationInsights.client = originalAIClient;
         }
     })
 });
