@@ -1,8 +1,7 @@
 /// <reference path="../IReplacement.d.ts" />
 
-import * as ApplicationInsights from "applicationinsights";
-import {Contracts} from "applicationinsights/Library/Contracts";
 import {Writable} from "stream";
+import {channel} from "../channel";
 
 const consolePatchFunction : PatchFunction = (originalConsole) => {
     const aiLoggingOutStream = new Writable();
@@ -16,10 +15,9 @@ const consolePatchFunction : PatchFunction = (originalConsole) => {
         }
         const data = chunk.toString();
 
-        if (ApplicationInsights.client) {
-            ApplicationInsights.client.trackTrace(data);
-        }
-        
+        // WARNING: If a subscriber invokes 'console.log' then this will trigger an infinite recursion
+        channel.publish("console", {data: data})
+                
         process.stdout.write(chunk);
         return true;
     }
@@ -30,9 +28,8 @@ const consolePatchFunction : PatchFunction = (originalConsole) => {
         }
         const data = chunk.toString();
 
-        if (ApplicationInsights.client) {
-            ApplicationInsights.client.trackTrace(data, Contracts.SeverityLevel.Warning);
-        }
+        // WARNING: If a subscriber invokes 'console.log' then this will trigger an infinite recursion
+        channel.publish("console", {data: data, stderr: true});
 
         process.stderr.write(chunk);
         return true;

@@ -1,11 +1,10 @@
 /// <reference path="../IReplacement.d.ts" />
 
-import * as ApplicationInsights from "applicationinsights";
+// This is purely to preserve zone.js context
+
+declare var Zone;
 
 const mongodbcorePatchFunction : PatchFunction = function (originalMongoCore) {
-    if (!ApplicationInsights.wrapWithCorrelationContext) {
-        return originalMongoCore;
-    }
     const originalConnect = originalMongoCore.Server.prototype.connect;
     originalMongoCore.Server.prototype.connect = function contextPreservingConnect() {
         const ret = originalConnect.apply(this, arguments);
@@ -15,9 +14,11 @@ const mongodbcorePatchFunction : PatchFunction = function (originalMongoCore) {
         // so we wrap the callbacks to restore appropriate state
         const originalWrite = this.s.pool.write;
         this.s.pool.write = function contextPreservingWrite() {
-            const cbidx = typeof arguments[1] === 'function' ? 1 : 2;
-            if (typeof arguments[cbidx] === 'function') {
-                arguments[cbidx] = ApplicationInsights.wrapWithCorrelationContext(arguments[cbidx]);
+            if (Zone && Zone.current) {
+                const cbidx = typeof arguments[1] === 'function' ? 1 : 2;
+                if (typeof arguments[cbidx] === 'function' ) {
+                    arguments[cbidx] = Zone.current.wrap(arguments[cbidx], 'Mongodb-core pool write');
+                }
             }
             return originalWrite.apply(this, arguments);
         };
@@ -26,14 +27,14 @@ const mongodbcorePatchFunction : PatchFunction = function (originalMongoCore) {
         // directly calls into connection.write
         const originalLogout = this.s.pool.logout;
         this.s.pool.logout = function contextPreservingLogout() {
-            if (typeof arguments[1] === 'function') {
-                arguments[1] = ApplicationInsights.wrapWithCorrelationContext(arguments[1]);
+            if (Zone && Zone.current) {
+                if (typeof arguments[1] === 'function') {
+                    arguments[1] = Zone.current.wrap(arguments[1], 'Mongodb-core pool logout');
+                }
             }
             return originalLogout.apply(this, arguments);
         };
         return ret;
-
-
     }
 
     return originalMongoCore;
