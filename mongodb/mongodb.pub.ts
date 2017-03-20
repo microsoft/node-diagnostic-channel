@@ -2,18 +2,11 @@
 
 import {channel} from "../channel";
 
-declare var Zone;
-
 const mongodbPatchFunction: PatchFunction = function (originalMongo) {
     const listener = originalMongo.instrument({
         operationIdGenerator: {
             next: function () {
-                if (Zone && Zone.current) {
-                    // provide a function to restore the current context
-                    return Zone.current.wrap((cb) => cb(), 'Mongodb instrumentation context preservation');
-                } else {
-                    return (cb) => cb();
-                }
+                return channel.bindToContext((cb) => cb());
             }
         }
     });

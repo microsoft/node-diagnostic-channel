@@ -2,7 +2,6 @@
 import {channel} from '../channel';
 
 import * as assert from 'assert';
-import "zone.js";
 
 describe('pub/sub', function () {
     afterEach(() => {
@@ -52,22 +51,63 @@ describe('pub/sub', function () {
         assert(invoked, "Subscriber not called");
     });
 
-    it('should invoke subscribers in the same zone as the publish', function () {
-        const zone1 = Zone.current.fork({name: 'z1'});
-        const zone2 = Zone.current.fork({name: 'z2'});
+    it('should invoke subscribers in the same context as the publish', function () {
+        const c1 = {name: '1'};
+        const c2 = {name: '2'};
+        let context = {name:'root'};
 
         let invocations = [];
         const subscribeFunction = () => {
-            invocations.push(Zone.current.name);
+            invocations.push(context);
         };
 
-        zone1.run(() => channel.subscribe('test', subscribeFunction));
-        zone2.run(() => channel.publish('test', {}));
-        zone1.run(() => channel.publish('test', {}));
+        channel.subscribe('test', subscribeFunction);
+
+        context = c1;
+        channel.publish('test', {});
+        context = c2;
+        channel.publish('test', {});
+
 
         assert.equal(invocations.length, 2);
-        assert.equal(invocations[0], zone2.name);
-        assert.equal(invocations[1], zone1.name);
+        assert.equal(invocations[0], c1);
+        assert.equal(invocations[1], c2);
+    });
 
-    })
+    it('should preserve contexts when wrapping function is used', function () {
+        const c1 = {name: '1'};
+        const c2 = {name: '2'};
+        const croot = {name: 'root'};
+        let context = croot;
+
+        channel.addContextPreservation((cb) => {
+            let originalContext = context;
+            return function () {
+                const oldContext = context;
+                context = originalContext;
+                cb.apply(this, arguments);
+                context = oldContext;
+            }
+        });
+
+        let invocations = [];
+        const subscribeFunction = () => {
+            invocations.push(context);
+        };
+
+        channel.subscribe('test', subscribeFunction);
+
+        const publishFunc = () => channel.publish('test', {});
+        const rootBound = channel.bindToContext(publishFunc);
+        context = c1;
+        const c1Bound = channel.bindToContext(publishFunc);
+
+        context = c2;
+        rootBound();
+        c1Bound();
+
+        assert.equal(invocations.length, 2);
+        assert.equal(invocations[0], croot);
+        assert.equal(invocations[1], c1);
+    });
 });

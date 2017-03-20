@@ -1,8 +1,7 @@
 /// <reference path="../IReplacement.d.ts" />
 
-// This is purely to preserve zone.js context
-
-declare var Zone;
+// This is purely to preserve context
+import {channel} from "../channel";
 
 const mongodbcorePatchFunction : PatchFunction = function (originalMongoCore) {
     const originalConnect = originalMongoCore.Server.prototype.connect;
@@ -14,11 +13,9 @@ const mongodbcorePatchFunction : PatchFunction = function (originalMongoCore) {
         // so we wrap the callbacks to restore appropriate state
         const originalWrite = this.s.pool.write;
         this.s.pool.write = function contextPreservingWrite() {
-            if (Zone && Zone.current) {
-                const cbidx = typeof arguments[1] === 'function' ? 1 : 2;
-                if (typeof arguments[cbidx] === 'function' ) {
-                    arguments[cbidx] = Zone.current.wrap(arguments[cbidx], 'Mongodb-core pool write');
-                }
+            const cbidx = typeof arguments[1] === 'function' ? 1 : 2;
+            if (typeof arguments[cbidx] === 'function' ) {
+                arguments[cbidx] = channel.bindToContext(arguments[cbidx]);
             }
             return originalWrite.apply(this, arguments);
         };
@@ -27,10 +24,8 @@ const mongodbcorePatchFunction : PatchFunction = function (originalMongoCore) {
         // directly calls into connection.write
         const originalLogout = this.s.pool.logout;
         this.s.pool.logout = function contextPreservingLogout() {
-            if (Zone && Zone.current) {
-                if (typeof arguments[1] === 'function') {
-                    arguments[1] = Zone.current.wrap(arguments[1], 'Mongodb-core pool logout');
-                }
+            if (typeof arguments[1] === 'function') {
+                arguments[1] = channel.bindToContext(arguments[1]);
             }
             return originalLogout.apply(this, arguments);
         };

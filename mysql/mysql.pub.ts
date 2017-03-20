@@ -1,7 +1,5 @@
 /// <reference path="../IReplacement.d.ts" />
 
-declare var Zone;
-
 import {channel} from "../channel";
 import * as path from "path";
 
@@ -11,20 +9,18 @@ const mysqlPatchFunction : PatchFunction = function (originalMysql, originalMysq
             const originalFunc = obj[func];
             if (originalFunc) {
                 obj[func] = function () {
-                    if (Zone && Zone.current) {
-                        let cbidx = arguments.length -1;
-                        for(let i = arguments.length -1; i >= 0; --i) {
-                            if (typeof arguments[i] === 'function') {
-                                cbidx = i;
-                                break;
-                            } else if (typeof arguments[i] !== 'undefined') {
-                                break;
-                            }
+                    let cbidx = arguments.length -1;
+                    for(let i = arguments.length -1; i >= 0; --i) {
+                        if (typeof arguments[i] === 'function') {
+                            cbidx = i;
+                            break;
+                        } else if (typeof arguments[i] !== 'undefined') {
+                            break;
                         }
-                        const cb = arguments[cbidx];
-                        if (typeof cb === 'function') {
-                            arguments[cbidx] = Zone.wrap(cb, `mysql ${name}.${func} context preseravtion`);
-                        }
+                    }
+                    const cb = arguments[cbidx];
+                    if (typeof cb === 'function') {
+                        arguments[cbidx] = channel.bindToContext(cb);
                     }
                     return originalFunc.apply(this,arguments);
                 }

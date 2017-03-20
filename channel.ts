@@ -4,6 +4,7 @@ export type ISubscriber = (event: any) => void;
 
 class ContextPreservingEventEmitter {
     private subscribers: {[key: string]: ISubscriber[]} = {};
+    private contextPreservationFunction: (cb: Function) => Function = (cb) => cb; 
 
     public publish(name: string, event: any): void {
         const listeners = this.subscribers[name];
@@ -40,6 +41,16 @@ class ContextPreservingEventEmitter {
     // Used for tests
     public reset(): void {
         this.subscribers = {};
+        this.contextPreservationFunction = (cb) => cb;
+    }
+
+    public bindToContext(cb: Function) {
+        return this.contextPreservationFunction(cb);
+    }
+
+    public addContextPreservation(preserver: (cb: Function) => Function) {
+        const previousPreservationStack = this.contextPreservationFunction;
+        this.contextPreservationFunction = (cb) => preserver(previousPreservationStack(cb));
     }
 }
 

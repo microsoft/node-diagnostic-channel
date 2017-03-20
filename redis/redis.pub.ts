@@ -1,7 +1,5 @@
 /// <reference path="../IReplacement.d.ts" />
 
-declare var Zone;
-
 import {channel} from "../channel";
 
 const redisPatchFunction : PatchFunction = (originalRedis) => {
@@ -14,10 +12,7 @@ const redisPatchFunction : PatchFunction = (originalRedis) => {
             const address = this.address;
             const startTime = process.hrtime();
 
-            let wrapFunction = (cb) => cb();
-            if (Zone && Zone.current) {
-                wrapFunction = Zone.current.wrap.bind(Zone.current);
-            }
+            let wrapFunction = channel.bindToContext;
 
             // Note: augmenting the callback on internal_send_command is correct for context
             // tracking, but may be too low-level for dependency tracking. There are some 'errors'
