@@ -1,0 +1,16 @@
+{
+    "name": "pubsub-channel",
+    "version": "0.0.1",
+    "main": "./channel.js",
+    "scripts":{
+        "prepublish": "tsc",
+        "test": "tsc && mocha tests"
+    },
+    "dependencies": {
+        "semver": "^5.3.0"
+    },
+    "devDependencies": {
+        "typescript": "^2.2.1",
+        "mocha": "^3.2.0"
+    }
+}

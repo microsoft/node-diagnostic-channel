@@ -1,27 +1,19 @@
+// This is for testing the overall integration
 
-// For demo purposes, combine pub/sub into single module
+import * as ApplicationInsights from "applicationinsights"
 
-import './bunyan/bunyan.sub';
-import './console/console.sub';
-import './mongodb/mongodb.sub';
-import './mysql/mysql.sub';
-import './redis/redis.sub';
+// TODO: auto-load packages
+import 'console-pub';
+import 'mongodb-pub';
 
-import './bunyan/bunyan.pub';
-import './console/console.pub';
-import './mongodb/mongodb.pub';
-import './mongodb/mongodb-core.pub';
-import './mysql/mysql.pub';
-import './redis/redis.pub';
-
-// Also for demo purposes: hook up zone.js context preserving
+// For demo purposes: hook up AI context preserving
 // This is something that applicationinsights would do
 
 declare var Zone;
-import {channel} from './channel';
+import {channel} from 'pubsub-channel';
 channel.addContextPreservation((cb) => {
-    if (Zone && Zone.current) {
-        return Zone.current.wrap(cb);
-    };
-    return cb;
-})
+    return ApplicationInsights.wrapWithCorrelationContext(cb);
+});
+
+// Verify that patches are applied
+console.dir(channel.getPatchesObject());

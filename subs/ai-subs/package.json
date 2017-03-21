@@ -1,0 +1,12 @@
+{
+    "name": "applicationinsights-pubsub-subs",
+    "version": "0.0.1",
+    "main": "./index.js",
+    "dependencies": {
+        "bunyan-sub": "../bunyan-sub",
+        "console-sub": "../console-sub",
+        "mongodb-sub": "../mongodb-sub",
+        "mysql-sub": "../mysql-sub",
+        "redis-sub": "../redis-sub"
+    }
+}

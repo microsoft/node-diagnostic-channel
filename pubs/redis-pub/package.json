@@ -1,0 +1,16 @@
+{
+    "name": "redis-pub",
+    "version": "0.0.1",
+    "main": "redis.pub.js",
+    "scripts": {
+        "prepublish": "tsc"
+    },
+    "devDependencies": {
+        "pubsub-channel": "../../pubsubchannel",
+        "typescript": "^2.2.1",
+        "mocha": "^3.2.0"
+    },
+    "peerDependencies": {
+        "pubsub-channel": "*"
+    }
+}

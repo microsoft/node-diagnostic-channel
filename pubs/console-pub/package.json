@@ -1,0 +1,17 @@
+{
+    "name": "console-pub",
+    "version": "0.0.1",
+    "main": "console.pub.js",
+    "scripts": {
+        "prepublish": "tsc",
+        "test": "tsc && mocha tests"
+    },
+    "devDependencies": {
+        "pubsub-channel": "../../pubsubchannel",
+        "typescript": "^2.2.1",
+        "mocha": "^3.2.0"
+    },
+    "peerDependencies": {
+        "pubsub-channel": "*"
+    }
+}
