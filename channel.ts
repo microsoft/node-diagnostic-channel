@@ -1,10 +1,13 @@
-// This file will essentially be its own package
+
+import {makePatchingRequire, IModulePatchMap} from './patchRequire';
 
 export type ISubscriber = (event: any) => void;
 
 class ContextPreservingEventEmitter {
     private subscribers: {[key: string]: ISubscriber[]} = {};
-    private contextPreservationFunction: (cb: Function) => Function = (cb) => cb; 
+    private contextPreservationFunction: (cb: Function) => Function = (cb) => cb;
+    private knownPatches: IModulePatchMap = {};
+
 
     public publish(name: string, event: any): void {
         const listeners = this.subscribers[name];
@@ -42,6 +45,9 @@ class ContextPreservingEventEmitter {
     public reset(): void {
         this.subscribers = {};
         this.contextPreservationFunction = (cb) => cb;
+
+        // Modify the knownPatches object rather than replace, since a reference will be used in the 
+        Object.getOwnPropertyNames(this.knownPatches).forEach((prop) => delete this.knownPatches[prop]);
     }
 
     public bindToContext(cb: Function) {
@@ -52,7 +58,24 @@ class ContextPreservingEventEmitter {
         const previousPreservationStack = this.contextPreservationFunction;
         this.contextPreservationFunction = (cb) => preserver(previousPreservationStack(cb));
     }
+
+    public registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void {
+        if(!this.knownPatches[packageName]) {
+            this.knownPatches[packageName] = [];
+        }
+
+        this.knownPatches[packageName].push(patcher);
+    }
+
+    public getPatchesObject(): IModulePatchMap {
+        return this.knownPatches;
+    }
 }
 
 // TODO: Should this be a global object to avoid issues with multiple different versions of the package that defines it?
 export const channel = new ContextPreservingEventEmitter();
+
+// TODO: should this only patch require after at least one monkey patch is registered?
+const moduleModule = require('module');
+// Note: We pass in the object now before any patches are registered, but the object 
+moduleModule.prototype.require = makePatchingRequire(channel.getPatchesObject());

@@ -38,4 +38,6 @@ const redisPatchFunction : PatchFunction = (originalRedis) => {
 export const redis: IModulePatcher = {
     versionSpecifier: ">= 2.0.0 < 3.0.0",
     patch: redisPatchFunction
-}
+};
+
+channel.registerMonkeyPatch('redis', redis);

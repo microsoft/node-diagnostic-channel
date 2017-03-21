@@ -39,3 +39,5 @@ export const mongoCore2: IModulePatcher = {
     versionSpecifier: ">= 2.0.0 <= 2.2.0",
     patch: mongodbcorePatchFunction
 }
+
+channel.registerMonkeyPatch('mongodb-core', mongoCore2);

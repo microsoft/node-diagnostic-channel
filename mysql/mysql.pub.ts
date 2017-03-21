@@ -4,8 +4,8 @@ import {channel} from "../channel";
 import * as path from "path";
 
 const mysqlPatchFunction : PatchFunction = function (originalMysql, originalMysqlPath) {
-    const patchObjectFunction = (obj, name) => {
-        return (func) => {
+    const patchObjectFunction = (obj: any, name: string) => {
+        return (func, cbWrapper?: (resultContainer: {result: any, startTime: [number, number]}, cb: Function) => Function) => {
             const originalFunc = obj[func];
             if (originalFunc) {
                 obj[func] = function () {
@@ -19,10 +19,19 @@ const mysqlPatchFunction : PatchFunction = function (originalMysql, originalMysq
                         }
                     }
                     const cb = arguments[cbidx];
+                    
+                    let resultContainer = {result: null, startTime: null};
                     if (typeof cb === 'function') {
-                        arguments[cbidx] = channel.bindToContext(cb);
+                        if (cbWrapper) {
+                            resultContainer.startTime = process.hrtime();
+                            arguments[cbidx] = channel.bindToContext(cbWrapper(resultContainer, cb));
+                        } else {
+                            arguments[cbidx] = channel.bindToContext(cb);
+                        }
                     }
-                    return originalFunc.apply(this,arguments);
+                    const result = originalFunc.apply(this,arguments);
+                    resultContainer.result = result;
+                    return result;
                 }
             }
         }
@@ -39,15 +48,22 @@ const mysqlPatchFunction : PatchFunction = function (originalMysql, originalMysq
     ];
 
     const connectionClass = require(`${path.dirname(originalMysqlPath)}/lib/Connection`);
-    connectionCallbackFunctions.forEach(patchClassMemberFunction(connectionClass, 'Connection'));
-    patchObjectFunction(connectionClass, 'Connection')('createQuery'); // Static method
+    connectionCallbackFunctions.forEach((value) => patchClassMemberFunction(connectionClass, 'Connection')(value));
+    patchObjectFunction(connectionClass, 'Connection')('createQuery', (resultContainer, cb) => {
+        return function (err) {
+            const hrDuration = process.hrtime(resultContainer.startTime);
+            const duration = (hrDuration[0] * 1e3 + hrDuration[1]/1e6)|0; 
+            channel.publish('mysql', {query: resultContainer.result, callbackArgs: arguments, err, duration});
+            cb.apply(this, arguments);
+        }
+    }); // Static method
     
     const poolCallbackFunctions = [
         '_enqueueCallback'
     ];
     const poolClass = require(`${path.dirname(originalMysqlPath)}/lib/Pool`);
 
-    poolCallbackFunctions.forEach(patchClassMemberFunction(poolClass, 'Pool'));
+    poolCallbackFunctions.forEach((value) => patchClassMemberFunction(poolClass, 'Pool')(value));
 
     // TODO: determine which events to publish
 
@@ -58,3 +74,5 @@ export const mysql: IModulePatcher = {
     versionSpecifier: ">= 2.0.0 <= 2.14.0",
     patch: mysqlPatchFunction
 };
+
+channel.registerMonkeyPatch('mysql', mysql);

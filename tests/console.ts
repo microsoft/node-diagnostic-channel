@@ -1,12 +1,16 @@
 import {makePatchingRequire} from "../patchRequire";
 import * as assert from 'assert';
 
+// Need to undo any changes this require makes, so we can test that it makes them.
+const consolePropertyDescriptor = Object.getOwnPropertyDescriptor(global, 'console');
 import {console as consolePatch} from "../console/console.pub";
+Object.defineProperty(global, 'console', consolePropertyDescriptor);
 
 import {channel} from "../channel";
 
 
 describe('Console', function () {
+    before(() => channel.reset());
     afterEach(() => {
         channel.reset();
     })

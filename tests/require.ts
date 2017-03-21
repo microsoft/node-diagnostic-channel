@@ -2,6 +2,15 @@ import {makePatchingRequire} from "../patchRequire";
 import * as assert from 'assert';
 
 describe('patchRequire', function () {
+    let originalRequire;
+    before(() => {
+        originalRequire = require('module').prototype.require;
+    });
+
+    afterEach(() => {
+        require('module').prototype.require = originalRequire;
+    })
+
     it('should produce a require-like function', function () {
         const patchedRequire = makePatchingRequire({});
         assert.strictEqual(patchedRequire('fs'), require('fs'), "Patched require did not return expected module")
@@ -69,7 +78,6 @@ describe('patchRequire', function () {
 
     it('should be able to intercept global require if attached correctly', function () {
         const moduleModule = require('module');
-        const originalRequire = moduleModule.prototype.require;
         const mock = {};
         const patchedRequire = makePatchingRequire({
             'fs': [
@@ -84,16 +92,11 @@ describe('patchRequire', function () {
 
         moduleModule.prototype.require = patchedRequire;
 
-        try {
-            assert.strictEqual(require('fs'), mock, 'Global require did not return patched result');
-        } finally {
-            moduleModule.prototype.require = originalRequire;
-        }
+        assert.strictEqual(require('fs'), mock, 'Global require did not return patched result');
     });
 
     it('should be able to patch non-built-in packages', function () {
         const moduleModule = require('module');
-        const originalRequire = moduleModule.prototype.require;
         const originalMongo = require('mongodb');
         const mock = {};
         const patchedRequire = makePatchingRequire({
@@ -107,10 +110,6 @@ describe('patchRequire', function () {
         });
 
         moduleModule.prototype.require = patchedRequire;
-        try {
-            assert.strictEqual(require('mongodb'), mock);
-        } finally {
-            moduleModule.prototype.require = originalRequire;
-        }
+        assert.strictEqual(require('mongodb'), mock);
     });
 })

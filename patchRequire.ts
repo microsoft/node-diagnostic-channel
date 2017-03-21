@@ -2,15 +2,17 @@
 import * as semver from 'semver';
 import * as path from 'path';
 
-import {IModulePatchMap} from './knownPatches';
+export interface IModulePatchMap {
+    [key: string] : IModulePatcher[]
+};
 
 declare var process;
 
-export function makePatchingRequire(knownPatches: IModulePatchMap) {
+const moduleModule = require('module');
+const nativeModules = Object.keys(process.binding('natives'));
+const originalRequire = moduleModule.prototype.require;
 
-    const moduleModule = require('module');
-    const nativeModules = Object.keys(process.binding('natives'));
-    const originalRequire = moduleModule.prototype.require;
+export function makePatchingRequire(knownPatches: IModulePatchMap) {
 
     const patchedModules : {[path: string]: any} = {};
 

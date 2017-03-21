@@ -49,3 +49,8 @@ export const console: IModulePatcher = {
     versionSpecifier: ">= 4.0.0",
     patch: consolePatchFunction
 }
+
+channel.registerMonkeyPatch('console', console);
+
+// Force patching of console
+require('console');

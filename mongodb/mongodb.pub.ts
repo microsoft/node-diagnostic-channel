@@ -38,9 +38,11 @@ const mongodbPatchFunction: PatchFunction = function (originalMongo) {
     });
     
     return originalMongo;
-}
+};
 
 export const mongo2: IModulePatcher = {
     versionSpecifier: '>= 2.0.0 <= 2.3.0',
     patch: mongodbPatchFunction
-}
+};
+
+channel.registerMonkeyPatch('mongodb', mongo2);
