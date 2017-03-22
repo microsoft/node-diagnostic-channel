@@ -17,3 +17,11 @@ channel.addContextPreservation((cb) => {
 
 // Verify that patches are applied
 console.dir(channel.getPatchesObject());
+
+declare var process;
+
+channel.subscribe('console', function (event) {
+    process.stdout.write("Console subscriber>\t" + event.data)
+})
+
+console.log("Test message");
