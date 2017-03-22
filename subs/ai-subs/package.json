@@ -8,5 +8,6 @@
         "mongodb-sub": "../mongodb-sub",
         "mysql-sub": "../mysql-sub",
         "redis-sub": "../redis-sub"
-    }
+    },
+    "pubsubAutoLoad": true
 }

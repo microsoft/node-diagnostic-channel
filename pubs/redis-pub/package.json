@@ -12,5 +12,6 @@
     },
     "peerDependencies": {
         "pubsub-channel": "*"
-    }
+    },
+    "pubsubAutoLoad": true
 }

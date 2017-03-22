@@ -13,11 +13,7 @@
         "console-pub": "./pubs/console-pub",
         "redis-pub": "./pubs/redis-pub",
         "mysql-pub": "./pubs/mysql-pub",
-        "bunyan-sub": "./subs/bunyan-sub",
-        "mongodb-sub": "./subs/mongodb-sub",
-        "console-sub": "./subs/console-sub",
-        "redis-sub": "./subs/redis-sub",
-        "mysql-sub": "./subs/mysql-sub"
+        "applicationinsights-pubsub-subs": "./subs/ai-subs"
     },
     "devDependencies": {
         "typescript": "^2.2.1",

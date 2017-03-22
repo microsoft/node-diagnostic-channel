@@ -72,6 +72,29 @@ class ContextPreservingEventEmitter {
     public getPatchesObject(): IModulePatchMap {
         return this.knownPatches;
     }
+
+    public autoLoadPackages(projectRoot: string): void {
+        try {
+            const packageJson = require(`${projectRoot}/package.json`);
+            const dependencies = Object.keys(packageJson['dependencies']);
+            dependencies.forEach((dep) => {
+                try {
+                    const depPackageJson = require(`${dep}/package.json`);
+                    if (depPackageJson['pubsubAutoLoad']) {
+                        require(dep);
+                    }
+                } catch (e) {
+                    // Couldn't load this package
+                    process.stderr.write("Failed to auto load " + dep);
+                    process.stderr.write(e.toString());
+                }
+            })
+        } catch (e) {
+            // Couldn't auto load packages
+            process.stderr.write("Failed to auto load packages");
+            process.stderr.write(e.toString());
+        }
+    }
 }
 
 // TODO: Should this be a global object to avoid issues with multiple different versions of the package that defines it?
