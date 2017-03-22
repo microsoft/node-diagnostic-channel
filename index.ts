@@ -14,6 +14,7 @@ channel.addContextPreservation((cb) => {
 // This is also something that applicationinsights would do:
 // channel.autoLoadPackages(path.join(__dirname, "..", "..", ".."))
 // to try and escape node_modules/applicationinsights/subfolder and reach the parent folder.
+// Alternately, perhaps path.dirname(require.main.paths[0]) as a likely folder containing package.json of the original 
 channel.autoLoadPackages(__dirname);
 
 // Verify that patches are applied

@@ -85,8 +85,9 @@ describe('pub/sub', function () {
             return function () {
                 const oldContext = context;
                 context = originalContext;
-                cb.apply(this, arguments);
+                const ret = cb.apply(this, arguments);
                 context = oldContext;
+                return ret;
             }
         });
 
@@ -97,14 +98,17 @@ describe('pub/sub', function () {
 
         channel.subscribe('test', subscribeFunction);
 
-        const publishFunc = () => channel.publish('test', {});
+        const publishFunc = () => {
+            channel.publish('test', {});
+            return true;
+        };
         const rootBound = channel.bindToContext(publishFunc);
         context = c1;
         const c1Bound = channel.bindToContext(publishFunc);
 
         context = c2;
-        rootBound();
-        c1Bound();
+        assert(rootBound(), "Bound function did not return a value");
+        assert(c1Bound());
 
         assert.equal(invocations.length, 2);
         assert.equal(invocations[0], croot);

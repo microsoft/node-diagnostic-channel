@@ -6,6 +6,7 @@ export {PatchFunction, IModulePatcher, makePatchingRequire} from './patchRequire
 export type ISubscriber = (event: any) => void;
 
 class ContextPreservingEventEmitter {
+    public version: string = require('./package.json').version; // Allow for future versions to replace things?
     private subscribers: {[key: string]: ISubscriber[]} = {};
     private contextPreservationFunction: (cb: Function) => Function = (cb) => cb;
     private knownPatches: IModulePatchMap = {};
@@ -97,10 +98,14 @@ class ContextPreservingEventEmitter {
     }
 }
 
-// TODO: Should this be a global object to avoid issues with multiple different versions of the package that defines it?
-export const channel = new ContextPreservingEventEmitter();
+declare var global: {pubsubChannel: ContextPreservingEventEmitter};
 
-// TODO: should this only patch require after at least one monkey patch is registered?
-const moduleModule = require('module');
-// Note: We pass in the object now before any patches are registered, but the object 
-moduleModule.prototype.require = makePatchingRequire(channel.getPatchesObject());
+if (!global.pubsubChannel) {
+    global.pubsubChannel = new ContextPreservingEventEmitter();
+    // TODO: should this only patch require after at least one monkey patch is registered?
+    const moduleModule = require('module');
+    // Note: We pass in the object now before any patches are registered, but the object 
+    moduleModule.prototype.require = makePatchingRequire(global.pubsubChannel.getPatchesObject());
+}
+
+export const channel = global.pubsubChannel;
