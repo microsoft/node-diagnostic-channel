@@ -10,13 +10,11 @@ const redisPatchFunction : PatchFunction = (originalRedis) => {
             const address = this.address;
             const startTime = process.hrtime();
 
-            let wrapFunction = channel.bindToContext;
-
             // Note: augmenting the callback on internal_send_command is correct for context
             // tracking, but may be too low-level for dependency tracking. There are some 'errors'
             // which higher levels expect in some cases
             // However, the only other option is to intercept every individual command.
-            command_obj.callback = wrapFunction(function (err) {
+            command_obj.callback = channel.bindToContext(function (err) {
                 const hrDuration = process.hrtime(startTime);
                 const duration = (hrDuration[0] * 1e3 + hrDuration[1]/1e6)|0;
                 channel.publish('redis', {duration, address, command_obj, err});
