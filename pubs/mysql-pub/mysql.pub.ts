@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
 import {channel, PatchFunction, IModulePatcher} from "pubsub-channel";
 import * as path from "path";
 
@@ -62,8 +64,6 @@ const mysqlPatchFunction : PatchFunction = function (originalMysql, originalMysq
     const poolClass = require(`${path.dirname(originalMysqlPath)}/lib/Pool`);
 
     poolCallbackFunctions.forEach((value) => patchClassMemberFunction(poolClass, 'Pool')(value));
-
-    // TODO: determine which events to publish
 
     return originalMysql;
 }

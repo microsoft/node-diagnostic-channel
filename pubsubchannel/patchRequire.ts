@@ -1,7 +1,8 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
 
 import * as semver from 'semver';
 import * as path from 'path';
-
 
 export type PatchFunction = (any, path: string) => any;
 export interface IModulePatcher {

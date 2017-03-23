@@ -9,5 +9,6 @@
         "mysql-sub": "../mysql-sub",
         "redis-sub": "../redis-sub"
     },
+    "license": "MIT",
     "pubsubAutoLoad": true
 }

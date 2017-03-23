@@ -14,5 +14,6 @@
     "peerDependencies": {
         "pubsub-channel": "*"
     },
+    "license": "MIT",
     "pubsubAutoLoad": true
 }
