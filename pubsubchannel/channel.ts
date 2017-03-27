@@ -56,7 +56,7 @@ class ContextPreservingEventEmitter {
         this.subscribers = {};
         this.contextPreservationFunction = (cb) => cb;
 
-        // Modify the knownPatches object rather than replace, since a reference will be used in the 
+        // Modify the knownPatches object rather than replace, since a reference will be used in the require patcher
         Object.getOwnPropertyNames(this.knownPatches).forEach((prop) => delete this.knownPatches[prop]);
     }
 
@@ -111,7 +111,8 @@ if (!global.pubsubChannel) {
     global.pubsubChannel = new ContextPreservingEventEmitter();
     // TODO: should this only patch require after at least one monkey patch is registered?
     const moduleModule = require('module');
-    // Note: We pass in the object now before any patches are registered, but the object 
+    // Note: We pass in the object now before any patches are registered, but the object is passed by reference
+    // so any updates made to the object will be visible in the patcher.
     moduleModule.prototype.require = makePatchingRequire(global.pubsubChannel.getPatchesObject());
 }
 
