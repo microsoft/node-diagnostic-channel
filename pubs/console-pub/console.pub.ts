@@ -15,7 +15,6 @@ const consolePatchFunction : PatchFunction = (originalConsole) => {
         }
         const data = chunk.toString();
 
-        // WARNING: If a subscriber invokes 'console.log' then this will trigger an infinite recursion
         channel.publish("console", {data: data})
                 
         process.stdout.write(chunk);
@@ -28,7 +27,6 @@ const consolePatchFunction : PatchFunction = (originalConsole) => {
         }
         const data = chunk.toString();
 
-        // WARNING: If a subscriber invokes 'console.log' then this will trigger an infinite recursion
         channel.publish("console", {data: data, stderr: true});
 
         process.stderr.write(chunk);
