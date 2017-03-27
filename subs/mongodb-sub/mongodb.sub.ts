@@ -3,7 +3,7 @@
 import * as ApplicationInsights from "applicationinsights";
 import {channel} from "pubsub-channel";
 
-channel.subscribe("mongodb", (event) => {
+export const subscriber = (event) => {
     if (ApplicationInsights._isDependencies && ApplicationInsights.client) {
         const dbName = (event.startedData && event.startedData.databaseName) || "Unknown database";
         ApplicationInsights.client
@@ -19,4 +19,6 @@ channel.subscribe("mongodb", (event) => {
                 .trackException(event.event.failure);
         }
     }
-});
+};
+
+channel.subscribe("mongodb", subscriber);

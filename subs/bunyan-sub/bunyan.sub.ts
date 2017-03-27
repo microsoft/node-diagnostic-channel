@@ -14,9 +14,11 @@ bunyanToAILevelMap[40] = Contracts.SeverityLevel.Warning;
 bunyanToAILevelMap[50] = Contracts.SeverityLevel.Error;
 bunyanToAILevelMap[60] = Contracts.SeverityLevel.Critical;
 
-channel.subscribe('bunyan', ({level, result}:{level: number, result: string}) => {
+export const subscriber = ({level, result}:{level: number, result: string}) => {
     if (ApplicationInsights.client) {
         const AIlevel = bunyanToAILevelMap[level]
         ApplicationInsights.client.trackTrace(result, AIlevel)
     }
-});
+};
+
+channel.subscribe('bunyan', subscriber);

@@ -3,7 +3,7 @@
 import * as ApplicationInsights from "applicationinsights";
 import {channel} from "pubsub-channel";
 
-channel.subscribe('mysql', (event) => {
+export const subscriber = (event) => {
     if (ApplicationInsights._isDependencies && ApplicationInsights.client) {
         const queryObj = event.query || {};
         const sqlString = queryObj.sql || "Unknown query";
@@ -19,4 +19,6 @@ channel.subscribe('mysql', (event) => {
                 success,
                 'mysql');
     }
-});
+};
+
+channel.subscribe('mysql', subscriber);
