@@ -13,11 +13,15 @@ class ContextPreservingEventEmitter {
     private contextPreservationFunction: (cb: Function) => Function = (cb) => cb;
     private knownPatches: IModulePatchMap = {};
 
+    private currently_publishing: boolean = false;
+
 
     public publish(name: string, event: any): void {
+        if (this.currently_publishing) return; // Avoid reentrancy
         const listeners = this.subscribers[name];
         // Note: Listeners called synchronously to preserve context
         if (listeners) {
+            this.currently_publishing = true;
             listeners.forEach((l) => {
                 try {
                     l(event)
@@ -25,6 +29,7 @@ class ContextPreservingEventEmitter {
                     // Subscriber threw an error
                 }
             });
+            this.currently_publishing = false;
         }
     }
 
