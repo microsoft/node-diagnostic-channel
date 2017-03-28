@@ -8,7 +8,7 @@ const consolePatchFunction : PatchFunction = (originalConsole) => {
     const aiLoggingErrStream = new Writable();
 
     // Default console is roughly equivalent to `new Console(process.stdout, process.stderr)`
-    // We create a version which prints to both AI traces and to stdout/stderr
+    // We create a version which publishes to the channel and also to stdout/stderr
     aiLoggingOutStream.write = function (chunk : string | Buffer): boolean {
         if (!chunk) {
             return true;
@@ -17,8 +17,7 @@ const consolePatchFunction : PatchFunction = (originalConsole) => {
 
         channel.publish("console", {data: data})
                 
-        process.stdout.write(chunk);
-        return true;
+        return process.stdout.write(chunk);
     }
 
     aiLoggingErrStream.write = function (chunk : string | Buffer): boolean {
@@ -29,8 +28,7 @@ const consolePatchFunction : PatchFunction = (originalConsole) => {
 
         channel.publish("console", {data: data, stderr: true});
 
-        process.stderr.write(chunk);
-        return true;
+        return process.stderr.write(chunk);
     }
 
     const aiLoggingConsole : Console = new originalConsole.Console(aiLoggingOutStream, aiLoggingErrStream);
