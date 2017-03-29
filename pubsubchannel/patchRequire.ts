@@ -49,10 +49,13 @@ export function makePatchingRequire(knownPatches: IModulePatchMap) {
                 // Instead, take the version of node itself
                 moduleVersion = process.version.substring(1);
             }
-            const modulePatcher : IModulePatcher = knownPatches[moduleId].find((v) => semver.satisfies(moduleVersion, v.versionSpecifier))
-            if (modulePatcher) {
-                return patchedModules[modulePath] = modulePatcher.patch(originalModule, modulePath);
+            let modifiedModule = originalModule;
+            for(const modulePatcher of knownPatches[moduleId]) {
+                if (semver.satisfies(moduleVersion, modulePatcher.versionSpecifier)) {
+                    modifiedModule = modulePatcher.patch(modifiedModule, modulePath);
+                }
             }
+            return patchedModules[modulePath] = modifiedModule;
         }
         return originalModule;
     }

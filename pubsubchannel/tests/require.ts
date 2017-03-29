@@ -48,9 +48,10 @@ describe('patchRequire', function () {
         assert.strictEqual(patchedRequire('fs'), fs);
     });
 
-    it('should only call one patching function', function () {
+    it('should call applicable patching functions in turn', function () {
         const fs = require('fs');
-        const mock = {};
+        const mock1 = {x:1};
+        const mock2 = {x:2};
         const nodeVersion = process.version.substring(1);
         const patchedRequire = makePatchingRequire({
             fs: [{
@@ -63,19 +64,19 @@ describe('patchRequire', function () {
                 versionSpecifier: `${nodeVersion}`,
                 patch: function (originalModule) {
                     assert.equal(originalModule, fs);
-                    return mock;
+                    return mock1;
                 }
             },
             {
                 versionSpecifier: `>= ${nodeVersion}`,
                 patch: function (originalModule) {
-                    assert.equal(originalModule, fs, "Patching more than once!");
-                    throw new Error("Patching out of order!")
+                    assert.equal(originalModule, mock1, "Patching out of order!");
+                    return mock2;
                 }
             }]
         });
 
-        assert.strictEqual(patchedRequire('fs'), mock);
+        assert.strictEqual(patchedRequire('fs'), mock2);
     });
 
     it('should be able to intercept global require if attached correctly', function () {

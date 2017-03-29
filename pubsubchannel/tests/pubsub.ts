@@ -115,4 +115,82 @@ describe('pub/sub', function () {
         assert.equal(invocations[0], croot);
         assert.equal(invocations[1], c1);
     });
+
+    it('should report no need for publishing with no subscribers', function () {
+        assert(!channel.shouldPublish("test"));
+    });
+
+    it('should report there is a need for publishing exactly when a subscriber has a filter returning true', function () {
+        let filterRetVal = true;
+        let subscriberCalled = false;
+        channel.subscribe("test", function () { subscriberCalled = true; }, () => filterRetVal);
+
+        assert(channel.shouldPublish("test"), "Filter returned true but shouldPublish was false");
+        assert(!subscriberCalled);
+
+        filterRetVal = false;
+        assert(!channel.shouldPublish("test"), "Filter returned false but shouldPublish was true");
+    });
+
+    it ('should report a need for publishing if at least one subscriber reports true', function () {
+        let filterRetVals = [false, false, true, false, false];
+        const mkFilter = (index) => () => filterRetVals[index];
+        for(let i = 0; i < filterRetVals.length; ++i) {
+            channel.subscribe("test", function () {}, mkFilter(i));
+        }
+
+        assert.equal(channel.shouldPublish("test"), filterRetVals.some((v) => v));
+        filterRetVals[3] = false;
+        assert.equal(channel.shouldPublish("test"), filterRetVals.some((v) => v));
+        filterRetVals[0] = true;
+        assert.equal(channel.shouldPublish("test"), filterRetVals.some((v) => v));
+    });
+
+    it('should unsubscribe the correct listener', function () {
+        let calls = [];
+        const listener1 = function () {
+            calls.push(1);
+        };
+        const listener2 = function () {
+            calls.push(2);
+        };
+        channel.subscribe('test', listener1);
+        channel.subscribe('test', listener2);
+        
+        assert(channel.unsubscribe('test', listener1), 'subscriber not unsubscribed');
+
+        channel.publish('test', {});
+
+        assert.equal(calls.length, 1, 'Wrong number of listeners invoked');
+        assert.equal(calls[0], 2, 'Wrong listener invoked');
+    });
+
+    it('should unsubscribe the correct listener when filters are involved', function () {
+        let calls = [];
+        const listener1 = function () {
+            calls.push(1);
+        };
+        const listener2 = function () {
+            calls.push(2);
+        };
+        const filter1 = function () {
+            return true;
+        };
+        const filter2 = function () {
+            return true;
+        };
+
+        channel.subscribe('test', listener1, filter1);
+        channel.subscribe('test', listener2, filter1);
+        channel.subscribe('test', listener1, filter2);
+        channel.subscribe('test', listener2, filter2);
+
+        assert(channel.unsubscribe('test', listener1, filter1), 'subscriber 1 not unsubscribed');
+        assert(channel.unsubscribe('test', listener2, filter2), 'subscriber 2 not unsubscribed');
+
+        channel.publish('test', {});
+
+        assert.equal(calls.length, 2, 'Wrong number of listeners invoked');
+        assert.deepEqual(calls, [2,1], 'Wrong listeners removed');
+    });
 });

@@ -3,12 +3,21 @@
 import {channel, PatchFunction, IModulePatcher} from "pubsub-channel";
 import * as path from "path";
 
+interface ResultContainer {
+    result: any,
+    startTime: [number, number]
+};
+type CallbackWrapper = (resultContainer: ResultContainer, cb: Function) => Function;
+
 const mysqlPatchFunction : PatchFunction = function (originalMysql, originalMysqlPath) {
+    // The `name` passed in here is for debugging purposes,
+    // to help distinguish which object is being patched.
     const patchObjectFunction = (obj: any, name: string) => {
-        return (func, cbWrapper?: (resultContainer: {result: any, startTime: [number, number]}, cb: Function) => Function) => {
+        return (func, cbWrapper?: CallbackWrapper) => {
             const originalFunc = obj[func];
             if (originalFunc) {
-                obj[func] = function () {
+                obj[func] = function mysqlContextPreserver() {
+                    // Find the callback, if there is one
                     let cbidx = arguments.length -1;
                     for(let i = arguments.length -1; i >= 0; --i) {
                         if (typeof arguments[i] === 'function') {
@@ -22,6 +31,9 @@ const mysqlPatchFunction : PatchFunction = function (originalMysql, originalMysq
                     
                     let resultContainer = {result: null, startTime: null};
                     if (typeof cb === 'function') {
+                        // Preserve context on the callback.
+                        // If this is one of the functions that we want to track,
+                        // then wrap the callback with the tracking wrapper
                         if (cbWrapper) {
                             resultContainer.startTime = process.hrtime();
                             arguments[cbidx] = channel.bindToContext(cbWrapper(resultContainer, cb));
@@ -49,6 +61,8 @@ const mysqlPatchFunction : PatchFunction = function (originalMysql, originalMysq
 
     const connectionClass = require(`${path.dirname(originalMysqlPath)}/lib/Connection`);
     connectionCallbackFunctions.forEach((value) => patchClassMemberFunction(connectionClass, 'Connection')(value));
+
+    // Connection.createQuery is a static method
     patchObjectFunction(connectionClass, 'Connection')('createQuery', (resultContainer, cb) => {
         return function (err) {
             const hrDuration = process.hrtime(resultContainer.startTime);
@@ -56,7 +70,7 @@ const mysqlPatchFunction : PatchFunction = function (originalMysql, originalMysq
             channel.publish('mysql', {query: resultContainer.result, callbackArgs: arguments, err, duration});
             cb.apply(this, arguments);
         }
-    }); // Static method
+    });
     
     const poolCallbackFunctions = [
         '_enqueueCallback'

@@ -7,14 +7,28 @@ export {PatchFunction, IModulePatcher, makePatchingRequire} from './patchRequire
 
 export type ISubscriber = (event: any) => void;
 
+interface IFilteredSubscriber {
+    listener: ISubscriber,
+    filter: () => boolean
+};
+
+const trueFilter = () => true;
+
 class ContextPreservingEventEmitter {
     public version: string = require('./package.json').version; // Allow for future versions to replace things?
-    private subscribers: {[key: string]: ISubscriber[]} = {};
+    private subscribers: {[key: string]: IFilteredSubscriber[]} = {};
     private contextPreservationFunction: (cb: Function) => Function = (cb) => cb;
     private knownPatches: IModulePatchMap = {};
 
     private currently_publishing: boolean = false;
 
+    public shouldPublish(name: string): boolean {
+        const listeners = this.subscribers[name];
+        if (listeners) {
+            return listeners.some(({filter}) => filter());
+        }
+        return false;
+    }
 
     public publish(name: string, event: any): void {
         if (this.currently_publishing) return; // Avoid reentrancy
@@ -22,9 +36,11 @@ class ContextPreservingEventEmitter {
         // Note: Listeners called synchronously to preserve context
         if (listeners) {
             this.currently_publishing = true;
-            listeners.forEach((l) => {
+            listeners.forEach(({listener, filter}) => {
                 try {
-                    l(event)
+                    if (filter && filter()) {
+                        listener(event)
+                    }
                 } catch (e) {
                     // Subscriber threw an error
                 }
@@ -33,22 +49,25 @@ class ContextPreservingEventEmitter {
         }
     }
 
-    public subscribe(name: string, listener: ISubscriber): void {
+    public subscribe(name: string, listener: ISubscriber, filter: () => boolean = trueFilter): void {
         if (!this.subscribers[name]) {
             this.subscribers[name] = [];
         }
 
-        this.subscribers[name].push(listener);
+        this.subscribers[name].push({listener, filter});
     }
 
-    public unsubscribe(name: string, listener: ISubscriber): void {
+    public unsubscribe(name: string, listener: ISubscriber, filter: () => boolean = trueFilter): boolean {
         const listeners = this.subscribers[name];
         if (listeners) {
-            const index = listeners.indexOf(listener);
-            if (index >= 0) {
-                listeners.splice(index, 1);
+            for (let index = 0; index < listeners.length; ++index) {
+                if (listeners[index].listener === listener && listeners[index].filter === filter) {
+                    listeners.splice(index,1);
+                    return true;
+                }
             }
         }
+        return false;
     }
 
     // Used for tests
