@@ -6,13 +6,14 @@ import {makePatchingRequire, IModulePatchMap, IModulePatcher} from './patchRequi
 export {PatchFunction, IModulePatcher, makePatchingRequire} from './patchRequire';
 
 export type ISubscriber = (event: any) => void;
+export type IFilter = (publishing: boolean) => boolean;
 
 interface IFilteredSubscriber {
     listener: ISubscriber,
-    filter: () => boolean
+    filter: IFilter
 };
 
-const trueFilter = () => true;
+const trueFilter = (publishing: boolean) => true;
 
 class ContextPreservingEventEmitter {
     public version: string = require('./package.json').version; // Allow for future versions to replace things?
@@ -25,7 +26,7 @@ class ContextPreservingEventEmitter {
     public shouldPublish(name: string): boolean {
         const listeners = this.subscribers[name];
         if (listeners) {
-            return listeners.some(({filter}) => filter());
+            return listeners.some(({filter}) => !filter || filter(false));
         }
         return false;
     }
@@ -38,7 +39,7 @@ class ContextPreservingEventEmitter {
             this.currently_publishing = true;
             listeners.forEach(({listener, filter}) => {
                 try {
-                    if (filter && filter()) {
+                    if (filter && filter(true)) {
                         listener(event)
                     }
                 } catch (e) {
@@ -49,7 +50,7 @@ class ContextPreservingEventEmitter {
         }
     }
 
-    public subscribe(name: string, listener: ISubscriber, filter: () => boolean = trueFilter): void {
+    public subscribe(name: string, listener: ISubscriber, filter: IFilter = trueFilter): void {
         if (!this.subscribers[name]) {
             this.subscribers[name] = [];
         }
@@ -57,7 +58,7 @@ class ContextPreservingEventEmitter {
         this.subscribers[name].push({listener, filter});
     }
 
-    public unsubscribe(name: string, listener: ISubscriber, filter: () => boolean = trueFilter): boolean {
+    public unsubscribe(name: string, listener: ISubscriber, filter: IFilter = trueFilter): boolean {
         const listeners = this.subscribers[name];
         if (listeners) {
             for (let index = 0; index < listeners.length; ++index) {
