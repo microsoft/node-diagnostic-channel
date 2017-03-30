@@ -10,7 +10,8 @@
     "devDependencies": {
         "pubsub-channel": "../../pubsubchannel",
         "typescript": "^2.2.1",
-        "mocha": "^3.2.0"
+        "mocha": "^3.2.0",
+        "mongodb": "^2.2.25"
     },
     "peerDependencies": {
         "pubsub-channel": "*"
