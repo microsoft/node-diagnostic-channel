@@ -11,7 +11,8 @@
         "pubsub-channel": "../../pubsubchannel",
         "typescript": "^2.2.1",
         "mocha": "^3.2.0",
-        "mongodb": "^2.2.25"
+        "mongodb": "^2.2.25",
+        "zone.js": "^0.8.5"
     },
     "peerDependencies": {
         "pubsub-channel": "*"
