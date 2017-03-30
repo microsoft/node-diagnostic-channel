@@ -6,8 +6,13 @@ const mongoCommunication = require("./mongodb.trace.json");
 
 export const mongodbcoreConnectionReplayPatchFunction : PatchFunction = function (originalMongoCore) {
     const oConnect = originalMongoCore.Connection.prototype.connect;
-    let connected = false;
+
     originalMongoCore.Connection.prototype.connect = function () {
+        // This is very much hackish.
+        // We want to substitute the connection that the connect function tries to make,
+        // and replace it with our own EventEmitter.
+        // To do this, we tweak the EventEmitter to have the relevant methods, and we 
+        // add a getter with no setter to 'this' so that the method does not overwrite it.
         const connection: any = new EventEmitter();
         connection.setKeepAlive = connection.setTimeout = connection.setNoDelay = connection.end = function () {};
         connection.writable = true;
@@ -24,7 +29,6 @@ export const mongodbcoreConnectionReplayPatchFunction : PatchFunction = function
         oConnect.apply(this, arguments);
 
         setTimeout(() => {
-            connected = true;
             connection.emit('connect', {})
         }, 0);
 

@@ -1,10 +1,12 @@
 
-import {channel} from 'pubsub-channel';
+import {channel, IStandardEvent} from 'pubsub-channel';
 
 import {mongodbcoreConnectionRecordPatchFunction, mongoCommunication} from './util/mongodbcore-mock-record';
 import {mongodbcoreConnectionReplayPatchFunction} from './util/mongodbcore-mock-replay';
 import '../mongodb-core.pub';
 import '../mongodb.pub';
+
+import {MongoData} from '../mongodb.pub';
 
 import 'zone.js';
 
@@ -22,8 +24,8 @@ describe('mongodb', function () {
         channel.registerMonkeyPatch('mongodb-core', {versionSpecifier: "*", patch: mongodbcoreConnectionReplayPatchFunction});
         channel.addContextPreservation((cb) => Zone.current.wrap(cb, 'context preservation'));
 
-        const events = [];
-        channel.subscribe('mongodb', function (event) {
+        const events: IStandardEvent<MongoData>[] = [];
+        channel.subscribe<MongoData>('mongodb', function (event) {
             events.push(event);
         });
 

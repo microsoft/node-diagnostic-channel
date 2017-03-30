@@ -4,12 +4,14 @@ import {channel, PatchFunction, IModulePatcher} from "pubsub-channel";
 
 export type MongoData = {
     startedData: {
-        databaseName?: string
+        databaseName?: string,
+        command?: any
     },
     event: {
         commandName?: string,
         duration?: number,
-        failure?: string
+        failure?: string,
+        reply?: any
     },
     succeeded: boolean
 }
