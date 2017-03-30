@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import * as ApplicationInsights from "applicationinsights";
-import {channel} from "pubsub-channel";
+import {channel, IStandardEvent} from "pubsub-channel";
 
-export const subscriber = (event) => {
+import {MysqlData} from "mysql-pub";
+
+export const subscriber = (event: IStandardEvent<MysqlData>) => {
     if (ApplicationInsights._isDependencies && ApplicationInsights.client) {
-        const queryObj = event.query || {};
+        const queryObj = event.data.query || {};
         const sqlString = queryObj.sql || "Unknown query";
-        const success = !event.err;
+        const success = !event.data.err;
 
         const connection = queryObj._connection || {};
         const connectionConfig = connection.config || {};
@@ -15,10 +17,10 @@ export const subscriber = (event) => {
         ApplicationInsights.client.trackDependency(
                 dbName,
                 sqlString,
-                event.duration | 0,
+                event.data.duration | 0,
                 success,
                 'mysql');
     }
 };
 
-channel.subscribe('mysql', subscriber);
+channel.subscribe<MysqlData>('mysql', subscriber);

@@ -2,6 +2,7 @@
     "name": "pubsub-channel",
     "version": "0.0.1",
     "main": "./channel.js",
+    "types": "./channel.d.ts",
     "scripts":{
         "prepublish": "tsc",
         "test": "tsc && mocha tests"

@@ -2,6 +2,7 @@
     "name": "mysql-pub",
     "version": "0.0.1",
     "main": "mysql.pub.js",
+    "types": "mysql.pub.d.ts",
     "scripts": {
         "prepublish": "tsc"
     },

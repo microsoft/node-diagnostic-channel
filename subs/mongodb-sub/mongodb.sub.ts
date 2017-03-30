@@ -1,24 +1,26 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import * as ApplicationInsights from "applicationinsights";
-import {channel} from "pubsub-channel";
+import {channel, IStandardEvent} from "pubsub-channel";
 
-export const subscriber = (event) => {
+import {MongoData} from "mongodb-pub";
+
+export const subscriber = (event: IStandardEvent<MongoData>) => {
     if (ApplicationInsights._isDependencies && ApplicationInsights.client) {
-        const dbName = (event.startedData && event.startedData.databaseName) || "Unknown database";
+        const dbName = (event.data.startedData && event.data.startedData.databaseName) || "Unknown database";
         ApplicationInsights.client
             .trackDependency(
                 dbName,
-                event.event.commandName,
-                event.event.duration,
-                event.succeeded,
+                event.data.event.commandName,
+                event.data.event.duration,
+                event.data.succeeded,
                 'mongodb');
                 
-        if (!event.succeeded) {
+        if (!event.data.succeeded) {
             ApplicationInsights.client
-                .trackException(event.event.failure);
+                .trackException(event.data.event.failure);
         }
     }
 };
 
-channel.subscribe("mongodb", subscriber);
+channel.subscribe<MongoData>("mongodb", subscriber);

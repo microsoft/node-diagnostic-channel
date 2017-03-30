@@ -6,7 +6,7 @@ import * as assert from 'assert';
 
 describe('pub/sub', function () {
     afterEach(() => {
-        channel.reset();
+        (<any>channel).reset();
     });
 
     it('should invoke subscribers', function () {
@@ -17,7 +17,7 @@ describe('pub/sub', function () {
         });
 
         channel.publish("test", testData);
-        assert.strictEqual(invokedData, testData, 'Subscriber called with incorrect values');
+        assert.strictEqual(invokedData.data, testData, 'Subscriber called with incorrect values');
     });
 
     it('should do nothing if there are no subscribers', function () {

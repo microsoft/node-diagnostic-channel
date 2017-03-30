@@ -2,6 +2,7 @@
     "name": "redis-pub",
     "version": "0.0.1",
     "main": "redis.pub.js",
+    "types": "redis.pub.d.ts",
     "scripts": {
         "prepublish": "tsc"
     },

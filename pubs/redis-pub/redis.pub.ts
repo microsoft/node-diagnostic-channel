@@ -2,6 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import {channel, PatchFunction, IModulePatcher} from "pubsub-channel";
 
+export type RedisData = {
+    duration: number,
+    address: string,
+    command_obj: any,
+    err: Error
+}
+
 const redisPatchFunction : PatchFunction = (originalRedis) => {
     const originalSend = originalRedis.RedisClient.prototype.internal_send_command;
 
@@ -19,7 +26,7 @@ const redisPatchFunction : PatchFunction = (originalRedis) => {
             command_obj.callback = channel.bindToContext(function (err) {
                 const hrDuration = process.hrtime(startTime);
                 const duration = (hrDuration[0] * 1e3 + hrDuration[1]/1e6)|0;
-                channel.publish('redis', {duration, address, command_obj, err});
+                channel.publish<RedisData>('redis', {duration, address, command_obj, err});
 
                 if (typeof cb === 'function') {
                     cb.apply(this, arguments);

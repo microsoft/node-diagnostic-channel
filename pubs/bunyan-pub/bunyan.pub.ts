@@ -2,6 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import {channel, PatchFunction, IModulePatcher} from "pubsub-channel";
 
+export type BunyanData = {
+    level: number,
+    result: string
+}
+
 const bunyanPatchFunction : PatchFunction = (originalBunyan) => {
     const originalEmit = originalBunyan.prototype._emit;
 
@@ -12,7 +17,7 @@ const bunyanPatchFunction : PatchFunction = (originalBunyan) => {
             if (!str) {
                 str = originalEmit.call(this, rec, true);
             }
-            channel.publish('bunyan', {level: rec.level, result:str});
+            channel.publish<BunyanData>('bunyan', {level: rec.level, result:str});
         }
         return ret;
     }

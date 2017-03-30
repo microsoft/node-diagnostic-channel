@@ -2,6 +2,7 @@
     "name": "bunyan-pub",
     "version": "0.0.1",
     "main": "bunyan.pub.js",
+    "types": "bunyan.pub.d.ts",
     "scripts": {
         "prepublish": "tsc"
     },

@@ -9,6 +9,22 @@ interface ResultContainer {
 };
 type CallbackWrapper = (resultContainer: ResultContainer, cb: Function) => Function;
 
+export type MysqlData = {
+    query: {
+        sql?: string,
+        _connection?: {
+            config?: {
+                socketPath?: string,
+                host?: string,
+                port?: number
+            }
+        }
+    },
+    callbackArgs: IArguments,
+    err: Error,
+    duration: number
+}
+
 const mysqlPatchFunction : PatchFunction = function (originalMysql, originalMysqlPath) {
     // The `name` passed in here is for debugging purposes,
     // to help distinguish which object is being patched.
@@ -67,7 +83,7 @@ const mysqlPatchFunction : PatchFunction = function (originalMysql, originalMysq
         return function (err) {
             const hrDuration = process.hrtime(resultContainer.startTime);
             const duration = (hrDuration[0] * 1e3 + hrDuration[1]/1e6)|0; 
-            channel.publish('mysql', {query: resultContainer.result, callbackArgs: arguments, err, duration});
+            channel.publish<MysqlData>('mysql', {query: resultContainer.result, callbackArgs: arguments, err, duration});
             cb.apply(this, arguments);
         }
     });

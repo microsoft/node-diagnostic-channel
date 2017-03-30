@@ -9,7 +9,8 @@
         "pubsub-channel": "../../pubsubchannel",
         "typescript": "^2.2.1",
         "mocha": "^3.2.0",
-        "applicationinsights": ">= 0.19.0"
+        "applicationinsights": ">= 0.19.0",
+        "console-pub": "../../pubs/console-pub"
     },
     "peerDependencies": {
         "pubsub-channel": "*",

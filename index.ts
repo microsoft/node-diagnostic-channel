@@ -9,7 +9,7 @@ import * as ApplicationInsights from "applicationinsights"
 // This is something that applicationinsights would do
 
 declare var __dirname;
-import {channel} from 'pubsub-channel';
+import {channel, IStandardEvent} from 'pubsub-channel';
 channel.addContextPreservation((cb) => {
     return ApplicationInsights.wrapWithCorrelationContext(cb);
 });
@@ -21,12 +21,14 @@ channel.addContextPreservation((cb) => {
 channel.autoLoadPackages(__dirname);
 
 // Verify that patches are applied
-console.dir(channel.getPatchesObject());
+console.dir((<any>channel).getPatchesObject());
+
+import {ConsoleData} from 'console-pub';
 
 declare var process;
 
-channel.subscribe('console', function (event) {
-    process.stdout.write("Console subscriber>\t" + event.data)
+channel.subscribe('console', function (event: IStandardEvent<ConsoleData>) {
+    process.stdout.write("Console subscriber>\t" + event.data.message)
 })
 
 console.log("Test message");

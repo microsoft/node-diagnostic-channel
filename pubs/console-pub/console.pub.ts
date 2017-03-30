@@ -3,6 +3,11 @@
 import {Writable} from "stream";
 import {channel, PatchFunction, IModulePatcher} from "pubsub-channel";
 
+export type ConsoleData = {
+    message: string,
+    stderr?: boolean
+};
+
 const consolePatchFunction : PatchFunction = (originalConsole) => {
     const aiLoggingOutStream = new Writable();
     const aiLoggingErrStream = new Writable();
@@ -13,9 +18,9 @@ const consolePatchFunction : PatchFunction = (originalConsole) => {
         if (!chunk) {
             return true;
         }
-        const data = chunk.toString();
+        const message = chunk.toString();
 
-        channel.publish("console", {data: data})
+        channel.publish<ConsoleData>("console", {message})
                 
         return process.stdout.write(chunk);
     }
@@ -24,9 +29,9 @@ const consolePatchFunction : PatchFunction = (originalConsole) => {
         if (!chunk) {
             return true;
         }
-        const data = chunk.toString();
+        const message = chunk.toString();
 
-        channel.publish("console", {data: data, stderr: true});
+        channel.publish<ConsoleData>("console", {message, stderr: true});
 
         return process.stderr.write(chunk);
     }

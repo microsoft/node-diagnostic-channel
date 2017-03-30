@@ -2,6 +2,7 @@
     "name": "console-pub",
     "version": "0.0.1",
     "main": "console.pub.js",
+    "types": "console.pub.d.ts",
     "scripts": {
         "prepublish": "tsc",
         "test": "tsc && mocha tests"

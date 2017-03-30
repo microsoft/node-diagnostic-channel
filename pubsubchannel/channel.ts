@@ -5,19 +5,39 @@ import {makePatchingRequire, IModulePatchMap, IModulePatcher} from './patchRequi
 
 export {PatchFunction, IModulePatcher, makePatchingRequire} from './patchRequire';
 
-export type ISubscriber = (event: any) => void;
+export interface IStandardEvent<T> {
+    timestamp: number,
+    data: T
+}
+
+export type ISubscriber<T> = (event: IStandardEvent<T>) => void;
 export type IFilter = (publishing: boolean) => boolean;
 
-interface IFilteredSubscriber {
-    listener: ISubscriber,
+interface IFilteredSubscriber<T> {
+    listener: ISubscriber<T>,
     filter: IFilter
 };
+
+export interface IChannel {
+    shouldPublish(name: string): boolean,
+    publish<T>(name: string, event: T): void,
+    subscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void,
+    unsubscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void,
+
+    bindToContext(cb: Function): Function,
+    addContextPreservation(preserver: (cb: Function) => Function): void,
+
+    registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void
+
+    autoLoadPackages(projectRoot: string): void
+}
+
 
 const trueFilter = (publishing: boolean) => true;
 
 class ContextPreservingEventEmitter {
     public version: string = require('./package.json').version; // Allow for future versions to replace things?
-    private subscribers: {[key: string]: IFilteredSubscriber[]} = {};
+    private subscribers: {[key: string]: IFilteredSubscriber<any>[]} = {};
     private contextPreservationFunction: (cb: Function) => Function = (cb) => cb;
     private knownPatches: IModulePatchMap = {};
 
@@ -31,16 +51,20 @@ class ContextPreservingEventEmitter {
         return false;
     }
 
-    public publish(name: string, event: any): void {
+    public publish<T>(name: string, event: T): void {
         if (this.currently_publishing) return; // Avoid reentrancy
         const listeners = this.subscribers[name];
         // Note: Listeners called synchronously to preserve context
         if (listeners) {
+            const standardEvent = {
+                timestamp: Date.now(),
+                data: event
+            };
             this.currently_publishing = true;
             listeners.forEach(({listener, filter}) => {
                 try {
                     if (filter && filter(true)) {
-                        listener(event)
+                        listener(standardEvent)
                     }
                 } catch (e) {
                     // Subscriber threw an error
@@ -50,7 +74,7 @@ class ContextPreservingEventEmitter {
         }
     }
 
-    public subscribe(name: string, listener: ISubscriber, filter: IFilter = trueFilter): void {
+    public subscribe<T>(name: string, listener: ISubscriber<T>, filter: IFilter = trueFilter): void {
         if (!this.subscribers[name]) {
             this.subscribers[name] = [];
         }
@@ -58,7 +82,7 @@ class ContextPreservingEventEmitter {
         this.subscribers[name].push({listener, filter});
     }
 
-    public unsubscribe(name: string, listener: ISubscriber, filter: IFilter = trueFilter): boolean {
+    public unsubscribe<T>(name: string, listener: ISubscriber<T>, filter: IFilter = trueFilter): boolean {
         const listeners = this.subscribers[name];
         if (listeners) {
             for (let index = 0; index < listeners.length; ++index) {
@@ -136,4 +160,4 @@ if (!global.pubsubChannel) {
     moduleModule.prototype.require = makePatchingRequire(global.pubsubChannel.getPatchesObject());
 }
 
-export const channel = global.pubsubChannel;
+export const channel: IChannel = global.pubsubChannel;

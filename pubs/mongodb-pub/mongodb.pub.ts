@@ -2,6 +2,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import {channel, PatchFunction, IModulePatcher} from "pubsub-channel";
 
+export type MongoData = {
+    startedData: {
+        databaseName?: string
+    },
+    event: {
+        commandName?: string,
+        duration?: number,
+        failure?: string
+    },
+    succeeded: boolean
+}
+
 const mongodbPatchFunction: PatchFunction = function (originalMongo) {
     const listener = originalMongo.instrument({
         operationIdGenerator: {
@@ -26,7 +38,7 @@ const mongodbPatchFunction: PatchFunction = function (originalMongo) {
         if (startedData) {
             delete eventMap[event.requestId];
         }
-        event.operationId(() => channel.publish('mongodb', {startedData, event, succeeded: true}));
+        event.operationId(() => channel.publish<MongoData>('mongodb', {startedData, event, succeeded: true}));
     });
 
     listener.on('failed', function (event) {
@@ -34,7 +46,7 @@ const mongodbPatchFunction: PatchFunction = function (originalMongo) {
         if (startedData) {
             delete eventMap[event.requestId];
         }
-        event.operationId(() => channel.publish('mongodb', {startedData, event, succeeded: false}));
+        event.operationId(() => channel.publish<MongoData>('mongodb', {startedData, event, succeeded: false}));
     });
     
     return originalMongo;
