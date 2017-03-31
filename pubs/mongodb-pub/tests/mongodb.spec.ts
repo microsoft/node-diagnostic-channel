@@ -1,8 +1,9 @@
-
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
 import {channel, IStandardEvent} from 'pubsub-channel';
 
 import {mongodbcoreConnectionRecordPatchFunction, mongoCommunication} from './util/mongodbcore-mock-record';
-import {mongodbcoreConnectionReplayPatchFunction} from './util/mongodbcore-mock-replay';
+import {makeMongodbcoreConnectionReplayPatchFunction} from './util/mongodbcore-mock-replay';
 import '../mongodb-core.pub';
 import '../mongodb.pub';
 
@@ -14,14 +15,29 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as assert from 'assert';
 
+enum Mode {
+    REPLAY,
+    RECORD
+}
+
+let mode: Mode = Mode.REPLAY;
+
 describe('mongodb', function () {
 
     it('should fire events when we communicate with a collection, and preserve context', function (done) {
+        const traceName = "mongodb.trace.json";
+        const tracePath = path.join(__dirname, "util", traceName);
         // Note:
         // We patch the underlying connection to record/replay a trace stored in util/mongodb.trace.json
         // This lets us validate the behavior of our mock as long as the mongo commands below are left unchanged,
         // or the trace is updated with a newly recorded version.
-        channel.registerMonkeyPatch('mongodb-core', {versionSpecifier: "*", patch: mongodbcoreConnectionReplayPatchFunction});
+        if (mode === Mode.REPLAY) {
+            const trace = require(tracePath);
+            channel.registerMonkeyPatch('mongodb-core', {versionSpecifier: "*", patch: makeMongodbcoreConnectionReplayPatchFunction(trace)});
+        } else {
+            assert.equal(mode, Mode.RECORD);
+            channel.registerMonkeyPatch('mongodb-core', {versionSpecifier: "*", patch: mongodbcoreConnectionRecordPatchFunction});
+        }
         channel.addContextPreservation((cb) => Zone.current.wrap(cb, 'context preservation'));
 
         const events: IStandardEvent<MongoData>[] = [];
@@ -74,9 +90,6 @@ describe('mongodb', function () {
                         return;
                     }
 
-                    // For recording traces
-                    //fs.writeFileSync(path.join(__dirname, "util", "mongodb.trace.json"), JSON.stringify(mongoCommunication));
-
                     assert.equal(events.length, 2);
                     assert.equal(events[0].data.startedData.command.insert, 'documents');
                     assert.equal(events[0].data.event.reply.n, 3)
@@ -85,7 +98,12 @@ describe('mongodb', function () {
                     assert.equal(events[1].data.event.reply.n, 1);
                     assert.equal(events[1].data.succeeded, true);
 
-
+                    if (mode === Mode.RECORD) {
+                        // For recording traces
+                        // The mongoCommunications trace should consist of Buffer objects,
+                        // which retain relevant data when JSON.stringified
+                        fs.writeFileSync(tracePath, JSON.stringify(mongoCommunication));
+                    }
                 }).then(done, done));
             }));
         }));

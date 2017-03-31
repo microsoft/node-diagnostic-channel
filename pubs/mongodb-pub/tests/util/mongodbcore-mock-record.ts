@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
 import {PatchFunction} from "pubsub-channel";
 
 
@@ -19,17 +21,6 @@ export const mongodbcoreConnectionRecordPatchFunction : PatchFunction = function
         mongoCommunication.push({send: buffer});
         return owrite.apply(this,arguments);
     }
-
-    /*const osconnect = originalMongoCore.Server.prototype.connect;
-    originalMongoCore.Server.prototype.connect = function () {
-        const ret = osconnect.apply(this, arguments);
-        const opwrite = this.s.pool.write;
-        this.s.pool.write = function () {
-            console.log(new Error().stack);
-            return opwrite.apply(this, arguments);
-        }
-        return ret;
-    }*/
 
     return originalMongoCore;
 }
