@@ -7,6 +7,10 @@ import {RedisData} from "redis-pub";
 
 export const subscriber = (event: IStandardEvent<RedisData>) => {
     if (ApplicationInsights._isDependencies && ApplicationInsights.client) {
+        if (event.data.command_obj.command === 'info') {
+            // We don't want to report 'info', it's irrelevant
+            return;
+        }
         ApplicationInsights.client.trackDependency(
             event.data.address,
             event.data.command_obj.command,
