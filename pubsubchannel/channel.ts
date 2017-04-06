@@ -1,47 +1,48 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 
-import {makePatchingRequire, IModulePatchMap, IModulePatcher} from './patchRequire';
+import {IModulePatcher, IModulePatchMap, makePatchingRequire} from "./patchRequire";
 
-export {PatchFunction, IModulePatcher, makePatchingRequire} from './patchRequire';
+export {PatchFunction, IModulePatcher, makePatchingRequire} from "./patchRequire";
 
 export interface IStandardEvent<T> {
-    timestamp: number,
-    data: T
+    timestamp: number;
+    data: T;
 }
 
 export type ISubscriber<T> = (event: IStandardEvent<T>) => void;
 export type IFilter = (publishing: boolean) => boolean;
 
 interface IFilteredSubscriber<T> {
-    listener: ISubscriber<T>,
-    filter: IFilter
-};
-
-export interface IChannel {
-    shouldPublish(name: string): boolean,
-    publish<T>(name: string, event: T): void,
-    subscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void,
-    unsubscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void,
-
-    bindToContext(cb: Function): Function,
-    addContextPreservation(preserver: (cb: Function) => Function): void,
-
-    registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void
-
-    autoLoadPackages(projectRoot: string): void
+    listener: ISubscriber<T>;
+    filter: IFilter;
 }
 
+export interface IChannel {
+    shouldPublish(name: string): boolean;
+    publish<T>(name: string, event: T): void;
+    subscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void;
+    unsubscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void;
+
+    /* tslint:disable:ban-types */
+    bindToContext<T extends Function>(cb: T): T;
+    addContextPreservation<T extends Function>(preserver: (cb: T) => T): void;
+    /* tslint:enable:ban-types */
+
+    registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void;
+
+    autoLoadPackages(projectRoot: string): void;
+}
 
 const trueFilter = (publishing: boolean) => true;
 
-class ContextPreservingEventEmitter {
-    public version: string = require('./package.json').version; // Allow for future versions to replace things?
-    private subscribers: {[key: string]: IFilteredSubscriber<any>[]} = {};
-    private contextPreservationFunction: (cb: Function) => Function = (cb) => cb;
+class ContextPreservingEventEmitter implements IChannel {
+    public version: string = require("./package.json").version; // Allow for future versions to replace things?
+    private subscribers: {[key: string]: Array<IFilteredSubscriber<any>>} = {};
+    private contextPreservationFunction: <T>(cb: T) => T = (cb) => cb;
     private knownPatches: IModulePatchMap = {};
 
-    private currently_publishing: boolean = false;
+    private currentlyPublishing: boolean = false;
 
     public shouldPublish(name: string): boolean {
         const listeners = this.subscribers[name];
@@ -52,25 +53,27 @@ class ContextPreservingEventEmitter {
     }
 
     public publish<T>(name: string, event: T): void {
-        if (this.currently_publishing) return; // Avoid reentrancy
+        if (this.currentlyPublishing) {
+            return; // Avoid reentrancy
+        }
         const listeners = this.subscribers[name];
         // Note: Listeners called synchronously to preserve context
         if (listeners) {
             const standardEvent = {
                 timestamp: Date.now(),
-                data: event
+                data: event,
             };
-            this.currently_publishing = true;
+            this.currentlyPublishing = true;
             listeners.forEach(({listener, filter}) => {
                 try {
                     if (filter && filter(true)) {
-                        listener(standardEvent)
+                        listener(standardEvent);
                     }
                 } catch (e) {
                     // Subscriber threw an error
                 }
             });
-            this.currently_publishing = false;
+            this.currentlyPublishing = false;
         }
     }
 
@@ -87,7 +90,7 @@ class ContextPreservingEventEmitter {
         if (listeners) {
             for (let index = 0; index < listeners.length; ++index) {
                 if (listeners[index].listener === listener && listeners[index].filter === filter) {
-                    listeners.splice(index,1);
+                    listeners.splice(index, 1);
                     return true;
                 }
             }
@@ -104,17 +107,19 @@ class ContextPreservingEventEmitter {
         Object.getOwnPropertyNames(this.knownPatches).forEach((prop) => delete this.knownPatches[prop]);
     }
 
-    public bindToContext(cb: Function) {
+    /* tslint:disable-next-line:ban-types */
+    public bindToContext<T extends Function>(cb: T): T {
         return this.contextPreservationFunction(cb);
     }
 
-    public addContextPreservation(preserver: (cb: Function) => Function) {
+    /* tslint:disable-next-line:ban-types */
+    public addContextPreservation<T extends Function>(preserver: (cb: T) => T) {
         const previousPreservationStack = this.contextPreservationFunction;
         this.contextPreservationFunction = (cb) => preserver(previousPreservationStack(cb));
     }
 
     public registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void {
-        if(!this.knownPatches[packageName]) {
+        if (!this.knownPatches[packageName]) {
             this.knownPatches[packageName] = [];
         }
 
@@ -128,11 +133,11 @@ class ContextPreservingEventEmitter {
     public autoLoadPackages(projectRoot: string): void {
         try {
             const packageJson = require(`${projectRoot}/package.json`);
-            const dependencies = Object.keys(packageJson['dependencies']);
+            const dependencies = Object.keys(packageJson["dependencies"]);
             dependencies.forEach((dep) => {
                 try {
                     const depPackageJson = require(`${dep}/package.json`);
-                    if (depPackageJson['pubsubAutoLoad']) {
+                    if (depPackageJson["pubsubAutoLoad"]) {
                         require(dep);
                     }
                 } catch (e) {
@@ -140,7 +145,7 @@ class ContextPreservingEventEmitter {
                     process.stderr.write("Failed to auto load " + dep);
                     process.stderr.write(e.toString());
                 }
-            })
+            });
         } catch (e) {
             // Couldn't auto load packages
             process.stderr.write("Failed to auto load packages");
@@ -149,12 +154,14 @@ class ContextPreservingEventEmitter {
     }
 }
 
-declare var global: {pubsubChannel: ContextPreservingEventEmitter};
+declare const global: {pubsubChannel: ContextPreservingEventEmitter};
 
 if (!global.pubsubChannel) {
     global.pubsubChannel = new ContextPreservingEventEmitter();
     // TODO: should this only patch require after at least one monkey patch is registered?
-    const moduleModule = require('module');
+    /* tslint:disable-next-line:no-var-requires */
+    const moduleModule = require("module");
+
     // Note: We pass in the object now before any patches are registered, but the object is passed by reference
     // so any updates made to the object will be visible in the patcher.
     moduleModule.prototype.require = makePatchingRequire(global.pubsubChannel.getPatchesObject());

@@ -1,5 +1,5 @@
 import { IModulePatcher } from "pubsub-channel";
-export declare type MongoData = {
+export interface IMongoData {
     startedData: {
         databaseName?: string;
         command?: any;
@@ -11,5 +11,5 @@ export declare type MongoData = {
         reply?: any;
     };
     succeeded: boolean;
-};
+}
 export declare const mongo2: IModulePatcher;

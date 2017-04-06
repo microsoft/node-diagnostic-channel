@@ -4,12 +4,13 @@
     "main": "bunyan.pub.js",
     "types": "bunyan.pub.d.ts",
     "scripts": {
-        "prepublish": "tsc"
+        "prepublish": "tslint -c tslint.json -p tsconfig.json && tsc"
     },
     "devDependencies": {
         "pubsub-channel": "../../pubsubchannel",
         "typescript": "^2.2.1",
-        "mocha": "^3.2.0"
+        "mocha": "^3.2.0",
+        "tslint": "^5.0.0"
     },
     "peerDependencies": {
         "pubsub-channel": "*"

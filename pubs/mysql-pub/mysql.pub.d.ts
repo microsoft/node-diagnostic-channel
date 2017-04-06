@@ -1,5 +1,5 @@
 import { IModulePatcher } from "pubsub-channel";
-export declare type MysqlData = {
+export interface IMysqlData {
     query: {
         sql?: string;
         _connection?: {
@@ -13,5 +13,5 @@ export declare type MysqlData = {
     callbackArgs: IArguments;
     err: Error;
     duration: number;
-};
+}
 export declare const mysql: IModulePatcher;

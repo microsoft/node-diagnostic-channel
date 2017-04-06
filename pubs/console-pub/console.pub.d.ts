@@ -1,6 +1,6 @@
 import { IModulePatcher } from "pubsub-channel";
-export declare type ConsoleData = {
+export interface IConsoleData {
     message: string;
     stderr?: boolean;
-};
+}
 export declare const console: IModulePatcher;

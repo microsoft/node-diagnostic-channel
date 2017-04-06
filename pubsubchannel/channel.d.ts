@@ -1,5 +1,5 @@
-import { IModulePatcher } from './patchRequire';
-export { PatchFunction, IModulePatcher, makePatchingRequire } from './patchRequire';
+import { IModulePatcher } from "./patchRequire";
+export { PatchFunction, IModulePatcher, makePatchingRequire } from "./patchRequire";
 export interface IStandardEvent<T> {
     timestamp: number;
     data: T;
@@ -11,8 +11,8 @@ export interface IChannel {
     publish<T>(name: string, event: T): void;
     subscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void;
     unsubscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void;
-    bindToContext(cb: Function): Function;
-    addContextPreservation(preserver: (cb: Function) => Function): void;
+    bindToContext<T extends Function>(cb: T): T;
+    addContextPreservation<T extends Function>(preserver: (cb: T) => T): void;
     registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void;
     autoLoadPackages(projectRoot: string): void;
 }

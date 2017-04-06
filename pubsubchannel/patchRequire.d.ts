@@ -1,4 +1,4 @@
-export declare type PatchFunction = (any, path: string) => any;
+export declare type PatchFunction = (module: any, path: string) => any;
 export interface IModulePatcher {
     versionSpecifier: string;
     patch: PatchFunction;

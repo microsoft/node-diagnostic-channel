@@ -3,21 +3,21 @@
 import * as ApplicationInsights from "applicationinsights";
 import {channel, IStandardEvent} from "pubsub-channel";
 
-import {RedisData} from "redis-pub";
+import {IRedisData} from "redis-pub";
 
-export const subscriber = (event: IStandardEvent<RedisData>) => {
+export const subscriber = (event: IStandardEvent<IRedisData>) => {
     if (ApplicationInsights._isDependencies && ApplicationInsights.client) {
-        if (event.data.command_obj.command === 'info') {
+        if (event.data.commandObj.command === 'info') {
             // We don't want to report 'info', it's irrelevant
             return;
         }
         ApplicationInsights.client.trackDependency(
             event.data.address,
-            event.data.command_obj.command,
+            event.data.commandObj.command,
             event.data.duration,
             !event.data.err,
             'redis'
         );
     }
 };
-channel.subscribe<RedisData>('redis', subscriber);
+channel.subscribe<IRedisData>('redis', subscriber);

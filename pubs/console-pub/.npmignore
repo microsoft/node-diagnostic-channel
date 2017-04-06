@@ -3,3 +3,5 @@
 *.js.map
 typings
 tests
+tslint.json
+tsconfig.json

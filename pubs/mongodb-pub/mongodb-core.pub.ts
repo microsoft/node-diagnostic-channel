@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
-import {channel, PatchFunction, IModulePatcher} from "pubsub-channel";
+import {channel, IModulePatcher, PatchFunction} from "pubsub-channel";
 
-const mongodbcorePatchFunction : PatchFunction = function (originalMongoCore) {
+const mongodbcorePatchFunction: PatchFunction = function(originalMongoCore) {
     const originalConnect = originalMongoCore.Server.prototype.connect;
     originalMongoCore.Server.prototype.connect = function contextPreservingConnect() {
         const ret = originalConnect.apply(this, arguments);
@@ -12,8 +12,8 @@ const mongodbcorePatchFunction : PatchFunction = function (originalMongoCore) {
         // so we wrap the callbacks to restore appropriate state
         const originalWrite = this.s.pool.write;
         this.s.pool.write = function contextPreservingWrite() {
-            const cbidx = typeof arguments[1] === 'function' ? 1 : 2;
-            if (typeof arguments[cbidx] === 'function' ) {
+            const cbidx = typeof arguments[1] === "function" ? 1 : 2;
+            if (typeof arguments[cbidx] === "function" ) {
                 arguments[cbidx] = channel.bindToContext(arguments[cbidx]);
             }
             return originalWrite.apply(this, arguments);
@@ -23,20 +23,20 @@ const mongodbcorePatchFunction : PatchFunction = function (originalMongoCore) {
         // directly calls into connection.write
         const originalLogout = this.s.pool.logout;
         this.s.pool.logout = function contextPreservingLogout() {
-            if (typeof arguments[1] === 'function') {
+            if (typeof arguments[1] === "function") {
                 arguments[1] = channel.bindToContext(arguments[1]);
             }
             return originalLogout.apply(this, arguments);
         };
         return ret;
-    }
+    };
 
     return originalMongoCore;
-}
+};
 
 export const mongoCore2: IModulePatcher = {
     versionSpecifier: ">= 2.0.0 <= 2.2.0",
-    patch: mongodbcorePatchFunction
-}
+    patch: mongodbcorePatchFunction,
+};
 
-channel.registerMonkeyPatch('mongodb-core', mongoCore2);
+channel.registerMonkeyPatch("mongodb-core", mongoCore2);

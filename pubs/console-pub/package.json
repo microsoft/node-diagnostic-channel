@@ -4,13 +4,14 @@
     "main": "console.pub.js",
     "types": "console.pub.d.ts",
     "scripts": {
-        "prepublish": "tsc",
+        "prepublish": "tslint -p tsconfig.json -c tslint.json && tsc",
         "test": "tsc && mocha tests"
     },
     "devDependencies": {
         "pubsub-channel": "../../pubsubchannel",
         "typescript": "^2.2.1",
-        "mocha": "^3.2.0"
+        "mocha": "^3.2.0",
+        "tslint": "^5.0.0"
     },
     "peerDependencies": {
         "pubsub-channel": "*"

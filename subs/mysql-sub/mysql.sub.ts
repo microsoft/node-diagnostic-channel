@@ -3,9 +3,9 @@
 import * as ApplicationInsights from "applicationinsights";
 import {channel, IStandardEvent} from "pubsub-channel";
 
-import {MysqlData} from "mysql-pub";
+import {IMysqlData} from "mysql-pub";
 
-export const subscriber = (event: IStandardEvent<MysqlData>) => {
+export const subscriber = (event: IStandardEvent<IMysqlData>) => {
     if (ApplicationInsights._isDependencies && ApplicationInsights.client) {
         const queryObj = event.data.query || {};
         const sqlString = queryObj.sql || "Unknown query";
@@ -23,4 +23,4 @@ export const subscriber = (event: IStandardEvent<MysqlData>) => {
     }
 };
 
-channel.subscribe<MysqlData>('mysql', subscriber);
+channel.subscribe<IMysqlData>('mysql', subscriber);

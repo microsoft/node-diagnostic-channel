@@ -4,7 +4,7 @@
     "main": "./channel.js",
     "types": "./channel.d.ts",
     "scripts":{
-        "prepublish": "tsc",
+        "prepublish": "tslint -c tslint.json -p tsconfig.json && tsc",
         "test": "tsc && mocha tests"
     },
     "dependencies": {
@@ -12,7 +12,8 @@
     },
     "devDependencies": {
         "typescript": "^2.2.1",
-        "mocha": "^3.2.0"
+        "mocha": "^3.2.0",
+        "tslint": "^5.0.0"
     },
     "license": "MIT"
 }

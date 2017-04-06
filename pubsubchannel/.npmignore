@@ -4,3 +4,5 @@
 typings
 tests
 README.md
+tslint.json
+tsconfig.json

@@ -1,33 +1,33 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
-import {channel, PatchFunction, IModulePatcher} from "pubsub-channel";
+import {channel, IModulePatcher, PatchFunction} from "pubsub-channel";
 
-export type BunyanData = {
-    level: number,
-    result: string
+export interface IBunyanData {
+    level: number;
+    result: string;
 }
 
-const bunyanPatchFunction : PatchFunction = (originalBunyan) => {
+const bunyanPatchFunction: PatchFunction = (originalBunyan) => {
     const originalEmit = originalBunyan.prototype._emit;
 
-    originalBunyan.prototype._emit = function (rec, noemit) {
+    originalBunyan.prototype._emit = function(rec, noemit) {
         const ret = originalEmit.apply(this, arguments);
         if (!noemit) {
             let str = ret;
             if (!str) {
                 str = originalEmit.call(this, rec, true);
             }
-            channel.publish<BunyanData>('bunyan', {level: rec.level, result:str});
+            channel.publish<IBunyanData>("bunyan", {level: rec.level, result: str});
         }
         return ret;
-    }
+    };
 
     return originalBunyan;
-}
+};
 
 export const bunyan: IModulePatcher = {
     versionSpecifier: ">= 1.0.0 < 2.0.0",
-    patch: bunyanPatchFunction
+    patch: bunyanPatchFunction,
 };
 
-channel.registerMonkeyPatch('bunyan', bunyan);
+channel.registerMonkeyPatch("bunyan", bunyan);

@@ -1,3 +1,3 @@
-import './mongodb.pub';
-import './mongodb-core.pub';
-export { MongoData } from './mongodb.pub';
+import "./mongodb-core.pub";
+import "./mongodb.pub";
+export { IMongoData } from "./mongodb.pub";

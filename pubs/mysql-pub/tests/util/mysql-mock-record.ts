@@ -2,15 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import {PatchFunction} from "pubsub-channel";
 
-import * as path from 'path';
+import * as path from "path";
 
 export const mysqlCommunication = [];
 
-export const mysqlConnectionRecordPatchFunction : PatchFunction = function (originalMysql, originalMysqlPath) {
+export const mysqlConnectionRecordPatchFunction: PatchFunction = function(originalMysql, originalMysqlPath) {
     const connectionClass = require(`${path.dirname(originalMysqlPath)}/lib/Connection`);
 
     const oconnect = connectionClass.prototype.connect;
-    connectionClass.prototype.connect = function () {
+    connectionClass.prototype.connect = function() {
         const ret = oconnect.apply(this, arguments);
 
         // Mysql uses a pool of connections,
@@ -18,17 +18,16 @@ export const mysqlConnectionRecordPatchFunction : PatchFunction = function (orig
         const thread = [];
         mysqlCommunication.push(thread);
 
-        this._socket.prependListener('data', function (data) {
-            console.log("socket data");
+        this._socket.prependListener("data", function(data) {
             thread.push({recv: data});
         });
         const owrite = this._socket.write;
-        this._socket.write = function (data) {
+        this._socket.write = function(data) {
             thread.push({send: data});
             return owrite.apply(this, arguments);
-        }
+        };
         return ret;
-    }
-    
+    };
+
     return originalMysql;
-}
+};

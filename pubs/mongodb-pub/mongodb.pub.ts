@@ -1,31 +1,31 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
-import {channel, PatchFunction, IModulePatcher} from "pubsub-channel";
+import {channel, IModulePatcher, PatchFunction} from "pubsub-channel";
 
-export type MongoData = {
+export interface IMongoData {
     startedData: {
-        databaseName?: string,
-        command?: any
-    },
+        databaseName?: string;
+        command?: any;
+    };
     event: {
-        commandName?: string,
-        duration?: number,
-        failure?: string,
-        reply?: any
-    },
-    succeeded: boolean
+        commandName?: string;
+        duration?: number;
+        failure?: string;
+        reply?: any;
+    };
+    succeeded: boolean;
 }
 
-const mongodbPatchFunction: PatchFunction = function (originalMongo) {
+const mongodbPatchFunction: PatchFunction = function(originalMongo) {
     const listener = originalMongo.instrument({
         operationIdGenerator: {
-            next: function () {
+            next: function() {
                 return channel.bindToContext((cb) => cb());
-            }
-        }
+            },
+        },
     });
-    const eventMap = {}
-    listener.on('started', function (event) {
+    const eventMap = {};
+    listener.on("started", function(event) {
         if (eventMap[event.requestId]) {
             // Note: Mongo can generate 2 completely separate requests
             // which share the same requestId, if a certain race condition is triggered.
@@ -35,28 +35,28 @@ const mongodbPatchFunction: PatchFunction = function (originalMongo) {
         eventMap[event.requestId] = event;
     });
 
-    listener.on('succeeded', function (event) {
+    listener.on("succeeded", function(event) {
         const startedData = eventMap[event.requestId];
         if (startedData) {
             delete eventMap[event.requestId];
         }
-        event.operationId(() => channel.publish<MongoData>('mongodb', {startedData, event, succeeded: true}));
+        event.operationId(() => channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: true}));
     });
 
-    listener.on('failed', function (event) {
+    listener.on("failed", function(event) {
         const startedData = eventMap[event.requestId];
         if (startedData) {
             delete eventMap[event.requestId];
         }
-        event.operationId(() => channel.publish<MongoData>('mongodb', {startedData, event, succeeded: false}));
+        event.operationId(() => channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: false}));
     });
-    
+
     return originalMongo;
 };
 
 export const mongo2: IModulePatcher = {
-    versionSpecifier: '>= 2.0.0 <= 2.3.0',
-    patch: mongodbPatchFunction
+    versionSpecifier: ">= 2.0.0 <= 2.3.0",
+    patch: mongodbPatchFunction,
 };
 
-channel.registerMonkeyPatch('mongodb', mongo2);
+channel.registerMonkeyPatch("mongodb", mongo2);

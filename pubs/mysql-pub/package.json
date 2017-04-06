@@ -4,14 +4,15 @@
     "main": "mysql.pub.js",
     "types": "mysql.pub.d.ts",
     "scripts": {
-        "prepublish": "tsc",
+        "prepublish": "tslint -p tsconfig.json -c tslint.json && tsc",
         "test": "tsc && mocha tests"
     },
     "devDependencies": {
         "pubsub-channel": "../../pubsubchannel",
         "typescript": "^2.2.1",
         "mocha": "^3.2.0",
-        "mysql": "2.13.0"
+        "mysql": "2.13.0",
+        "tslint": "^5.0.0"
     },
     "peerDependencies": {
         "pubsub-channel": "*"

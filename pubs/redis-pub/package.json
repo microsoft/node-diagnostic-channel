@@ -4,14 +4,15 @@
     "main": "redis.pub.js",
     "types": "redis.pub.d.ts",
     "scripts": {
-        "prepublish": "tsc",
+        "prepublish": "tslint -c tslint.json -p tsconfig.json && tsc",
         "test": "tsc && mocha tests"
     },
     "devDependencies": {
         "pubsub-channel": "../../pubsubchannel",
         "typescript": "^2.2.1",
         "mocha": "^3.2.0",
-        "redis": "^2.7.1"
+        "redis": "^2.7.1",
+        "tslint": "^5.0.0"
     },
     "peerDependencies": {
         "pubsub-channel": "*"
