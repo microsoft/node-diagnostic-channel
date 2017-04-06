@@ -23,11 +23,11 @@ channel.autoLoadPackages(__dirname);
 // Verify that patches are applied
 console.dir((<any>channel).getPatchesObject());
 
-import {ConsoleData} from 'console-pub';
+import {IConsoleData} from 'console-pub';
 
 declare var process;
 
-channel.subscribe('console', function (event: IStandardEvent<ConsoleData>) {
+channel.subscribe('console', function (event: IStandardEvent<IConsoleData>) {
     process.stdout.write("Console subscriber>\t" + event.data.message)
 })
 
