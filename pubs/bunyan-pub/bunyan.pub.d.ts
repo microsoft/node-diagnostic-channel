@@ -1,4 +1,4 @@
-import { IModulePatcher } from "diagnosticsource";
+import { IModulePatcher } from "diagnosticssource";
 export interface IBunyanData {
     level: number;
     result: string;

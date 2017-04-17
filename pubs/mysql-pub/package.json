@@ -8,7 +8,7 @@
         "test": "tsc && mocha tests"
     },
     "devDependencies": {
-        "diagnosticsource": "../../node-diagnosticsource",
+        "diagnosticssource": "../../node-diagnosticssource",
         "typescript": "^2.2.1",
         "mocha": "^3.2.0",
         "mysql": "2.13.0",
@@ -16,7 +16,7 @@
         "tslint": "^5.0.0"
     },
     "peerDependencies": {
-        "diagnosticsource": "*"
+        "diagnosticssource": "*"
     },
     "license": "MIT",
     "pubsubAutoLoad": true

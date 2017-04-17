@@ -1,5 +1,5 @@
 {
-    "name": "diagnosticsource",
+    "name": "diagnosticssource",
     "version": "0.0.1",
     "main": "./channel.js",
     "types": "./channel.d.ts",

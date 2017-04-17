@@ -9,7 +9,7 @@ This package is intended to connect event 'publishers' to event 'subscribers' in
 Subscribing to an event is simple:
 
 ```js
-var channel = require('diagnosticsource');
+var channel = require('diagnosticssource');
 
 channel.subscribe('someEvent', function (event) {
     // do something about the event
@@ -23,7 +23,7 @@ The contents of the `event` parameter to the subscribe callback is determined en
 Publishing an event can be simple:
 
 ```js
-var channel = require('diagnosticsource');
+var channel = require('diagnosticssource');
 
 channel.publish('someEvent', someData);
 ```
@@ -31,7 +31,7 @@ channel.publish('someEvent', someData);
 In many cases, preserving context may require some additional effort:
 
 ```js
-var channel = require('diagnosticsource');
+var channel = require('diagnosticssource');
 
 function doWork(args, callback) {
     // In some context...
