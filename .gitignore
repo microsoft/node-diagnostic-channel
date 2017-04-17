@@ -39,4 +39,4 @@ jspm_packages
 # Generated files
 *.js
 *.js.map
-
+*.d.ts

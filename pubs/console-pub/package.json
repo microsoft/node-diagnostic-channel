@@ -8,6 +8,8 @@
         "test": "tsc && mocha tests"
     },
     "devDependencies": {
+        "@types/mocha": "^2.2.40",
+        "@types/node": "^7.0.12",
         "diagnosticssource": "../../node-diagnosticssource",
         "typescript": "^2.2.1",
         "mocha": "^3.2.0",
