@@ -154,17 +154,17 @@ class ContextPreservingEventEmitter implements IChannel {
     }
 }
 
-declare const global: {pubsubChannel: ContextPreservingEventEmitter};
+declare const global: {diagnosticsSource: ContextPreservingEventEmitter};
 
-if (!global.pubsubChannel) {
-    global.pubsubChannel = new ContextPreservingEventEmitter();
+if (!global.diagnosticsSource) {
+    global.diagnosticsSource = new ContextPreservingEventEmitter();
     // TODO: should this only patch require after at least one monkey patch is registered?
     /* tslint:disable-next-line:no-var-requires */
     const moduleModule = require("module");
 
     // Note: We pass in the object now before any patches are registered, but the object is passed by reference
     // so any updates made to the object will be visible in the patcher.
-    moduleModule.prototype.require = makePatchingRequire(global.pubsubChannel.getPatchesObject());
+    moduleModule.prototype.require = makePatchingRequire(global.diagnosticsSource.getPatchesObject());
 }
 
-export const channel: IChannel = global.pubsubChannel;
+export const channel: IChannel = global.diagnosticsSource;

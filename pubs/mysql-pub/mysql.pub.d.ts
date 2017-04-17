@@ -1,4 +1,4 @@
-import { IModulePatcher } from "pubsub-channel";
+import { IModulePatcher } from "diagnosticsource";
 export interface IMysqlData {
     query: {
         sql?: string;

@@ -3,7 +3,7 @@
 import * as ApplicationInsights from "applicationinsights";
 import {Contracts} from "applicationinsights/Library/Contracts";
 
-import {channel, IStandardEvent} from "pubsub-channel";
+import {channel, IStandardEvent} from "diagnosticsource";
 
 import {IBunyanData} from "bunyan-pub";
 

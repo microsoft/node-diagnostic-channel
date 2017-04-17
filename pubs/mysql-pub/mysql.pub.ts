@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
+import {channel, IModulePatcher, PatchFunction} from "diagnosticsource";
 import * as path from "path";
-import {channel, IModulePatcher, PatchFunction} from "pubsub-channel";
 
 interface IResultContainer {
     result: any;

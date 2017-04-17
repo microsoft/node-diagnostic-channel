@@ -1,5 +1,5 @@
 {
-    "name": "pubsub-channel",
+    "name": "diagnosticsource",
     "version": "0.0.1",
     "main": "./channel.js",
     "types": "./channel.d.ts",
