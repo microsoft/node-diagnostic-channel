@@ -9,6 +9,9 @@
         "mysql-sub": "../mysql-sub",
         "redis-sub": "../redis-sub"
     },
+    "scripts": {
+        "test": "echo None"
+    },
     "license": "MIT",
     "pubsubAutoLoad": true
 }
