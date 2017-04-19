@@ -37,7 +37,7 @@ export interface IChannel {
 const trueFilter = (publishing: boolean) => true;
 
 class ContextPreservingEventEmitter implements IChannel {
-    public version: string = require("./package.json").version; // Allow for future versions to replace things?
+    public version: string = require("./../package.json").version; // Allow for future versions to replace things?
     private subscribers: {[key: string]: Array<IFilteredSubscriber<any>>} = {};
     private contextPreservationFunction: <T>(cb: T) => T = (cb) => cb;
     private knownPatches: IModulePatchMap = {};
