@@ -15,7 +15,7 @@
     "@types/mocha": "^2.2.40",
     "@types/node": "^7.0.12",
     "copyfiles": "^1.2.0",
-    "diagnosticssource": "../../node-diagnosticssource",
+    "diagnostic-source": "../../diagnostic-source",
     "mocha": "^3.2.0",
     "redis": "^2.7.1",
     "rimraf": "^2.6.1",
@@ -24,7 +24,7 @@
     "zone.js": "^0.8.5"
   },
   "peerDependencies": {
-    "diagnosticssource": "*"
+    "diagnostic-source": "*"
   },
   "files": [
     ".dist/**/*",

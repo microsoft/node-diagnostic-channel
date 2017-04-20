@@ -1,7 +1,7 @@
 #!/bin/bash #
 # Helper script to compile/install the packages in the correct order
 BASEDIR=$(dirname "$0")
-pushd $BASEDIR/node-diagnosticssource
+pushd $BASEDIR/diagnostic-source
 npm install && npm run clean && npm test
 popd
 
@@ -12,7 +12,10 @@ for x in `ls $BASEDIR/pubs`; do
 done
 
 for x in `ls $BASEDIR/subs`; do
-    pushd $BASEDIR/subs/$x
-    npm install && npm test
-    popd
+    if [ ! $x == ".gitignore" ]
+    then
+        pushd $BASEDIR/subs/$x
+        npm install && npm test
+        popd
+    fi
 done

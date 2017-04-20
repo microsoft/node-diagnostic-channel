@@ -9,7 +9,7 @@ const originalConsoleDescriptor = Object.getOwnPropertyDescriptor(global, "conso
 import {console as consolePatch, IConsoleData} from "../console.pub";
 Object.defineProperty(global, "console", originalConsoleDescriptor);
 
-import {channel, IStandardEvent, makePatchingRequire} from "diagnosticssource";
+import {channel, IStandardEvent, makePatchingRequire} from "diagnostic-source";
 
 describe("Console", function() {
     const moduleModule = require("module");
