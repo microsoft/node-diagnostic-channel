@@ -4,13 +4,13 @@ setlocal enableDelayedExpansion
 
 echo Installing DiagnosticsSource
 pushd %~dp0\node-diagnosticssource
-cmd.exe /c "npm install && npm test"
+cmd.exe /c "npm install && npm run clean && npm test"
 popd
 
 for /F %%x in ('dir /B/D %~dp0\pubs') do (
     echo Installing %%x
     pushd %~dp0\pubs\%%x
-    cmd.exe /c "npm install && npm test"
+    cmd.exe /c "npm install && npm run clean && npm test"
     popd
 )
 

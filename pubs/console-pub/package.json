@@ -1,23 +1,33 @@
 {
-    "name": "console-pub",
-    "version": "0.0.1",
-    "main": "console.pub.js",
-    "types": "console.pub.d.ts",
-    "scripts": {
-        "prepublish": "tslint -p tsconfig.json -c tslint.json && tsc",
-        "test": "tsc && mocha tests"
-    },
-    "devDependencies": {
-        "@types/mocha": "^2.2.40",
-        "@types/node": "^7.0.12",
-        "diagnosticssource": "../../node-diagnosticssource",
-        "typescript": "^2.2.1",
-        "mocha": "^3.2.0",
-        "tslint": "^5.0.0"
-    },
-    "peerDependencies": {
-        "diagnosticssource": "*"
-    },
-    "license": "MIT",
-    "pubsubAutoLoad": true
+  "name": "console-pub",
+  "version": "0.0.1",
+  "main": ".dist/console.pub.js",
+  "types": ".dist/console.pub.d.ts",
+  "scripts": {
+    "build": "tsc --outDir ./.dist",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "clean": "rimraf ./.dist",
+    "prepublish": "npm run lint && npm run build",
+    "test": "npm run build && mocha .dist/tests"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.40",
+    "@types/node": "^7.0.12",
+    "diagnosticssource": "../../node-diagnosticssource",
+    "mocha": "^3.2.0",
+    "rimraf": "^2.6.1",
+    "tslint": "^5.0.0",
+    "typescript": "^2.2.1"
+  },
+  "peerDependencies": {
+    "diagnosticssource": "*"
+  },
+  "files": [
+    ".dist/**/*",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "license": "MIT",
+  "pubsubAutoLoad": true
 }

@@ -2,12 +2,12 @@
 # Helper script to compile/install the packages in the correct order
 BASEDIR=$(dirname "$0")
 pushd $BASEDIR/node-diagnosticssource
-npm install && npm test
+npm install && npm run clean && npm test
 popd
 
 for x in `ls $BASEDIR/pubs`; do
     pushd $BASEDIR/pubs/$x
-    npm install && npm test
+    npm install && npm run clean && npm test
     popd
 done
 
