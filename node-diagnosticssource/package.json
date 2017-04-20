@@ -7,7 +7,7 @@
     "build": "tsc --outDir ./.dist",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "clean": "rimraf ./.dist",
-    "prepublish": "npm run build lint && npm run build",
+    "prepublish": "npm run lint && npm run build",
     "test": "npm run build && mocha ./.dist/tests/**/*.js"
   },
   "dependencies": {
@@ -21,5 +21,11 @@
     "tslint": "^5.0.0",
     "typescript": "^2.2.1"
   },
+  "files": [
+    ".dist/**/*",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
   "license": "MIT"
 }
