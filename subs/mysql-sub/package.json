@@ -6,14 +6,14 @@
         "prepublish": "tsc"
     },
     "devDependencies": {
-        "diagnosticssource": "../../node-diagnosticssource",
+        "diagnostic-source": "../../diagnostic-source",
         "typescript": "^2.2.1",
         "mocha": "^3.2.0",
         "applicationinsights": ">= 0.19.0",
         "mysql-pub": "../../pubs/mysql-pub"
     },
     "peerDependencies": {
-        "diagnosticssource": "*",
+        "diagnostic-source": "*",
         "applicationinsights": ">= 0.19.0"
     },
     "license": "MIT"

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
-import {channel, IStandardEvent} from "diagnosticssource";
+import {channel, IStandardEvent} from "diagnostic-source";
 
 import {redisCommunication, redisConnectionRecordPatchFunction} from "./util/redis-mock-record";
 import {makeRedisReplayFunction} from "./util/redis-mock-replay";
