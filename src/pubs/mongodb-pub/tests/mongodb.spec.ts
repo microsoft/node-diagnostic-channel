@@ -13,6 +13,7 @@ import "zone.js";
 
 import * as assert from "assert";
 import * as fs from "fs";
+import * as net from "net";
 import * as path from "path";
 
 enum Mode {
@@ -24,6 +25,10 @@ enum Mode {
 let mode: Mode = Mode.REPLAY;
 
 describe("mongodb", function() {
+    const server = net.createServer();
+
+    before(() => { server.listen({port: 27017}); });
+    after(() => { server.close(); });
 
     it("should fire events when we communicate with a collection, and preserve context", function(done) {
         const traceName = "mongodb.trace.json";

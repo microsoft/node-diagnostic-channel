@@ -13,6 +13,7 @@ import "zone.js";
 
 import * as assert from "assert";
 import * as fs from "fs";
+import * as net from "net";
 import * as path from "path";
 
 enum Mode {
@@ -24,7 +25,11 @@ enum Mode {
 let mode: Mode = Mode.REPLAY;
 
 describe("mysql", function() {
+    const server = net.createServer();
 
+    before(() => { server.listen({port: 3306}); });
+    after(() => { server.close(); });
+    
     it("should fire events when we interact with it, and preserve context", function(done) {
         const traceName = "mysql.trace.json";
         const tracePath = path.join(__dirname, "util", traceName);
