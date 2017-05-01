@@ -1,7 +1,7 @@
 #! /bin/bash
 # Helper script to compile/install the packages in the correct order
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-pushd $BASEDIR/src/diagnostic-source
+pushd $BASEDIR/src/diagnostic-channel
 npm install && npm run clean && npm test
 popd
 

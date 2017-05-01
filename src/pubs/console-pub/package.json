@@ -13,14 +13,14 @@
   "devDependencies": {
     "@types/mocha": "^2.2.40",
     "@types/node": "^7.0.12",
-    "diagnostic-source": "../../diagnostic-source",
+    "diagnostic-channel": "../../diagnostic-channel",
     "mocha": "^3.2.0",
     "rimraf": "^2.6.1",
     "tslint": "^5.0.0",
     "typescript": "^2.2.1"
   },
   "peerDependencies": {
-    "diagnostic-source": "*"
+    "diagnostic-channel": "*"
   },
   "files": [
     ".dist/**/*",

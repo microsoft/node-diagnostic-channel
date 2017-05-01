@@ -3,7 +3,7 @@ rem Helper script to compile/install the packages in the correct order
 setlocal enableDelayedExpansion
 
 echo Installing DiagnosticsSource
-pushd %~dp0\src\diagnostic-source
+pushd %~dp0\src\diagnostic-channel
 cmd.exe /c "npm install && npm run clean && npm test"
 popd
 

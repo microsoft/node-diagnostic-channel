@@ -6,7 +6,7 @@
         "test": "tsc && mocha tests"
     },
     "dependencies": {
-        "diagnostic-source": "../src/diagnostic-source",
+        "diagnostic-channel": "../src/diagnostic-channel",
         "applicationinsights": "^0.19.0",
         "bunyan-pub": "../src/pubs/bunyan-pub",
         "mongodb-pub": "../src/pubs/mongodb-pub",

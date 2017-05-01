@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
-import {channel, IModulePatcher, PatchFunction} from "diagnostic-source";
+import {channel, IModulePatcher, PatchFunction} from "diagnostic-channel";
 
 export interface IBunyanData {
     level: number;
