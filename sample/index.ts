@@ -9,7 +9,7 @@ import * as ApplicationInsights from "applicationinsights"
 // This is something that applicationinsights would do
 
 declare var __dirname;
-import {channel, IStandardEvent} from 'diagnostic-source';
+import {channel, IStandardEvent} from "diagnostic-channel";
 channel.addContextPreservation((cb) => {
     return ApplicationInsights.wrapWithCorrelationContext(cb);
 });

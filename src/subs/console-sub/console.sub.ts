@@ -3,7 +3,7 @@
 import * as ApplicationInsights from "applicationinsights";
 import {Contracts} from "applicationinsights/Library/Contracts";
 
-import {channel, IStandardEvent} from "diagnostic-source";
+import {channel, IStandardEvent} from "diagnostic-channel";
 
 import {IConsoleData} from "console-pub";
 
