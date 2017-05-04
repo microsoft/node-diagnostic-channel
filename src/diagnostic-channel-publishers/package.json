@@ -27,7 +27,8 @@
     "diagnostic-channel": "*"
   },
   "files": [
-    ".dist/**/*",
+    ".dist/src/**/*.d.ts",
+    ".dist/src/**/*.js",
     "LICENSE",
     "README.md",
     "package.json"

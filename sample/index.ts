@@ -14,11 +14,14 @@ channel.addContextPreservation((cb) => {
     return ApplicationInsights.wrapWithCorrelationContext(cb);
 });
 
-// This is also something that applicationinsights would do:
-// channel.autoLoadPackages(path.join(__dirname, "..", "..", ".."))
-// to try and escape node_modules/applicationinsights/subfolder and reach the parent folder.
-// Alternately, perhaps path.dirname(require.main.paths[0]) as a likely folder containing package.json of the original 
-channel.autoLoadPackages(__dirname);
+import {enable as enablePublishers} from "diagnostic-channel-publishers";
+enablePublishers();
+
+import "console-sub";
+import "bunyan-sub";
+import "mongodb-sub";
+import "mysql-sub";
+import "redis-sub";
 
 // Verify that patches are applied
 console.dir((<any>channel).getPatchesObject());
