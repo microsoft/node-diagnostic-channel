@@ -5,12 +5,12 @@ import {Contracts} from "applicationinsights/Library/Contracts";
 
 import {channel, IStandardEvent} from "diagnostic-channel";
 
-import {IConsoleData} from "console-pub";
+import {console as consolePub} from "diagnostic-channel-publishers";
 
-export const subscriber = (event: IStandardEvent<IConsoleData>) => {
+export const subscriber = (event: IStandardEvent<consolePub.IConsoleData>) => {
     if (ApplicationInsights.client) {
         ApplicationInsights.client.trackTrace(event.data.message, event.data.stderr ? Contracts.SeverityLevel.Warning : Contracts.SeverityLevel.Information);
     }
 };
 
-channel.subscribe<IConsoleData>("console", subscriber);
+channel.subscribe<consolePub.IConsoleData>("console", subscriber);

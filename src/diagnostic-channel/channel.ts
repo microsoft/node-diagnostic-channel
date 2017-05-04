@@ -30,8 +30,6 @@ export interface IChannel {
     /* tslint:enable:ban-types */
 
     registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void;
-
-    autoLoadPackages(projectRoot: string): void;
 }
 
 const trueFilter = (publishing: boolean) => true;
@@ -128,29 +126,6 @@ class ContextPreservingEventEmitter implements IChannel {
 
     public getPatchesObject(): IModulePatchMap {
         return this.knownPatches;
-    }
-
-    public autoLoadPackages(projectRoot: string): void {
-        try {
-            const packageJson = require(`${projectRoot}/package.json`);
-            const dependencies = Object.keys(packageJson["dependencies"]);
-            dependencies.forEach((dep) => {
-                try {
-                    const depPackageJson = require(`${dep}/package.json`);
-                    if (depPackageJson["pubsubAutoLoad"]) {
-                        require(dep);
-                    }
-                } catch (e) {
-                    // Couldn't load this package
-                    process.stderr.write("Failed to auto load " + dep);
-                    process.stderr.write(e.toString());
-                }
-            });
-        } catch (e) {
-            // Couldn't auto load packages
-            process.stderr.write("Failed to auto load packages");
-            process.stderr.write(e.toString());
-        }
     }
 }
 

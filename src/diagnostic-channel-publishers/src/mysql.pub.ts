@@ -106,4 +106,6 @@ export const mysql: IModulePatcher = {
     patch: mysqlPatchFunction,
 };
 
-channel.registerMonkeyPatch("mysql", mysql);
+export function enable() {
+    channel.registerMonkeyPatch("mysql", mysql);
+}

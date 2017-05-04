@@ -39,4 +39,6 @@ export const mongoCore2: IModulePatcher = {
     patch: mongodbcorePatchFunction,
 };
 
-channel.registerMonkeyPatch("mongodb-core", mongoCore2);
+export function enable() {
+    channel.registerMonkeyPatch("mongodb-core", mongoCore2);
+}

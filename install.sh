@@ -5,11 +5,9 @@ pushd $BASEDIR/src/diagnostic-channel
 npm install && npm run clean && npm test
 popd
 
-for x in `ls $BASEDIR/src/pubs`; do
-    pushd $BASEDIR/src/pubs/$x
-    npm install && npm run clean && npm test
-    popd
-done
+pushd $BASEDIR/src/diagnostic-channel-publishers
+npm install && npm run clean && npm test
+popd
 
 for x in `ls $BASEDIR/src/subs`; do
     if [ ! $x == ".gitignore" ]

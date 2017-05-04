@@ -7,12 +7,11 @@ pushd %~dp0\src\diagnostic-channel
 cmd.exe /c "npm install && npm run clean && npm test"
 popd
 
-for /F %%x in ('dir /B/D %~dp0\src\pubs') do (
-    echo ----------------------- Installing %%x
-    pushd %~dp0\src\pubs\%%x
-    cmd.exe /c "npm install && npm run clean && npm test"
-    popd
-)
+echo Installing DiagnosticsSource Publishers
+pushd %~dp0\src\diagnostic-channel-publishers
+cmd.exe /c "npm install && npm run clean && npm test"
+popd
+
 
 for /F %%x in ('dir /B/D %~dp0\src\subs') do (
     IF NOT "%%x"==".gitignore" (

@@ -1,11 +1,10 @@
 {
-  "name": "mongodb-pub",
+  "name": "diagnostic-channel-publishers",
   "version": "0.0.1",
-  "main": ".dist/index.js",
-  "types": ".dist/index.d.ts",
+  "main": ".dist/src/index.js",
+  "types": ".dist/src/index.d.ts",
   "scripts": {
-    "build": "tsc --outDir ./.dist",
-    "postbuild": "copyfiles tests/**/*.json .dist",
+    "build": "tsc --outDir ./.dist && node copyTestAssets.js",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "clean": "rimraf ./.dist",
     "prepublish": "npm run lint && npm run build",
@@ -14,13 +13,14 @@
   "devDependencies": {
     "@types/mocha": "^2.2.40",
     "@types/node": "^7.0.12",
-    "copyfiles": "^1.2.0",
-    "diagnostic-channel": "../../diagnostic-channel",
+    "diagnostic-channel": "../diagnostic-channel",
     "mocha": "^3.2.0",
-    "mongodb": "^2.2.25",
     "rimraf": "^2.6.1",
     "tslint": "^5.0.0",
     "typescript": "^2.2.1",
+    "redis": "^2.7.1",
+    "mysql": "2.13.0",
+    "mongodb": "^2.2.25",
     "zone.js": "^0.8.5"
   },
   "peerDependencies": {
@@ -32,6 +32,5 @@
     "README.md",
     "package.json"
   ],
-  "license": "MIT",
-  "pubsubAutoLoad": true
+  "license": "MIT"
 }
