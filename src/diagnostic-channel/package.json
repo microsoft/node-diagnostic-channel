@@ -1,6 +1,6 @@
 {
   "name": "diagnostic-channel",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "./.dist/channel.js",
   "types": "./.dist/channel.d.ts",
   "scripts": {
@@ -22,7 +22,8 @@
     "typescript": "^2.2.1"
   },
   "files": [
-    ".dist/**/*",
+    ".dist/*.d.ts",
+    ".dist/*.js",
     "LICENSE",
     "README.md",
     "package.json"
