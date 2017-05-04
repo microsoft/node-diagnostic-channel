@@ -30,4 +30,6 @@ export const bunyan: IModulePatcher = {
     patch: bunyanPatchFunction,
 };
 
-channel.registerMonkeyPatch("bunyan", bunyan);
+export function enable() {
+    channel.registerMonkeyPatch("bunyan", bunyan);
+}

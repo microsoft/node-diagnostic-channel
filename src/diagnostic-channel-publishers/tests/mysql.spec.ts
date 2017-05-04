@@ -5,9 +5,7 @@ import {channel, IStandardEvent} from "diagnostic-channel";
 import {mysqlCommunication, mysqlConnectionRecordPatchFunction} from "./util/mysql-mock-record";
 import {makeMysqlConnectionReplayFunction} from "./util/mysql-mock-replay";
 
-import "../mysql.pub";
-
-import {IMysqlData} from "../mysql.pub";
+import {enable as enableMysql, IMysqlData} from "../src/mysql.pub";
 
 import "zone.js";
 
@@ -27,7 +25,10 @@ let mode: Mode = Mode.REPLAY;
 describe("mysql", function() {
     const server = net.createServer();
 
-    before(() => { server.listen({port: 3306}); });
+    before(() => {
+        enableMysql();
+        server.listen({port: 3306});
+    });
     after(() => { server.close(); });
 
     it("should fire events when we interact with it, and preserve context", function(done) {

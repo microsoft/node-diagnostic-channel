@@ -2,12 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import {channel, IStandardEvent} from "diagnostic-channel";
 
-import "../mongodb-core.pub";
-import "../mongodb.pub";
+import {enable as enableCore} from "../src/mongodb-core.pub";
+import {enable as enableMongo, IMongoData} from "../src/mongodb.pub";
 import {mongoCommunication, mongodbcoreConnectionRecordPatchFunction} from "./util/mongodbcore-mock-record";
 import {makeMongodbcoreConnectionReplayPatchFunction} from "./util/mongodbcore-mock-replay";
-
-import {IMongoData} from "../mongodb.pub";
 
 import "zone.js";
 
@@ -27,7 +25,11 @@ let mode: Mode = Mode.REPLAY;
 describe("mongodb", function() {
     const server = net.createServer();
 
-    before(() => { server.listen({port: 27017}); });
+    before(() => {
+        enableCore();
+        enableMongo();
+        server.listen({port: 27017});
+    });
     after(() => { server.close(); });
 
     it("should fire events when we communicate with a collection, and preserve context", function(done) {

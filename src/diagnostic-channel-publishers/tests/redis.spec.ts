@@ -5,9 +5,7 @@ import {channel, IStandardEvent} from "diagnostic-channel";
 import {redisCommunication, redisConnectionRecordPatchFunction} from "./util/redis-mock-record";
 import {makeRedisReplayFunction} from "./util/redis-mock-replay";
 
-import "../redis.pub";
-
-import {IRedisData} from "../redis.pub";
+import {enable as enableRedis, IRedisData} from "../src/redis.pub";
 
 import "zone.js";
 
@@ -24,6 +22,9 @@ enum Mode {
 let mode: Mode = Mode.REPLAY;
 
 describe("redis", function() {
+    before(() => {
+        enableRedis();
+    });
 
     it("should fire events when we interact with it, and preserve context", function(done) {
         const traceName = "redis.trace.json";

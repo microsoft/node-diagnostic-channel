@@ -59,4 +59,6 @@ export const mongo2: IModulePatcher = {
     patch: mongodbPatchFunction,
 };
 
-channel.registerMonkeyPatch("mongodb", mongo2);
+export function enable() {
+    channel.registerMonkeyPatch("mongodb", mongo2);
+}

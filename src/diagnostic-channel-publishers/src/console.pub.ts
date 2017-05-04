@@ -51,8 +51,10 @@ export const console: IModulePatcher = {
     patch: consolePatchFunction,
 };
 
-channel.registerMonkeyPatch("console", console);
+export function enable() {
+    channel.registerMonkeyPatch("console", console);
 
-// Force patching of console
-/* tslint:disable-next-line:no-var-requires */
-require("console");
+    // Force patching of console
+    /* tslint:disable-next-line:no-var-requires */
+    require("console");
+}

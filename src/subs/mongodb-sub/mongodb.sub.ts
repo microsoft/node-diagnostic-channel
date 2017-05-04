@@ -3,9 +3,9 @@
 import * as ApplicationInsights from "applicationinsights";
 import {channel, IStandardEvent} from "diagnostic-channel";
 
-import {IMongoData} from "mongodb-pub";
+import {mongodb} from "diagnostic-channel-publishers";
 
-export const subscriber = (event: IStandardEvent<IMongoData>) => {
+export const subscriber = (event: IStandardEvent<mongodb.IMongoData>) => {
     if (ApplicationInsights._isDependencies && ApplicationInsights.client) {
         const dbName = (event.data.startedData && event.data.startedData.databaseName) || "Unknown database";
         ApplicationInsights.client
@@ -23,4 +23,4 @@ export const subscriber = (event: IStandardEvent<IMongoData>) => {
     }
 };
 
-channel.subscribe<IMongoData>("mongodb", subscriber);
+channel.subscribe<mongodb.IMongoData>("mongodb", subscriber);

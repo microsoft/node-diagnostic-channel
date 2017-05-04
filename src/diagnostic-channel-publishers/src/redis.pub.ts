@@ -50,4 +50,6 @@ export const redis: IModulePatcher = {
     patch: redisPatchFunction,
 };
 
-channel.registerMonkeyPatch("redis", redis);
+export function enable() {
+    channel.registerMonkeyPatch("redis", redis);
+}

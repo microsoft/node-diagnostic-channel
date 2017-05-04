@@ -4,18 +4,17 @@ import * as assert from "assert";
 
 /* tslint:disable:no-console */
 
-// Need to undo any changes this require makes, so we can test that it makes them.
-const originalConsoleDescriptor = Object.getOwnPropertyDescriptor(global, "console");
-import {console as consolePatch, IConsoleData} from "../console.pub";
-Object.defineProperty(global, "console", originalConsoleDescriptor);
+import {console as consolePatch, IConsoleData} from "../src/console.pub";
 
 import {channel, IStandardEvent, makePatchingRequire} from "diagnostic-channel";
 
 describe("Console", function() {
     const moduleModule = require("module");
     const originalRequire = moduleModule.prototype.require;
-
-    before(() => (channel as any).reset());
+    const originalConsoleDescriptor = Object.getOwnPropertyDescriptor(global, "console");
+    before(() => {
+        (channel as any).reset();
+    });
     afterEach(() => {
         (channel as any).reset();
         moduleModule.prototype.require = originalRequire;

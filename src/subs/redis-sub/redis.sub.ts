@@ -3,9 +3,9 @@
 import * as ApplicationInsights from "applicationinsights";
 import {channel, IStandardEvent} from "diagnostic-channel";
 
-import {IRedisData} from "redis-pub";
+import {redis} from "diagnostic-channel-publishers";
 
-export const subscriber = (event: IStandardEvent<IRedisData>) => {
+export const subscriber = (event: IStandardEvent<redis.IRedisData>) => {
     if (ApplicationInsights._isDependencies && ApplicationInsights.client) {
         if (event.data.commandObj.command === 'info') {
             // We don't want to report 'info', it's irrelevant
@@ -20,4 +20,4 @@ export const subscriber = (event: IStandardEvent<IRedisData>) => {
         );
     }
 };
-channel.subscribe<IRedisData>('redis', subscriber);
+channel.subscribe<redis.IRedisData>('redis', subscriber);
