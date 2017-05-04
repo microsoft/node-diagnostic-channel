@@ -1,37 +1,42 @@
-# Node Diagnostic-Channel
+# diagnostic-channel
 
-This package is intended to connect event 'publishers' to event 'subscribers' in such a way that the 'context' of the event is preserved. The exact nature of 'context' is deliberately left unspecified.
+This package provides a channel to connect diagnostic event publishers and subscribers. It includes a way to preserve context for the published event too. What that context is and contains is deliberately left unspecified.
 
-## Example Usage
+## Usage
 
-### Subscriber
-
-Subscribing to an event is simple:
+### Subscribe to an event:
 
 ```js
-var channel = require('diagnostic-channel');
+const channel = require('diagnostic-channel').channel;
 
 channel.subscribe('someEvent', function (event) {
     // do something about the event
 });
 ```
 
-The contents of the `event` parameter to the subscribe callback is determined entirely by the publisher.
+The properties of the `event` object passed to the subscriber handler function
+are determined by the publisher.
 
-### Publisher
-
-Publishing an event can be simple:
+### Publish an event
 
 ```js
-var channel = require('diagnostic-channel');
+var someData = { myField: "myData" };
+const channel = require('diagnostic-channel').channel;
 
 channel.publish('someEvent', someData);
 ```
 
-In many cases, preserving context may require some additional effort:
+### Publish an event with context
+
+Preserving context on publication may require some additional effort. A
+correlation handler can be added with the `addContextPreservation` method, and
+then the `bindToContext` method can be used to set up context using the
+provided handler before calling its received function.
 
 ```js
-var channel = require('diagnostic-channel');
+channel.addContextPreservation((callback) => {
+    return Zone.current.wrap(callback);
+});
 
 function doWork(args, callback) {
     // In some context...
@@ -44,23 +49,23 @@ function doWork(args, callback) {
 
 ## API
 
-### Subscribe
+### subscribe
 
 `channel.subscribe(name: string, callback: (event: any) => void): void`
 
-Register the callback to be called when `publish` is invoked with a matching name. The callback will be given the data that is passed to the `publish` call.
+Register the callback to be called when `publish` is invoked with a matching name. The callback will be given the object that is passed to the `publish` call.
 
 If the callback throws an error, it will be silently ignored. If the callback modifies the event object, any subsequent subscribers will see the modified object, and it may also impact the original code's execution.
 
-### Publish
+### publish
 
 `channel.publish(name: string, event: any): void`
 
-Trigger each subscribed callback for the same named event, passing the event object to each.
+Trigger each subscribed callback for the same named event, passing the `event` object to each.
 
 Subscribers may modify the event object.
 
-### Unsubscribe
+### unsubscribe
 
 `channel.unsubscribe(name: string, callback: (event: any) => void): void`
 
@@ -72,7 +77,7 @@ Remove a previously registered callback from the named event. This uses function
 
 Pushes the provided context preservation function onto a 'stack' of functions to preserve context.
 
-The context preservation function `preserver` should track the context at the time it is invoked, and return a function that restores the preserved context, forwards its arguments to `callback`, returns the context to before this function was called, then returns the result of `callback`.
+The context preservation function `preserver` is expected to capture the current context and return a function that when invoked restores this preserved context and only then calls the provided callback with the originally provided arguments. Before returning, this second function should also restore the previous context.
 
 A simple example preserving the Zone.js context:
 
@@ -82,7 +87,7 @@ channel.addContextPreservation((callback) => {
 });
 ```
 
-For a more general contrived example, where the 'context' is a global object called `context`:
+A more general, but somewhat contrived, example, where the 'context' is a global object called `context`:
 
 ```js
 var context = { value: 1 };
@@ -154,18 +159,3 @@ var foo = require('foo');
 // Now foo.doSomethingAsync will be the patched version, assuming that the version of the foo package found by require() falls within the 1.0.0 - 2.0.0 range.
 ```
 
-### autoLoadPackages
-
-`channel.autoLoadPackages(projectRoot: string)`
-
-Attempt to automatically discover and `require()` any publisher or subscriber packages present in the project.
-
-Specifically, inspect every package in the `dependencies` of `projectRoot/package.json` and see whether they have a `pubsubAutoLoad` key set to a truthy value in their own package.json
-
-This is so you do not need to explcitly
-```js
-require('mongodb-pub'); require('mongodb-sub'); require('redis-pub'); require('redis-sub');
-// ...
-``` 
-
-in your code, you just need to specify them in the package.json so they are installed, and then invoke this function. 
