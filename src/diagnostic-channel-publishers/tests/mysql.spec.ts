@@ -7,6 +7,8 @@ import {makeMysqlConnectionReplayFunction} from "./util/mysql-mock-replay";
 
 import {enable as enableMysql, IMysqlData} from "../src/mysql.pub";
 
+import * as Q from "q";
+
 import "zone.js";
 
 import * as assert from "assert";
@@ -64,7 +66,7 @@ describe("mysql", function() {
         // We need to ensure that once we run out of connections in the pool, context is still preserved
         z1.run(() => {
             for (let i = 0; i < 2; ++i) {
-                promises.push( new Promise((resolve, reject) =>
+                promises.push( new Q.Promise((resolve, reject) =>
                     pool.query("select 1 as solution", function(err, results) {
                         if (err) {
                             reject(err);
@@ -85,7 +87,7 @@ describe("mysql", function() {
         });
         z2.run(() => {
             for (let i = 0; i < 2; ++i) {
-                promises.push( new Promise((resolve, reject) =>
+                promises.push( new Q.Promise((resolve, reject) =>
                     pool.query("select 2 as solution", function(err, results) {
                         if (err) {
                             reject(err);
@@ -106,7 +108,7 @@ describe("mysql", function() {
             }
         });
 
-        Promise.all(promises).then(() => {
+        Q.all(promises).then(() => {
             assert.equal(events.length, 4);
 
             if (mode === Mode.RECORD) {
