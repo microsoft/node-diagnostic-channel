@@ -45,7 +45,11 @@ const consolePatchFunction: PatchFunction = (originalConsole) => {
         if (originalMethod) {
             originalConsole[method] = function() {
                 if (aiLoggingConsole[method]) {
-                    aiLoggingConsole[method].apply(aiLoggingConsole, arguments);
+                    try {
+                        aiLoggingConsole[method].apply(aiLoggingConsole, arguments);
+                    } catch (e) {
+                        // Ignore errors; allow the original method to throw if necessary
+                    }
                 }
                 return originalMethod.apply(originalConsole, arguments);
             };
