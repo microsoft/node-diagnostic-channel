@@ -22,7 +22,7 @@ const consolePatchFunction: PatchFunction = (originalConsole) => {
 
         channel.publish<IConsoleData>("console", {message});
 
-        return process.stdout.write(chunk);
+        return true;
     };
 
     aiLoggingErrStream.write = function(chunk: string | Buffer): boolean {
@@ -33,17 +33,30 @@ const consolePatchFunction: PatchFunction = (originalConsole) => {
 
         channel.publish<IConsoleData>("console", {message, stderr: true});
 
-        return process.stderr.write(chunk);
+        return true;
     };
 
     const aiLoggingConsole: Console = new originalConsole.Console(aiLoggingOutStream, aiLoggingErrStream);
-    aiLoggingConsole.Console = originalConsole.Console;
 
-    const consolePropertyDescriptor = Object.getOwnPropertyDescriptor(global, "console");
-    consolePropertyDescriptor.get = function() { return aiLoggingConsole; };
-    Object.defineProperty(global, "console", consolePropertyDescriptor);
+    const consoleMethods = ["log", "info", "warn", "error", "dir", "time", "timeEnd", "trace", "assert"];
 
-    return aiLoggingConsole;
+    for (const method of consoleMethods) {
+        const originalMethod = originalConsole[method];
+        if (originalMethod) {
+            originalConsole[method] = function() {
+                if (aiLoggingConsole[method]) {
+                    try {
+                        aiLoggingConsole[method].apply(aiLoggingConsole, arguments);
+                    } catch (e) {
+                        // Ignore errors; allow the original method to throw if necessary
+                    }
+                }
+                return originalMethod.apply(originalConsole, arguments);
+            };
+        }
+    }
+
+    return originalConsole;
 };
 
 export const console: IModulePatcher = {
