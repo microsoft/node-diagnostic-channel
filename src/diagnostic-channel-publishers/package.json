@@ -7,7 +7,6 @@
     "build": "tsc --outDir ./.dist && node copyTestAssets.js",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "clean": "rimraf ./.dist",
-    "prepublish": "npm run lint && npm run build",
     "test": "npm run build && mocha .dist/tests"
   },
   "devDependencies": {
