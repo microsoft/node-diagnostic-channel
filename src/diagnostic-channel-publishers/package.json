@@ -4,10 +4,10 @@
   "main": ".dist/src/index.js",
   "types": ".dist/src/index.d.ts",
   "scripts": {
-    "build": "tsc --outDir ./.dist && node copyTestAssets.js",
-    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "build": "node node_modules/typescript/bin/tsc --outDir ./.dist && node copyTestAssets.js",
+    "lint": "node node_modules/tslint/bin/tslint -c tslint.json -p tsconfig.json",
     "clean": "rimraf ./.dist",
-    "test": "npm run build && mocha .dist/tests"
+    "test": "node node_modules/mocha/bin/mocha ./.dist/tests/**/*.js"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.40",
