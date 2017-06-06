@@ -13,12 +13,12 @@ services:
 #     - mongodb-org-server
 install:
  - npm install
- before_script:
-  - sudo /etc/init.d/mysql stop
+before_script:
+ - sudo /etc/init.d/mysql stop
 script:
-- gulp install
-- gulp clean
-- gulp build
-- gulp lint
-- gulp test
+ - gulp install
+ - gulp clean
+ - gulp build
+ - gulp lint
+ - gulp test
 notifications:
