@@ -2,15 +2,6 @@ sudo: required
 language: node_js
 node_js:
 - 6
-services:
-#- docker
-#- mongodb
-# addons:
-#   apt:
-#     sources:
-#     - mongodb-3.2-precise
-#     packages:
-#     - mongodb-org-server
 install:
  - npm install
 before_script:
