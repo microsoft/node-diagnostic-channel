@@ -7,7 +7,7 @@
     "build": "node node_modules/typescript/bin/tsc --outDir ./.dist && node copyTestAssets.js",
     "lint": "node node_modules/tslint/bin/tslint -c tslint.json -p tsconfig.json",
     "clean": "rimraf ./.dist",
-    "test": "node node_modules/mocha/bin/mocha ./.dist/tests/**/*.js"
+    "test": "node node_modules/mocha/bin/mocha ./.dist/tests/{*.js,**/*.js}"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.40",
