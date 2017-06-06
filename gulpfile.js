@@ -7,8 +7,8 @@ var util = require('util');
 function getDirectories() {
     var dirs = ['./src/diagnostic-channel',
         './src/diagnostic-channel-publishers'];
-        //.concat(getSubscriberDirectories());
-        return dirs;
+    //.concat(getSubscriberDirectories());
+    return dirs;
 }
 
 function getSubscriberDirectories() {
@@ -56,7 +56,12 @@ function runNpmTasks(taskName, dirs, done) {
     done();
 }
 
-gulp.task('install', function (done) {
+gulp.task('link', function () {
+    runNpmTask('link', './src/diagnostic-channel');
+    runNpmTask('link diagnostic-channel', './src/diagnostic-channel');
+});
+
+gulp.task('install', ['link'], function (done) {
     runNpmTasks('install', getDirectories(), done);
 });
 
