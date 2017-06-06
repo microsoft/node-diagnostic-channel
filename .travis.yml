@@ -3,8 +3,8 @@ language: node_js
 node_js:
 - 6
 services:
-- docker
-- mongodb
+#- docker
+#- mongodb
 addons:
   apt:
     sources:
