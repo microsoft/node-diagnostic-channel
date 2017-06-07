@@ -7,7 +7,7 @@
     "build": "tsc --outDir ./.dist && node copyTestAssets.js",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "clean": "rimraf ./.dist",
-    "test": "node node_modules/mocha/bin/mocha ./.dist/tests/{*.js,**/*.js}"
+    "test": "mocha ./.dist/tests/{*.js,**/*.js}"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.40",
