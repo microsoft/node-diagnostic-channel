@@ -1,0 +1,16 @@
+sudo: required
+language: node_js
+node_js:
+- 6
+install:
+ - npm install
+before_script:
+ - sudo /etc/init.d/mysql stop
+script:
+ - gulp install
+ - gulp clean
+ - gulp build
+ - gulp lint
+ - gulp test
+notifications:
+
