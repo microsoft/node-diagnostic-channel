@@ -7,8 +7,7 @@
     "build": "tsc --outDir ./.dist",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "clean": "rimraf ./.dist",
-    "prepublish": "npm run lint && npm run build",
-    "test": "npm run build && mocha ./.dist/tests/**/*.js"
+    "test": "node node_modules/mocha/bin/mocha ./.dist/tests/**/*.js"
   },
   "dependencies": {
     "semver": "^5.3.0"
