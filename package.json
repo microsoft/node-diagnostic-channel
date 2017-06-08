@@ -3,13 +3,17 @@
   "version": "1.0.0",
   "description": "**diagnostic-channel** provides a shared channel for handling instrumentation\r and diagnostic messages in Node.js apps. Instrumentation patchers and module\r authors can publish messages to this channel by calling `channel.publish(...)`,\r and APM providers and other tools can subscribe to those messages by calling\r `channel.subscribe(...)`. Subscribers can transform the original generic message\r as needed in their handlers and relay the message on to storage and monitoring\r systems.",
   "main": "gulpfile.js",
+  "scripts": {
+    "install-children": "gulp install",
+    "build": "gulp build",
+    "lint": "gulp lint",
+    "clean": "gulp clean",
+    "test": "gulp test"
+  },
   "dependencies": {
     "gulp": "^3.9.1"
   },
   "devDependencies": {},
-  "scripts": {
-    "test": "test"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Microsoft/node-diagnostic-channel.git"
