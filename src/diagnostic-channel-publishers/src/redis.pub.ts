@@ -17,7 +17,7 @@ const redisPatchFunction: PatchFunction = (originalRedis) => {
     originalRedis.RedisClient.prototype.internal_send_command = function(commandObj) {
         if (commandObj) {
             const cb = commandObj.callback;
-            if (!cb.pubsubBound) {
+            if (!cb || !cb.pubsubBound) {
                 const address = this.address;
                 const startTime = process.hrtime();
 

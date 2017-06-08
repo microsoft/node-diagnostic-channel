@@ -22,20 +22,45 @@ enum Mode {
 let mode: Mode = Mode.REPLAY;
 
 describe("redis", function() {
+    const traceName = "redis.trace.json";
+    const tracePath = path.join(__dirname, "util", traceName);
+    let client;
+    let success: boolean = true;
     before(() => {
         enableRedis();
-    });
-
-    it("should fire events when we interact with it, and preserve context", function(done) {
-        const traceName = "redis.trace.json";
-        const tracePath = path.join(__dirname, "util", traceName);
-
         if (mode === Mode.RECORD) {
             channel.registerMonkeyPatch("redis", {versionSpecifier: "*", patch: redisConnectionRecordPatchFunction});
         } else {
             const trace = require(tracePath);
             channel.registerMonkeyPatch("redis", {versionSpecifier: "*", patch: makeRedisReplayFunction(trace)});
         }
+    });
+
+    afterEach((done) => {
+        const finish = () => {
+            (<any>channel).reset();
+            if ((<any>this).ctx.currentTest.state !== "passed") {
+                success = false;
+            }
+            done();
+        }
+        if (client) {
+            client.quit(finish);
+        } else {
+            finish();
+        }
+    });
+
+    after(() => {
+        if (mode === Mode.RECORD && success) {
+            fs.writeFileSync(tracePath, JSON.stringify(redisCommunication));
+        }
+        if (!success) {
+            throw new Error('Not a success');
+        }
+    })
+
+    it("should fire events when we interact with it, and preserve context", function(done) {
         channel.addContextPreservation((cb) => Zone.current.wrap(cb, "context preservation"));
 
         const events: Array<IStandardEvent<IRedisData>> = [];
@@ -43,7 +68,8 @@ describe("redis", function() {
 
         const redis = require("redis");
 
-        const client = redis.createClient("redis://localhost");
+        client = redis.createClient("redis://localhost");
+        
 
         const z1 = Zone.current.fork({name: "1"});
         z1.run(() => {
@@ -75,7 +101,7 @@ describe("redis", function() {
 
                         try {
                             /* tslint:disable-next-line:no-bitwise */
-                            assert.equal(reply2, initialValue | 0 + 1);
+                            assert.equal(reply2, initialValue | 0 + 1, "Mismatch in returned value");
 
                             assert.equal(events.length, 3);
                             assert.equal(events[0].data.commandObj.command, "info");
@@ -86,13 +112,38 @@ describe("redis", function() {
                             return;
                         }
 
-                        if (mode === Mode.RECORD) {
-                            fs.writeFileSync(tracePath, JSON.stringify(redisCommunication));
-                        }
                         done();
                     });
                 });
             });
+        });
+    });
+
+    it("should record events even if no callback is passed", function (done) {
+        channel.addContextPreservation((cb) => Zone.current.wrap(cb, "context preservation"));
+
+        const z1 = Zone.current.fork({name: "1"});
+
+        const events = [];
+
+        channel.subscribe<IRedisData>("redis", (event) => {
+            events.push(event);
+            if (events.length === 2) {
+                // Skip the 'info' event which is always first
+                if (Zone.current !== z1) {
+                    done(new Error("Context not preserved without callback"));
+                } else {
+                    done();
+                }
+            }
+        });
+
+        const redis = require("redis");
+
+        client = redis.createClient("redis://localhost");
+
+        z1.run(() => {
+            client.incr("value");
         });
     });
 });

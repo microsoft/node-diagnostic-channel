@@ -11,13 +11,13 @@ export function makeRedisReplayFunction(redisCommunication: any[]): PatchFunctio
         const ocreateStream = originalRedis.RedisClient.prototype.create_stream;
         originalRedis.RedisClient.prototype.create_stream = function() {
             const fakeStream: any = new EventEmitter();
-            fakeStream.setTimeout = fakeStream.setNoDelay = fakeStream.setKeepAlive = function() {/* empty */};
+            fakeStream.setTimeout = fakeStream.setNoDelay = fakeStream.setKeepAlive = fakeStream.destroy = function() {/* empty */};
             fakeStream.writable = true;
             this.options.stream = fakeStream;
 
             this.options.stream.write = function(message) {
                 const next = redisCommunication.shift();
-                if (next.send) {
+                if (next && next.send) {
                     assert.equal(message, next.send);
                     if (redisCommunication[0].recv) {
                         setTimeout(() => {
@@ -26,7 +26,7 @@ export function makeRedisReplayFunction(redisCommunication: any[]): PatchFunctio
                     }
                     return next.ret;
                 } else {
-                    throw new Error("Unexpected write");
+                    throw new Error("Unexpected write: " + message);
                 }
             };
 
