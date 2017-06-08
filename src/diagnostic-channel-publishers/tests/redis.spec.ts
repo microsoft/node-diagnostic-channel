@@ -38,12 +38,12 @@ describe("redis", function() {
 
     afterEach((done) => {
         const finish = () => {
-            (<any>channel).reset();
-            if ((<any>this).ctx.currentTest.state !== "passed") {
+            (channel as any).reset();
+            if ((this as any).ctx.currentTest.state !== "passed") {
                 success = false;
             }
             done();
-        }
+        };
         if (client) {
             client.quit(finish);
         } else {
@@ -56,9 +56,9 @@ describe("redis", function() {
             fs.writeFileSync(tracePath, JSON.stringify(redisCommunication));
         }
         if (!success) {
-            throw new Error('Not a success');
+            throw new Error("Not a success");
         }
-    })
+    });
 
     it("should fire events when we interact with it, and preserve context", function(done) {
         channel.addContextPreservation((cb) => Zone.current.wrap(cb, "context preservation"));
@@ -69,7 +69,6 @@ describe("redis", function() {
         const redis = require("redis");
 
         client = redis.createClient("redis://localhost");
-        
 
         const z1 = Zone.current.fork({name: "1"});
         z1.run(() => {
@@ -119,7 +118,7 @@ describe("redis", function() {
         });
     });
 
-    it("should record events even if no callback is passed", function (done) {
+    it("should record events even if no callback is passed", function(done) {
         channel.addContextPreservation((cb) => Zone.current.wrap(cb, "context preservation"));
 
         const z1 = Zone.current.fork({name: "1"});
