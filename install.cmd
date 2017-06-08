@@ -4,12 +4,12 @@ setlocal enableDelayedExpansion
 
 echo Installing DiagnosticsSource
 pushd %~dp0\src\diagnostic-channel
-cmd.exe /c "npm install && npm run clean && npm test"
+cmd.exe /c "npm run clean && npm install && npm test"
 popd
 
 echo Installing DiagnosticsSource Publishers
 pushd %~dp0\src\diagnostic-channel-publishers
-cmd.exe /c "npm install && npm run clean && npm test"
+cmd.exe /c "npm run clean && npm install && npm test"
 popd
 
 
