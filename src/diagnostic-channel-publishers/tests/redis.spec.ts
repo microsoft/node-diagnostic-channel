@@ -38,7 +38,6 @@ describe("redis", function() {
 
     afterEach((done) => {
         const finish = () => {
-            (channel as any).reset();
             if ((this as any).ctx.currentTest.state !== "passed") {
                 success = false;
             }
