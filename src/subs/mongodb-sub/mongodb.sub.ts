@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
-import * as ApplicationInsights from "applicationinsights";
+import ApplicationInsights = require("applicationinsights");
 import {channel, IStandardEvent} from "diagnostic-channel";
 
 import {mongodb} from "diagnostic-channel-publishers";
 
 export const subscriber = (event: IStandardEvent<mongodb.IMongoData>) => {
-    if (ApplicationInsights._isDependencies && ApplicationInsights.client) {
+    if (ApplicationInsights.client) {
         const dbName = (event.data.startedData && event.data.startedData.databaseName) || "Unknown database";
         ApplicationInsights.client
             .trackDependency(
@@ -18,7 +18,7 @@ export const subscriber = (event: IStandardEvent<mongodb.IMongoData>) => {
                 
         if (!event.data.succeeded) {
             ApplicationInsights.client
-                .trackException(event.data.event.failure);
+                .trackException(new Error(event.data.event.failure));
         }
     }
 };

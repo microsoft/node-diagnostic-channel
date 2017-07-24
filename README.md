@@ -55,8 +55,8 @@ To use the set of publisher patches from this repo:
 `require('diagnostic-channel-publishers').enable()`.
 
 If you're creating a publisher/patcher for another module, start from one of the
-included publishers in [src/diagnostic-channel-publishers/src](https://github.com/Microsoft/node-diagnostic-channel/tree/master/src/diagnostic-channel-publishers/src). Deeper instructions
-will be provided in the future.
+included publishers in [src/diagnostic-channel-publishers/src](https://github.com/Microsoft/node-diagnostic-channel/tree/master/src/diagnostic-channel-publishers/src)
+and see [Contributing](#Contributing) below
 
 # License
 
@@ -65,6 +65,9 @@ MIT. See [LICENSE](./LICENSE).
 # Contributing
 
 * Please submit issues and PRs through the [GitHub tracker][].
+* Make sure you have `tsc`, `tslint`, `gulp`, and `mocha` installed globally.
+* Run `gulp init` to install dependencies in every subdirectory, and `gulp test`
+to run the test suites.
 
 [GitHub tracker]: https://github.com/microsoft/node-diagnostic-channel/issues
 

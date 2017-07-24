@@ -5,19 +5,19 @@ var path = require('path');
 var util = require('util');
 
 function getDirectories() {
-    var dirs = ['./src/diagnostic-channel',
+    return [
+        './src/diagnostic-channel',
         './src/diagnostic-channel-publishers'];
-    //.concat(getSubscriberDirectories());
-    return dirs;
 }
 
-function getSubscriberDirectories() {
+function getAdditionalDirectories() {
     return [
         './src/subs/bunyan-sub',
         './src/subs/console-sub',
         './src/subs/mongodb-sub',
         './src/subs/mysql-sub',
-        './src/subs/redis-sub'];
+        './src/subs/redis-sub',
+        './sample'];
 }
 
 /*
@@ -61,17 +61,27 @@ gulp.task('link', function () {
     runNpmTask('link diagnostic-channel', './src/diagnostic-channel');
 });
 
-gulp.task('install', ['link'], function (done) {
+gulp.task('install-main', ['link'], function (done) {
     runNpmTasks('install', getDirectories(), done);
+});
+
+gulp.task('build-main', ['install-main'], function (done) {
+    runNpmTasks('run build', getDirectories(), done)
 });
 
 gulp.task('clean', function (done) {
     runNpmTasks('run clean', getDirectories(), done);
 });
 
-gulp.task('build', function (done) {
-    runNpmTasks('run build', getDirectories(), done);
+gulp.task('install-subs', ['build-main'], function (done) {
+    runNpmTasks('install', getAdditionalDirectories(), done);
 });
+
+gulp.task('build-subs', ['install-subs'], function (done) {
+    runNpmTasks('run build', getAdditionalDirectories(), done);
+});
+
+gulp.task('init', ['build-subs']);
 
 gulp.task('test', function (done) {
     runNpmTasks('run test', getDirectories(), done);

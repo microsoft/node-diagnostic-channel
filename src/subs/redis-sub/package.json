@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "main": "redis.sub.js",
     "scripts": {
-        "prepublish": "tsc"
+        "build": "tsc"
     },
     "devDependencies": {
         "diagnostic-channel": "../../diagnostic-channel",

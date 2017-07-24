@@ -10,7 +10,17 @@
         "object-literal-shorthand": false,
         "max-line-length": false,
         "no-string-literal": false,
-        "member-ordering": false
+        "member-ordering": false,
+        // allow the use of Function without heavy use of disable:ban-types
+        "ban-types": {
+            "options": [
+                ["Object", "Avoid using the `Object` type. Did you mean `object`?"],
+                ["Boolean", "Avoid using the `Boolean` type. Did you mean `boolean`?"],
+                ["Number", "Avoid using the `Number` type. Did you mean `number`?"],
+                ["String", "Avoid using the `String` type. Did you mean `string`?"],
+                ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"]
+            ]
+        }
     },
     "rulesDirectory": []
 }

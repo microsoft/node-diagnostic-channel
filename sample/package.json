@@ -2,7 +2,7 @@
     "name": "ai-thirdparty-demo",
     "version": "0.0.1",
     "scripts": {
-        "prepublish": "tsc",
+        "build": "tsc",
         "test": "tsc && mocha tests"
     },
     "dependencies": {

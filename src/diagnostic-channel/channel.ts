@@ -23,12 +23,8 @@ export interface IChannel {
     publish<T>(name: string, event: T): void;
     subscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void;
     unsubscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void;
-
-    /* tslint:disable:ban-types */
     bindToContext<T extends Function>(cb: T): T;
     addContextPreservation<T extends Function>(preserver: (cb: T) => T): void;
-    /* tslint:enable:ban-types */
-
     registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void;
 }
 
@@ -37,7 +33,7 @@ const trueFilter = (publishing: boolean) => true;
 class ContextPreservingEventEmitter implements IChannel {
     public version: string = require("./../package.json").version; // Allow for future versions to replace things?
     private subscribers: {[key: string]: Array<IFilteredSubscriber<any>>} = {};
-    private contextPreservationFunction: <T>(cb: T) => T = (cb) => cb;
+    private contextPreservationFunction: <F extends Function>(cb: F) => F = (cb) => cb;
     private knownPatches: IModulePatchMap = {};
 
     private currentlyPublishing: boolean = false;
@@ -105,15 +101,13 @@ class ContextPreservingEventEmitter implements IChannel {
         Object.getOwnPropertyNames(this.knownPatches).forEach((prop) => delete this.knownPatches[prop]);
     }
 
-    /* tslint:disable-next-line:ban-types */
     public bindToContext<T extends Function>(cb: T): T {
         return this.contextPreservationFunction(cb);
     }
 
-    /* tslint:disable-next-line:ban-types */
     public addContextPreservation<T extends Function>(preserver: (cb: T) => T) {
         const previousPreservationStack = this.contextPreservationFunction;
-        this.contextPreservationFunction = (cb) => preserver(previousPreservationStack(cb));
+        this.contextPreservationFunction = ((cb: T) => preserver(previousPreservationStack(cb))) as any;
     }
 
     public registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void {
