@@ -17,6 +17,7 @@
     },
     "devDependencies": {
         "typescript": "^2.2.1",
-        "mocha": "^3.2.0"
+        "mocha": "^3.2.0",
+        "tslint": "^5.0.0"
     }
 }
