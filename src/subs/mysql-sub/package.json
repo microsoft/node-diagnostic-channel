@@ -3,7 +3,8 @@
     "version": "0.0.1",
     "main": "mysql.sub.js",
     "scripts": {
-        "build": "tsc"
+        "build": "tsc",
+        "lint": "tslint -c tslint.json -p tsconfig.json"
     },
     "devDependencies": {
         "diagnostic-channel": "../../diagnostic-channel",

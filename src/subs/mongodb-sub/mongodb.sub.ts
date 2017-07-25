@@ -14,8 +14,8 @@ export const subscriber = (event: IStandardEvent<mongodb.IMongoData>) => {
                 event.data.event.commandName,
                 event.data.event.duration,
                 event.data.succeeded,
-                'mongodb');
-                
+                "mongodb");
+
         if (!event.data.succeeded) {
             ApplicationInsights.client
                 .trackException(new Error(event.data.event.failure));

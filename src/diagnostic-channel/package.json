@@ -1,10 +1,10 @@
 {
   "name": "diagnostic-channel",
   "version": "0.1.0",
-  "main": "./.dist/channel.js",
-  "types": "./.dist/channel.d.ts",
+  "main": "./.dist/src/channel.js",
+  "types": "./.dist/src/channel.d.ts",
   "scripts": {
-    "build": "tsc --outDir ./.dist",
+    "build": "tsc",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "clean": "rimraf ./.dist",
     "test": "mocha ./.dist/tests/**/*.js"
@@ -30,8 +30,8 @@
     "typescript": "^2.2.1"
   },
   "files": [
-    ".dist/*.d.ts",
-    ".dist/*.js",
+    ".dist/src/**/*.d.ts",
+    ".dist/src/**/*.js",
     "LICENSE",
     "README.md",
     "package.json"

@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "scripts": {
         "build": "tsc",
-        "test": "tsc && mocha tests"
+        "lint": "tslint -c tslint.json -p tsconfig.json"
     },
     "dependencies": {
         "diagnostic-channel": "../src/diagnostic-channel",

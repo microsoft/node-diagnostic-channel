@@ -88,6 +88,5 @@ gulp.task('test', function (done) {
 });
 
 gulp.task('lint', function (done) {
-    runNpmTasks('run lint', getDirectories(), done);
+    runNpmTasks('run lint', getDirectories().concat(getAdditionalDirectories()), done);
 });
-

@@ -13,14 +13,14 @@ export const subscriber = (event: IStandardEvent<mysql.IMysqlData>) => {
 
         const connection = queryObj._connection || {};
         const connectionConfig = connection.config || {};
-        const dbName = connectionConfig.socketPath ? connectionConfig.socketPath : `${connectionConfig.host || 'localhost'}:${connectionConfig.port}`;
+        const dbName = connectionConfig.socketPath ? connectionConfig.socketPath : `${connectionConfig.host || "localhost"}:${connectionConfig.port}`;
         ApplicationInsights.client.trackDependency(
                 dbName,
                 sqlString,
-                event.data.duration | 0,
+                Math.floor(event.data.duration),
                 success,
-                'mysql');
+                "mysql");
     }
 };
 
-channel.subscribe<mysql.IMysqlData>('mysql', subscriber);
+channel.subscribe<mysql.IMysqlData>("mysql", subscriber);

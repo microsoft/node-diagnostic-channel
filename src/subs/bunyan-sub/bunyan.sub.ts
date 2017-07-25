@@ -15,9 +15,9 @@ bunyanToAILevelMap[60] = ApplicationInsights.contracts.SeverityLevel.Critical;
 
 export const subscriber = (event: IStandardEvent<bunyan.IBunyanData>) => {
     if (ApplicationInsights.client) {
-        const AIlevel = bunyanToAILevelMap[event.data.level]
-        ApplicationInsights.client.trackTrace(event.data.result, AIlevel)
+        const AIlevel = bunyanToAILevelMap[event.data.level];
+        ApplicationInsights.client.trackTrace(event.data.result, AIlevel);
     }
 };
 
-channel.subscribe<bunyan.IBunyanData>('bunyan', subscriber);
+channel.subscribe<bunyan.IBunyanData>("bunyan", subscriber);

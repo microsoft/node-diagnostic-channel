@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 
 // This is for testing the overall integration
-import * as ApplicationInsights from "applicationinsights"
+import * as ApplicationInsights from "applicationinsights";
 
 // For demo purposes: hook up AI context preserving
 // This is something that applicationinsights would do
@@ -11,22 +11,20 @@ channel.addContextPreservation((cb) => {
     return ApplicationInsights.wrapWithCorrelationContext(cb);
 });
 
-import {enable as enablePublishers} from "diagnostic-channel-publishers";
+import {console as consolePub, enable as enablePublishers} from "diagnostic-channel-publishers";
 enablePublishers();
 
-import "console-sub";
 import "bunyan-sub";
+import "console-sub";
 import "mongodb-sub";
 import "mysql-sub";
 import "redis-sub";
 
 // Verify that patches are applied
-console.dir((<any>channel).getPatchesObject());
+console.dir((channel as any).getPatchesObject());
 
-import {IConsoleData} from '../src/diagnostic-channel-publishers/.dist/src/console.pub';
-
-channel.subscribe('console', function (event: IStandardEvent<IConsoleData>) {
-    process.stdout.write("Console subscriber>\t" + event.data.message)
-})
+channel.subscribe("console", function(event: IStandardEvent<consolePub.IConsoleData>) {
+    process.stdout.write("Console subscriber>\t" + event.data.message);
+});
 
 console.log("Test message");

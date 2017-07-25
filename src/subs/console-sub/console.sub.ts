@@ -8,8 +8,8 @@ import {console as consolePub} from "diagnostic-channel-publishers";
 
 export const subscriber = (event: IStandardEvent<consolePub.IConsoleData>) => {
     if (ApplicationInsights.client) {
-        const severity = event.data.stderr 
-            ? ApplicationInsights.contracts.SeverityLevel.Warning 
+        const severity = event.data.stderr
+            ? ApplicationInsights.contracts.SeverityLevel.Warning
             : ApplicationInsights.contracts.SeverityLevel.Information;
         ApplicationInsights.client.trackTrace(event.data.message, severity);
     }

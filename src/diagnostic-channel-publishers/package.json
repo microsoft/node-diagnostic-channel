@@ -4,7 +4,7 @@
   "main": ".dist/src/index.js",
   "types": ".dist/src/index.d.ts",
   "scripts": {
-    "build": "tsc --outDir ./.dist && node copyTestAssets.js",
+    "build": "tsc && node copyTestAssets.js",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "clean": "rimraf ./.dist",
     "test": "mocha ./.dist/tests/{*.js,**/*.js}"
