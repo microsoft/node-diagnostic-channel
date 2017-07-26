@@ -10,7 +10,6 @@ export interface IWinstonData {
 
 // register a "filter" with each logger that publishes the data about to be logged
 const winstonPatchFunction: PatchFunction = (originalWinston) => {
-    const originalConfigure = originalWinston.Logger.prototype.configure;
     const originalLog = originalWinston.Logger.prototype.log;
     const loggingFilter = (level, message, meta) => {
         channel.publish<IWinstonData>("winston", {level, message, meta});
@@ -28,14 +27,6 @@ const winstonPatchFunction: PatchFunction = (originalWinston) => {
 
         return originalLog.apply(this, arguments);
     };
-
-    // patch the pre-created default logger
-    // the default logger is created with no configuration other than a console transport
-    originalWinston.configure({
-        transports: [
-            new originalWinston.transports.Console(),
-        ],
-    });
 
     return originalWinston;
 };

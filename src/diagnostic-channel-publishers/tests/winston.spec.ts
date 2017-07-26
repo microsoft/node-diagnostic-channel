@@ -14,34 +14,35 @@ function compareWinstonData(actual: IWinstonData, expected: IWinstonData): void 
 
 describe("winston", () => {
     let winston;
+    let actual: IWinstonData = null;
+    const listener = (event: IStandardEvent<IWinstonData>) => {
+        actual = event.data;
+    };
 
     before(() => {
         enableWinston();
         winston = require("winston");
     });
 
+    beforeEach(() => {
+        channel.subscribe<IWinstonData>("winston", listener);
+    });
+
     afterEach(() => {
-        (channel as any).reset();
+        channel.unsubscribe<IWinstonData>("winston", listener);
+        actual = null;
     });
 
     it("should intercept the default logger", () => {
-        let actual: IWinstonData = null;
         const expected: IWinstonData = {message: "should intercept the default logger", meta: {}, level: "info"};
 
-        channel.subscribe<IWinstonData>("winston", (event) => {
-            actual = event.data;
-        });
         winston.info(expected.message, expected.meta);
         compareWinstonData(actual, expected);
     });
 
     it("should intercept new loggers", () => {
-        let actual: IWinstonData = null;
         const expected: IWinstonData = {message: "should intercept a new logger", meta: {testing: "new loggers"}, level: "info"};
 
-        channel.subscribe<IWinstonData>("winston", (event) => {
-            actual = event.data;
-        });
         const loggerWithoutFilter = new winston.Logger({
             transports: [new winston.transports.Console()],
         });
@@ -50,31 +51,23 @@ describe("winston", () => {
     });
 
     it("should intercept loggers with pre-configured filters", () => {
-        let actual: IWinstonData = null;
         const expected: IWinstonData = {message: "unfiltered", meta: {testing: "new loggers"}, level: "info"};
         const filteredMessage = "filtered";
 
-        channel.subscribe<IWinstonData>("winston", (event) => {
-            actual = event.data;
-        });
         const loggerWithFilter = new winston.Logger({
             filters: [
                 (level, message, meta) => filteredMessage,
             ],
             transports: [new winston.transports.Console()],
         });
-        loggerWithFilter.log("info", expected.message, expected.meta);
+        loggerWithFilter.log("info", "unfiltered", expected.meta);
         expected.message = filteredMessage;
         compareWinstonData(actual, expected);
     });
 
     it("should always publish the most-filtered message", () => {
-        let actual: IWinstonData = null;
         const expected: IWinstonData = {message: "unfiltered", meta: {testing: "new loggers"}, level: "info"};
 
-        channel.subscribe<IWinstonData>("winston", (event) => {
-            actual = event.data;
-        });
         const loggerWithFilter = new winston.Logger({
             filters: [
                 (level, message, meta) => "kinda filtered",
@@ -83,12 +76,12 @@ describe("winston", () => {
         });
 
         loggerWithFilter.filters.push(() => "more filtered");
-        loggerWithFilter.log("info", expected.message, expected.meta);
+        loggerWithFilter.log("info", "unfiltered", expected.meta);
         expected.message = "more filtered";
         compareWinstonData(actual, expected);
 
         loggerWithFilter.filters.push(() => "even more filtered");
-        loggerWithFilter.log("info", expected.message, expected.meta);
+        loggerWithFilter.log("info", "unfiltered", expected.meta);
         expected.message = "even more filtered";
         compareWinstonData(actual, expected);
     });
