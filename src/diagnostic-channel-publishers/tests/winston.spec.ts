@@ -54,35 +54,40 @@ describe("winston", () => {
         const expected: IWinstonData = {message: "unfiltered", meta: {testing: "new loggers"}, level: "info"};
         const filteredMessage = "filtered";
 
-        const loggerWithFilter = new winston.Logger({
+        const logger = new winston.Logger({
             filters: [
                 (level, message, meta) => filteredMessage,
             ],
             transports: [new winston.transports.Console()],
         });
-        loggerWithFilter.log("info", "unfiltered", expected.meta);
+        logger.log("info", "unfiltered", expected.meta);
         expected.message = filteredMessage;
         compareWinstonData(actual, expected);
     });
 
-    it("should always publish the most-filtered message", () => {
-        const expected: IWinstonData = {message: "unfiltered", meta: {testing: "new loggers"}, level: "info"};
+    it("should always publish the most-filtered, most-rewritten message", () => {
+        const expected: IWinstonData = {message: "unfiltered", meta: {rewritten: 0}, level: "info"};
 
-        const loggerWithFilter = new winston.Logger({
+        const logger = new winston.Logger({
             filters: [
                 (level, message, meta) => "kinda filtered",
+            ],
+            rewriters: [
+                (level, message, meta) => { meta.rewritten = 1; return meta; },
             ],
             transports: [new winston.transports.Console()],
         });
 
-        loggerWithFilter.filters.push(() => "more filtered");
-        loggerWithFilter.log("info", "unfiltered", expected.meta);
-        expected.message = "more filtered";
-        compareWinstonData(actual, expected);
+        const rewritten2 = { rewritten: 2 };
+        logger.filters.push(() => "more filtered");
+        logger.rewriters.push((level, message, meta) => rewritten2);
+        logger.log("info", "unfiltered", {});
+        compareWinstonData(actual, {message: "more filtered", meta: rewritten2, level: "info"});
 
-        loggerWithFilter.filters.push(() => "even more filtered");
-        loggerWithFilter.log("info", "unfiltered", expected.meta);
-        expected.message = "even more filtered";
-        compareWinstonData(actual, expected);
+        const rewritten3 = { rewritten: 3 };
+        logger.filters.push(() => "even more filtered");
+        logger.rewriters.push((level, message, meta) => rewritten3);
+        logger.log("info", "unfiltered", {});
+        compareWinstonData(actual, {message: "even more filtered", meta: rewritten3, level: "info"});
     });
 });
