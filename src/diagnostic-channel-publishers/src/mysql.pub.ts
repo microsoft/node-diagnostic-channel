@@ -7,7 +7,7 @@ interface IResultContainer {
     result: any;
     startTime: [number, number];
 }
-/* tslint:disable-next-line:ban-types */
+
 type CallbackWrapper<T extends Function> = (resultContainer: IResultContainer, cb: T) => T;
 
 export interface IMysqlData {
@@ -30,7 +30,6 @@ const mysqlPatchFunction: PatchFunction = function(originalMysql, originalMysqlP
     // The `name` passed in here is for debugging purposes,
     // to help distinguish which object is being patched.
     const patchObjectFunction = (obj: any, name: string) => {
-        /* tslint:disable-next-line:ban-types */
         return <T extends Function>(func, cbWrapper?: CallbackWrapper<T>) => {
             const originalFunc = obj[func];
             if (originalFunc) {

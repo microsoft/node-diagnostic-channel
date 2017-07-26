@@ -3,14 +3,16 @@
     "version": "0.0.1",
     "main": "bunyan.sub.js",
     "scripts": {
-        "prepublish": "tsc"
+        "build": "tsc",
+        "lint": "tslint -c tslint.json -p tsconfig.json"
     },
     "devDependencies": {
         "diagnostic-channel": "../../diagnostic-channel",
         "typescript": "^2.2.1",
         "mocha": "^3.2.0",
         "applicationinsights": ">= 0.19.0",
-        "diagnostic-channel-publishers": "../../diagnostic-channel-publishers"
+        "diagnostic-channel-publishers": "../../diagnostic-channel-publishers",
+        "tslint": "^5.0.0"
     },
     "peerDependencies": {
         "diagnostic-channel": "*",

@@ -2,8 +2,8 @@
     "name": "ai-thirdparty-demo",
     "version": "0.0.1",
     "scripts": {
-        "prepublish": "tsc",
-        "test": "tsc && mocha tests"
+        "build": "tsc",
+        "lint": "tslint -c tslint.json -p tsconfig.json"
     },
     "dependencies": {
         "diagnostic-channel": "../src/diagnostic-channel",
@@ -17,6 +17,7 @@
     },
     "devDependencies": {
         "typescript": "^2.2.1",
-        "mocha": "^3.2.0"
+        "mocha": "^3.2.0",
+        "tslint": "^5.0.0"
     }
 }
