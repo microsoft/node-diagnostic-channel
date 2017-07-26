@@ -7,8 +7,9 @@ import * as mongodbCore from "./mongodb-core.pub";
 import * as mongodb from "./mongodb.pub";
 import * as mysql from "./mysql.pub";
 import * as redis from "./redis.pub";
+import * as winston from "./winston.pub";
 
-export { bunyan, consolePub as console, mongodbCore, mongodb, mysql, redis};
+export { bunyan, consolePub as console, mongodbCore, mongodb, mysql, redis, winston};
 
 export function enable() {
     bunyan.enable();
@@ -17,4 +18,5 @@ export function enable() {
     mongodb.enable();
     mysql.enable();
     redis.enable();
+    winston.enable();
 }
