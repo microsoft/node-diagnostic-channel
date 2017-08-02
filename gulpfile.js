@@ -45,48 +45,47 @@ function runNpmTask(taskName, directory) {
     return proc.status;
 }
 
-function runNpmTasks(taskName, dirs, done) {
+function runNpmTasks(taskName, dirs) {
     for (var i = 0; i < dirs.length; i++) {
         var rc = runNpmTask(taskName, dirs[i]);
         if (rc !== 0) {
-            done(util.format('Error.  command %s in directory %s failed with return code %d', taskName, dirs[i], rc));
-            return;
+            throw new Error(`$Error: command \`${taskName}\` in directory ${dirs[i]} failed with return code ${rc}`);
         }
     }
-    done();
 }
 
-gulp.task('link', function () {
-    runNpmTask('link', './src/diagnostic-channel');
-    runNpmTask('link diagnostic-channel', './src/diagnostic-channel');
+gulp.task('install-main', function () {
+    runNpmTask('install', './src/diagnostic-channel');
+    // We can add linking back in later if need be, but linking seems to make npm do unexplainable things
+    // runNpmTask('link', './src/diagnostic-channel');
+    // runNpmTask('link diagnostic-channel', './src/diagnostic-channel-publishers');
+    runNpmTask('install', './src/diagnostic-channel-publishers');
 });
 
-gulp.task('install-main', ['link'], function (done) {
-    runNpmTasks('install', getDirectories(), done);
+gulp.task('build-main', ['install-main'], function () {
+    runNpmTasks('run build', getDirectories())
 });
 
-gulp.task('build-main', ['install-main'], function (done) {
-    runNpmTasks('run build', getDirectories(), done)
+gulp.task('clean', function () {
+    runNpmTasks('run clean', getDirectories());
 });
 
-gulp.task('clean', function (done) {
-    runNpmTasks('run clean', getDirectories(), done);
+gulp.task('install-subs', ['build-main'], function () {
+    // runNpmTasks('link diagnostic-channel', getAdditionalDirectories());
+    // runNpmTasks('link diagnostic-channel-publishers', getAdditionalDirectories());
+    runNpmTasks('install', getAdditionalDirectories());
 });
 
-gulp.task('install-subs', ['build-main'], function (done) {
-    runNpmTasks('install', getAdditionalDirectories(), done);
-});
-
-gulp.task('build-subs', ['install-subs'], function (done) {
-    runNpmTasks('run build', getAdditionalDirectories(), done);
+gulp.task('build-subs', ['install-subs'], function () {
+    runNpmTasks('run build', getAdditionalDirectories());
 });
 
 gulp.task('init', ['build-subs']);
 
-gulp.task('test', function (done) {
-    runNpmTasks('run test', getDirectories(), done);
+gulp.task('test', ['build-main'], function () {
+    runNpmTasks('run test', getDirectories());
 });
 
-gulp.task('lint', function (done) {
-    runNpmTasks('run lint', getDirectories().concat(getAdditionalDirectories()), done);
+gulp.task('lint', function () {
+    runNpmTasks('run lint', getDirectories().concat(getAdditionalDirectories()));
 });
