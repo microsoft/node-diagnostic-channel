@@ -4,7 +4,8 @@
 import * as assert from "assert";
 import {channel, IStandardEvent, makePatchingRequire} from "diagnostic-channel";
 import "zone.js";
-import {enable as enablePostgres, IPostgresData, IPostgresResult} from "../src/postgres.pub";
+import {enable as enablePostgres, IPostgresData, IPostgresResult} from "../src/pg.pub";
+import {enable as enablePostgresPool} from "../src/pg-pool.pub";
 
 interface IPostgresTest {
     text?: string;
@@ -18,10 +19,11 @@ interface IPostgresTest {
     res: IPostgresResult;
 }
 
-describe("postgres-v6", () => {
+describe("pg@6.x", () => {
     let pg;
     let actual: IPostgresData = null;
     let client;
+    let pool;
     const listener = (event: IStandardEvent<IPostgresData>) => {
         actual = event.data;
     };
@@ -73,8 +75,17 @@ describe("postgres-v6", () => {
 
     before(() => {
         enablePostgres();
+        enablePostgresPool();
         channel.addContextPreservation((cb) => Zone.current.wrap(cb, "context preservation"));
         pg = require("pg");
+        pool = new pg.Pool({
+            user: dbSettings.user,
+            password: dbSettings.password,
+            database: dbSettings.database,
+            host: dbSettings.host,
+            port: dbSettings.port,
+            max: 2,
+        });
     });
 
     beforeEach((done) => {
@@ -89,7 +100,11 @@ describe("postgres-v6", () => {
         client.end(done);
     });
 
-    it("should intercept query(text, values, callback)", function test(done) {
+    after((done) => {
+        pool.end(done);
+    });
+
+    it("should intercept client.query(text, values, callback)", function test(done) {
         const child = Zone.current.fork({name: "child"});
 
         child.run(() => {
@@ -123,7 +138,7 @@ describe("postgres-v6", () => {
         });
     });
 
-    it("should intercept query(text, callback)", function test(done) {
+    it("should intercept client.query(text, callback)", function test(done) {
         const child = Zone.current.fork({name: "child"});
 
         child.run(() => {
@@ -154,7 +169,7 @@ describe("postgres-v6", () => {
         });
     });
 
-    it("should intercept query({text, callback})", function test(done) {
+    it("should intercept client.query({text, callback})", function test(done) {
         const child = Zone.current.fork({name: "child"});
 
         child.run(() => {
@@ -185,7 +200,7 @@ describe("postgres-v6", () => {
         });
     });
 
-    it("should intercept query({text}, callback)", function test(done) {
+    it("should intercept client.query({text}, callback)", function test(done) {
         const child = Zone.current.fork({name: "child"});
 
         child.run(() => {
@@ -216,7 +231,7 @@ describe("postgres-v6", () => {
         });
     });
 
-    it("should intercept query(text, values)", function test(done) {
+    it("should intercept client.query(text, values)", function test(done) {
         const child = Zone.current.fork({name: "child"});
 
         child.run(() => {
@@ -257,7 +272,7 @@ describe("postgres-v6", () => {
         });
     });
 
-    it("should intercept query({text, values})", function test(done) {
+    it("should intercept client.query({text, values})", function test(done) {
         const child = Zone.current.fork({name: "child"});
 
         child.run(() => {
@@ -298,7 +313,7 @@ describe("postgres-v6", () => {
         });
     });
 
-    it("should intercept query(text)", function test(done) {
+    it("should intercept client.query(text)", function test(done) {
         const child = Zone.current.fork({name: "child"});
 
         child.run(() => {
@@ -330,6 +345,64 @@ describe("postgres-v6", () => {
                     }
                 });
             }).then(done, done);
+        });
+    });
+
+    it("should intercept pool.query(text)", function test(done) {
+        const child = Zone.current.fork({name: "child"});
+
+        child.run(() => {
+            pool.query("SELECT NOW()").then((res) => {
+                done(checkSuccess({
+                    res: res,
+                    err: null,
+                    zone: child,
+                    text: "SELECT NOW()",
+                }));
+            }, done);
+        });
+    });
+
+    it("should intercept pool.query(text, values)", function test(done) {
+        const child = Zone.current.fork({name: "child"});
+
+        child.run(() => {
+            pool.query("SELECT $1::text", ["0"]).then((res) => {
+                done(checkSuccess({
+                    res: res,
+                    err: null,
+                    zone: child,
+                    preparable: {
+                        text: "SELECT $1::text",
+                        args: ["0"],
+                    },
+                }));
+            }, done);
+        });
+    });
+
+    it("should intercept pool.connect()", function test(done) {
+        const child = Zone.current.fork({name: "child"});
+
+        child.run(() => {
+            pool.connect((err, poolClient, release) => {
+                if (err) {
+                    return done(err);
+                }
+
+                poolClient.query("SELECT NOW()").then((res) => {
+                    poolClient.release();
+                    done(checkSuccess({
+                        res,
+                        err: null,
+                        zone: child,
+                        text: "SELECT NOW()",
+                    }));
+                }, (e) => {
+                    poolClient.release();
+                    done(e);
+                });
+            });
         });
     });
 });

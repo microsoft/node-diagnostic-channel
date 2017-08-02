@@ -87,7 +87,17 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
                 callback = patchCallback(callback);
             } else {
                 data.query.text = config;
-                values = patchCallback(values);
+
+                // pg v6 will, for some reason, accept both
+                // client.query("...", undefined, () => {...})
+                // **and**
+                // client.query("...", () => {...});
+                // Internally, precedence is given to the callback argument
+                if (callback) {
+                    callback = patchCallback(callback);
+                } else {
+                    values = patchCallback(values);
+                }
             }
         } else {
             if (typeof config.name === "string") {
@@ -100,14 +110,13 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
             } else {
                 data.query.text = config.text;
             }
-
-            if (config.callback) {
-                config.callback = patchCallback(config.callback);
+            
+            if (callback) {
+                callback = patchCallback(callback);
             } else if (values) {
                 values = patchCallback(values);
             } else {
-                // user didn't provide a callback
-                values = patchCallback();
+                config.callback = patchCallback(config.callback);
             }
         }
 
