@@ -5,14 +5,13 @@ import {EventEmitter} from "events";
 
 function postgresPool1PatchFunction(originalPgPool) {
     const originalConnect = originalPgPool.prototype.connect;
-    const originalQuery = originalPgPool.prototype.query;
 
     originalPgPool.prototype.connect = function connect(callback?: Function): void {
-        if (callback) {
-            return originalConnect.call(this, channel.bindToContext(callback));
-        } else {
-            return originalConnect.call(this, callback);
-        }
+        callback = callback
+            ? channel.bindToContext(callback)
+            : callback;
+
+        originalConnect.apply(this, arguments);
     };
 
     return originalPgPool;

@@ -32,6 +32,11 @@ type PostgresCallback = (err: Error, res: IPostgresResult) => any;
 function postgres6PatchFunction(originalPg, originalPgPath) {
     const originalClientQuery = originalPg.Client.prototype.query;
 
+    // this keeps track of user-supplied callback => patched callbacks so we don't keep
+    // re-patching the same callback over and over for library functions
+    // IMPORTANT: use a WeakMap so that we don't keep references to temporary/otherwise unreferenced functions
+    const patchedCallbacks = new WeakMap<PostgresCallback, PostgresCallback>();
+
     // wherever the callback is passed, find it, save it, and remove it from the call
     // to the the original .query() function
     originalPg.Client.prototype.query = function query(config, values, callback) {
@@ -49,7 +54,12 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
         let queryResult;
 
         function patchCallback(cb?: PostgresCallback): PostgresCallback {
-            return channel.bindToContext(function trackingCallback(err: Error, res: IPostgresResult): any {
+            const existingPatch = patchedCallbacks.get(cb);
+            if (existingPatch) {
+                return existingPatch;
+            }
+
+            const trackingCallback = channel.bindToContext(function(err: Error, res: IPostgresResult): any {
                 const end = process.hrtime(start);
                 data.result = res && { rowCount: res.rowCount, command: res.command };
                 data.error = err;
@@ -59,7 +69,7 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
                 // emulate weird internal behavior in pg@6
                 // on success, the callback is called *before* query events are emitted
                 // on failure, the callback is called *instead of* the query emitting events
-                // with no events, that means no promises (since the promise is resolved/rejected in a )
+                // with no events, that means no promises (since the promise is resolved/rejected in an event handler)
                 // since we are always inserting ourselves as a callback, we have to restore the original
                 // behavior if the user didn't provide one themselves
                 if (err) {
@@ -72,6 +82,12 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
                     cb.apply(this, arguments);
                 }
             });
+
+            if (cb) {
+                patchedCallbacks.set(cb, trackingCallback);
+            }
+
+            return trackingCallback;
         }
 
         // this function takes too many variations of aguments.
@@ -110,7 +126,7 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
             } else {
                 data.query.text = config.text;
             }
-            
+
             if (callback) {
                 callback = patchCallback(callback);
             } else if (values) {

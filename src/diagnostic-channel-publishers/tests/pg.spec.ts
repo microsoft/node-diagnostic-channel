@@ -4,8 +4,8 @@
 import * as assert from "assert";
 import {channel, IStandardEvent, makePatchingRequire} from "diagnostic-channel";
 import "zone.js";
-import {enable as enablePostgres, IPostgresData, IPostgresResult} from "../src/pg.pub";
 import {enable as enablePostgresPool} from "../src/pg-pool.pub";
+import {enable as enablePostgres, IPostgresData, IPostgresResult} from "../src/pg.pub";
 
 interface IPostgresTest {
     text?: string;
@@ -35,11 +35,14 @@ describe("pg@6.x", () => {
         port: 14200,
     };
     const checkSuccess = (data: IPostgresTest): Error => {
-        if (data.err) {
-            return data.err;
-        }
-
         try {
+            assert(data, "No data argument was provided to checkSuccess");
+            assert(actual, "No events were published to the channel");
+
+            if (data.err) {
+                return data.err;
+            }
+
             assert.equal(data.err, actual.error, "Invalid error object");
             assert.equal(data.res.rowCount, actual.result.rowCount, "query and actual have different number of rows");
             assert.equal(actual.database.host, dbSettings.host, "actual has incorrect host");
@@ -60,11 +63,14 @@ describe("pg@6.x", () => {
         }
     };
     const checkFailure = (data: IPostgresTest): Error => {
-        if (!data.err) {
-            return new Error("No error returned by bad query");
-        }
-
         try {
+            assert(data, "No data argument was provided to checkSuccess");
+            assert(actual, "No events were published to the channel");
+
+            if (!data.err) {
+                return new Error("No error returned by bad query");
+            }
+
             assert.equal(data.err, actual.error, "Error returned to callback does not match actual error");
             assert.equal(data.zone, Zone.current, "Context was not preserved");
             return null;
@@ -381,28 +387,74 @@ describe("pg@6.x", () => {
         });
     });
 
-    it("should intercept pool.connect()", function test(done) {
+    it("should intercept pool.connect() with too many clients", function test(done) {
         const child = Zone.current.fork({name: "child"});
 
         child.run(() => {
-            pool.connect((err, poolClient, release) => {
-                if (err) {
-                    return done(err);
+            let c1err = new Error("c1err not assigned");
+
+            pool.connect((e1, c1) => {
+                if (e1) {
+                    return done(e1);
                 }
 
-                poolClient.query("SELECT NOW()").then((res) => {
-                    poolClient.release();
-                    done(checkSuccess({
+                pool.connect((e2, c2) => {
+                    if (e2) {
+                        return done(e2);
+                    }
+
+                    pool.connect((e3, c3) => {
+                        if (e3) {
+                            return done(e3);
+                        }
+
+                        c3.query("SELECT NOW()", (err, res) => {
+                            c3.release(err);
+                            c2.release();
+                            done(checkSuccess({
+                                res,
+                                err,
+                                zone: child,
+                                text: "SELECT NOW()",
+                            }));
+                        });
+                    });
+                });
+
+                c1.query("SELECT NOW()").then((res) => {
+                    c1.release();
+                    c1err = checkSuccess({
                         res,
                         err: null,
                         zone: child,
                         text: "SELECT NOW()",
-                    }));
+                    });
                 }, (e) => {
-                    poolClient.release();
-                    done(e);
+                    c1.release();
+                    c1err = e;
                 });
             });
         });
+    });
+
+    it("should not re-patched previously patched callbacks", function test(done) {
+        let count = 0;
+        const counter = (event: IStandardEvent<IPostgresData>) => {
+            count += 1;
+        };
+        const queryHandler = (err, res) => {
+            if (err) {
+                throw err;
+            }
+        };
+
+        channel.subscribe("postgres", counter);
+
+        client.query("SELECT 0", queryHandler).then(() => {
+            return client.query("SELECT NOW()", queryHandler);
+        }).then(() => {
+            assert.equal(count, 2, "subscriber called too many times");
+            channel.unsubscribe("postgres", counter);
+        }).then(done, done);
     });
 });
