@@ -53,9 +53,15 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
         const start = process.hrtime();
         let queryResult;
 
-        function patchCallback(cb?: PostgresCallback): PostgresCallback {
+        function patchCallback(cb?: PostgresCallback, cachePatched?: boolean): PostgresCallback {
             const existingPatch = patchedCallbacks.get(cb);
             if (existingPatch) {
+                // edge case where a previously-seen user callback is now being used
+                // as the callback of a config object
+                if (cachePatched) {
+                    patchedCallbacks.set(existingPatch, existingPatch);
+                }
+
                 return existingPatch;
             }
 
@@ -82,6 +88,11 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
                     cb.apply(this, arguments);
                 }
             });
+
+            if (cachePatched) {
+                // this should only happen in the case of config.callback = patch(config.callback)
+                patchedCallbacks.set(trackingCallback, trackingCallback);
+            }
 
             if (cb) {
                 patchedCallbacks.set(cb, trackingCallback);
@@ -132,7 +143,7 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
             } else if (values) {
                 values = patchCallback(values);
             } else {
-                config.callback = patchCallback(config.callback);
+                config.callback = patchCallback(config.callback, true);
             }
         }
 

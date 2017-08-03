@@ -438,22 +438,43 @@ describe("pg@6.x", () => {
     });
 
     it("should not re-patched previously patched callbacks", function test(done) {
-        let count = 0;
+        let events = 0;
+        let handlers = 0;
         const counter = (event: IStandardEvent<IPostgresData>) => {
-            count += 1;
+            events += 1;
         };
         const queryHandler = (err, res) => {
             if (err) {
                 throw err;
             }
+
+            handlers += 1;
+        };
+        const config = {
+            text: "SELECT NOW()",
+            callback: queryHandler,
         };
 
         channel.subscribe("postgres", counter);
 
-        client.query("SELECT 0", queryHandler).then(() => {
+        client.query("SELECT NOW()", queryHandler).then(() => {
             return client.query("SELECT NOW()", queryHandler);
         }).then(() => {
-            assert.equal(count, 2, "subscriber called too many times");
+            assert.equal(events, 2, "subscriber called too many times");
+            assert.equal(handlers, 2, "callback called too many times");
+            return client.query(config);
+        }).then(() => {
+            return client.query(config);
+        }).then(() => {
+            assert.equal(events, 4, "subscriber called too many times");
+            assert.equal(handlers, 4, "callback called too many times");
+        }).then(() => {
+            return client.query("SELECT NOW()", config.callback);
+        }).then(() => {
+            return client.query("SELECT NOW()", () => null);
+        }).then(() => {
+            assert.equal(events, 6, "subscriber called too many times");
+            assert.equal(handlers, 5, "callback called too many times");
             channel.unsubscribe("postgres", counter);
         }).then(done, done);
     });
