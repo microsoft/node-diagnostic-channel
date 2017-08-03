@@ -7,9 +7,9 @@ function postgresPool1PatchFunction(originalPgPool) {
     const originalConnect = originalPgPool.prototype.connect;
 
     originalPgPool.prototype.connect = function connect(callback?: Function): void {
-        callback = callback
-            ? channel.bindToContext(callback)
-            : callback;
+        if (callback) {
+            arguments[0] = channel.bindToContext(callback);
+        }
 
         originalConnect.apply(this, arguments);
     };

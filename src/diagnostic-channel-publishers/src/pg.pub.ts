@@ -31,11 +31,7 @@ type PostgresCallback = (err: Error, res: IPostgresResult) => any;
 
 function postgres6PatchFunction(originalPg, originalPgPath) {
     const originalClientQuery = originalPg.Client.prototype.query;
-
-    // this keeps track of user-supplied callback => patched callbacks so we don't keep
-    // re-patching the same callback over and over for library functions
-    // IMPORTANT: use a WeakMap so that we don't keep references to temporary/otherwise unreferenced functions
-    const patchedCallbacks = new WeakMap<PostgresCallback, PostgresCallback>();
+    const diagnosticOriginalFunc = "__diagnosticOriginalFunc";
 
     // wherever the callback is passed, find it, save it, and remove it from the call
     // to the the original .query() function
@@ -53,16 +49,9 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
         const start = process.hrtime();
         let queryResult;
 
-        function patchCallback(cb?: PostgresCallback, cachePatched?: boolean): PostgresCallback {
-            const existingPatch = patchedCallbacks.get(cb);
-            if (existingPatch) {
-                // edge case where a previously-seen user callback is now being used
-                // as the callback of a config object
-                if (cachePatched) {
-                    patchedCallbacks.set(existingPatch, existingPatch);
-                }
-
-                return existingPatch;
+        function patchCallback(cb?: PostgresCallback): PostgresCallback {
+            if (cb && cb[diagnosticOriginalFunc]) {
+                cb = cb[diagnosticOriginalFunc];
             }
 
             const trackingCallback = channel.bindToContext(function(err: Error, res: IPostgresResult): any {
@@ -89,19 +78,16 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
                 }
             });
 
-            if (cachePatched) {
-                // this should only happen in the case of config.callback = patch(config.callback)
-                patchedCallbacks.set(trackingCallback, trackingCallback);
+            try {
+                Object.defineProperty(trackingCallback, diagnosticOriginalFunc, { value: cb });
+                return trackingCallback;
+            } catch (e) {
+                // this should never happen, but bailout in case it does
+                return cb;
             }
-
-            if (cb) {
-                patchedCallbacks.set(cb, trackingCallback);
-            }
-
-            return trackingCallback;
         }
 
-        // this function takes too many variations of aguments.
+        // this function takes too many variations of arguments.
         // this patches any provided callback or creates a new callback if one wasn't provided.
         // since the callback is always called (if provided) in addition to always having a Promisified
         // EventEmitter returned (well, sometimes -- see above), its safe to insert a callback if none was given
@@ -143,11 +129,16 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
             } else if (values) {
                 values = patchCallback(values);
             } else {
-                config.callback = patchCallback(config.callback, true);
+                config.callback = patchCallback(config.callback);
             }
         }
 
-        queryResult = originalClientQuery.call(this, config, values, callback);
+        arguments[0] = config;
+        arguments[1] = values;
+        arguments[2] = callback;
+        arguments.length = (arguments.length > 3) ? arguments.length : 3;
+
+        queryResult = originalClientQuery.apply(this, arguments);
         return queryResult;
     };
 

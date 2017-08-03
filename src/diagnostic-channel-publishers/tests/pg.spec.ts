@@ -3,6 +3,7 @@
 
 import * as assert from "assert";
 import {channel, IStandardEvent, makePatchingRequire} from "diagnostic-channel";
+import {Promise} from "q";
 import "zone.js";
 import {enable as enablePostgresPool} from "../src/pg-pool.pub";
 import {enable as enablePostgres, IPostgresData, IPostgresResult} from "../src/pg.pub";
@@ -57,6 +58,7 @@ describe("pg@6.x", () => {
                 assert.equal(actual.query.plan, data.plan, "actual has incorrect query plan");
             }
             assert.equal(data.zone, Zone.current, "Context was not preserved");
+            actual = null;
             return null;
         } catch (e) {
             return e;
@@ -73,6 +75,7 @@ describe("pg@6.x", () => {
 
             assert.equal(data.err, actual.error, "Error returned to callback does not match actual error");
             assert.equal(data.zone, Zone.current, "Context was not preserved");
+            actual = null;
             return null;
         } catch (e) {
             return e;
@@ -437,7 +440,7 @@ describe("pg@6.x", () => {
         });
     });
 
-    it("should not re-patched previously patched callbacks", function test(done) {
+    it("should handle the same callback being given to multiple client.query()s", function test(done) {
         let events = 0;
         let handlers = 0;
         const counter = (event: IStandardEvent<IPostgresData>) => {
@@ -476,6 +479,66 @@ describe("pg@6.x", () => {
             assert.equal(events, 6, "subscriber called too many times");
             assert.equal(handlers, 5, "callback called too many times");
             channel.unsubscribe("postgres", counter);
+        }).then(done, done);
+    });
+
+    it("should preserve correct zones even when using the same callback in client.query()", function test(done) {
+        function handler(err: Error, res: any) {
+            zoneQueue.push(Zone.current);
+        }
+        const zoneQueue: Zone[] = [];
+        const z1 = Zone.current.fork({name: "z1"});
+        const z2 = Zone.current.fork({name: "z2"});
+
+        z1.run<Promise<void>>(() => {
+            return client.query("SELECT NOW()", handler);
+        }).then(() => {
+            return z2.run<Promise<void>>(() => {
+                return client.query("SELECT NOW()", handler);
+            });
+        }).then(() => {
+            assert.equal(zoneQueue[0], z1, "First zoneQueue item is not z1");
+            assert.equal(zoneQueue[1], z2, "Second zoneQueue item is not z2");
+        }).then(done, done);
+    });
+
+    it("should preserve correct zones even when using the same callback in pool.connect()", function test(done) {
+        function handler(err: Error, _: any, release: Function) {
+            if (err) {
+                rejecter(err);
+            }
+            zoneQueue.push(Zone.current);
+            release();
+            resolver();
+        }
+
+        let resolver;
+        let rejecter;
+        const zoneQueue: Zone[] = [];
+        const z1 = Zone.current.fork({name: "z1"});
+        const z2 = Zone.current.fork({name: "z2"});
+        const p = new pg.Pool(dbSettings);
+
+        z1.run<Promise<void>>(() => {
+            return new Promise((res, rej) => {
+                resolver = res;
+                rejecter = rej;
+
+                p.connect(handler);
+            });
+        }).then(() => {
+            return z2.run<Promise<void>>(() => {
+                return new Promise((res, rej) => {
+                    resolver = res;
+                    rejecter = rej;
+
+                    p.connect(handler);
+                });
+            });
+        }).then(() => {
+            assert.equal(zoneQueue[0], z1, "First zoneQueue item is not z1");
+            assert.equal(zoneQueue[1], z2, "Second zoneQueue item is not z2");
+            return p.end();
         }).then(done, done);
     });
 });
