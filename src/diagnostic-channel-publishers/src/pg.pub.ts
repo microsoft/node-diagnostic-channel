@@ -91,46 +91,51 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
         // this patches any provided callback or creates a new callback if one wasn't provided.
         // since the callback is always called (if provided) in addition to always having a Promisified
         // EventEmitter returned (well, sometimes -- see above), its safe to insert a callback if none was given
-        if (typeof config === "string") {
-            if (values instanceof Array) {
-                data.query.preparable = {
-                    text: config,
-                    args: values,
-                };
-                callback = patchCallback(callback);
-            } else {
-                data.query.text = config;
-
-                // pg v6 will, for some reason, accept both
-                // client.query("...", undefined, () => {...})
-                // **and**
-                // client.query("...", () => {...});
-                // Internally, precedence is given to the callback argument
-                if (callback) {
+        try {
+            if (typeof config === "string") {
+                if (values instanceof Array) {
+                    data.query.preparable = {
+                        text: config,
+                        args: values,
+                    };
                     callback = patchCallback(callback);
                 } else {
+                    data.query.text = config;
+
+                    // pg v6 will, for some reason, accept both
+                    // client.query("...", undefined, () => {...})
+                    // **and**
+                    // client.query("...", () => {...});
+                    // Internally, precedence is given to the callback argument
+                    if (callback) {
+                        callback = patchCallback(callback);
+                    } else {
+                        values = patchCallback(values);
+                    }
+                }
+            } else {
+                if (typeof config.name === "string") {
+                    data.query.plan = config.name;
+                } else if (config.values instanceof Array) {
+                    data.query.preparable = {
+                        text: config.text,
+                        args: config.values,
+                    };
+                } else {
+                    data.query.text = config.text;
+                }
+
+                if (callback) {
+                    callback = patchCallback(callback);
+                } else if (values) {
                     values = patchCallback(values);
+                } else {
+                    config.callback = patchCallback(config.callback);
                 }
             }
-        } else {
-            if (typeof config.name === "string") {
-                data.query.plan = config.name;
-            } else if (config.values instanceof Array) {
-                data.query.preparable = {
-                    text: config.text,
-                    args: config.values,
-                };
-            } else {
-                data.query.text = config.text;
-            }
-
-            if (callback) {
-                callback = patchCallback(callback);
-            } else if (values) {
-                values = patchCallback(values);
-            } else {
-                config.callback = patchCallback(config.callback);
-            }
+        } catch (e) {
+            // if our logic here throws, bail out and just let pg do its thing
+            return originalClientQuery.apply(this, arguments);
         }
 
         arguments[0] = config;

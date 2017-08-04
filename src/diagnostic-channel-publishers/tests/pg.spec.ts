@@ -541,4 +541,15 @@ describe("pg@6.x", () => {
             return p.end();
         }).then(done, done);
     });
+
+    it("should let the pg module throw its own errors with bad arguments", function test() {
+        function assertPgError(e: Error) {
+            const src = e.stack.split("\n").map((el) => el.trim())[1];
+            return /node_modules[/\\]pg/.test(src);
+        }
+
+        assert.throws(() => client.query(), assertPgError, "query with no arguments did not throw from pg");
+        assert.doesNotThrow(() => client.query(1, ["0"], () => null), "query with invalid text should not immediately throw");
+        assert.doesNotThrow(() => client.query({ random: "object" }, undefined, () => null), "query with invalid config object did not throw from pg");
+    });
 });
