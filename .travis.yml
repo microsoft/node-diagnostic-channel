@@ -1,14 +1,18 @@
 sudo: required
 language: node_js
+services:
+  - docker
 node_js:
-- 6
+  - 6
 install:
- - npm install
+  - npm install
 before_script:
- - sudo /etc/init.d/mysql stop
+  - sudo service mysql stop
+  - docker-compose version
+  - docker-compose up -d
 script:
- - gulp init
- - gulp lint
- - gulp test
-notifications:
-
+  - gulp init
+  - gulp lint
+  - gulp test
+after_script:
+  - docker-compose down
