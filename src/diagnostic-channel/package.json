@@ -1,13 +1,13 @@
 {
   "name": "diagnostic-channel",
   "version": "0.1.0",
-  "main": "./.dist/src/channel.js",
-  "types": "./.dist/src/channel.d.ts",
+  "main": "./dist/src/channel.js",
+  "types": "./dist/src/channel.d.ts",
   "scripts": {
     "build": "tsc",
     "lint": "tslint -c tslint.json -p tsconfig.json",
-    "clean": "rimraf ./.dist",
-    "test": "mocha ./.dist/tests/**/*.js"
+    "clean": "rimraf ./dist",
+    "test": "mocha ./dist/tests/**/*.js"
   },
   "homepage": "https://github.com/Microsoft/node-diagnostic-channel",
   "bugs": {
@@ -30,8 +30,8 @@
     "typescript": "^2.2.1"
   },
   "files": [
-    ".dist/src/**/*.d.ts",
-    ".dist/src/**/*.js",
+    "dist/src/**/*.d.ts",
+    "dist/src/**/*.js",
     "LICENSE",
     "README.md",
     "package.json"
