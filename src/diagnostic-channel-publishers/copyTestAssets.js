@@ -4,7 +4,7 @@ var fs = require("fs");
 var path = require("path");
 
 var sourcePath = path.join(__dirname, "tests", "util");
-var destPath = path.join(__dirname, ".dist", "tests", "util");
+var destPath = path.join(__dirname, "dist", "tests", "util");
 
 fs.readdir(sourcePath, (err, files) => {
     if (err) {

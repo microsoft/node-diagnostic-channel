@@ -1,13 +1,13 @@
 {
   "name": "diagnostic-channel-publishers",
   "version": "0.1.3",
-  "main": ".dist/src/index.js",
-  "types": ".dist/src/index.d.ts",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "tsc && node copyTestAssets.js",
     "lint": "tslint -c tslint.json -p tsconfig.json",
-    "clean": "rimraf ./.dist",
-    "test": "mocha ./.dist/tests/{*.js,**/*.js}"
+    "clean": "rimraf ./dist",
+    "test": "mocha ./dist/tests/{*.js,**/*.js}"
   },
   "homepage": "https://github.com/Microsoft/node-diagnostic-channel",
   "bugs": {
@@ -38,8 +38,8 @@
     "diagnostic-channel": "*"
   },
   "files": [
-    ".dist/src/**/*.d.ts",
-    ".dist/src/**/*.js",
+    "dist/src/**/*.d.ts",
+    "dist/src/**/*.js",
     "LICENSE",
     "README.md",
     "package.json"

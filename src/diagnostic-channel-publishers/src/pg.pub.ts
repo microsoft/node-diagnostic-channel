@@ -151,7 +151,7 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
 }
 
 export const postgres6: IModulePatcher = {
-    versionSpecifier: ">= 6.0.0 <= 6.4.1",
+    versionSpecifier: "6.x",
     patch: postgres6PatchFunction,
 };
 
