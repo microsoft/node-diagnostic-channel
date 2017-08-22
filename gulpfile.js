@@ -55,11 +55,10 @@ function runNpmTasks(taskName, dirs) {
 }
 
 gulp.task('install-main', function () {
-    runNpmTask('install', './src/diagnostic-channel');
-    // We can add linking back in later if need be, but linking seems to make npm do unexplainable things
-    // runNpmTask('link', './src/diagnostic-channel');
-    // runNpmTask('link diagnostic-channel', './src/diagnostic-channel-publishers');
+    runNpmTask('link', './src/diagnostic-channel');
+    runNpmTask('link diagnostic-channel', './src/diagnostic-channel-publishers');
     runNpmTask('install', './src/diagnostic-channel-publishers');
+    runNpmTask('install', './src/diagnostic-channel');
 });
 
 gulp.task('build-main', ['install-main'], function () {

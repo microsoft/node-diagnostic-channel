@@ -55,7 +55,7 @@ const mongodbPatchFunction: PatchFunction = function(originalMongo) {
 };
 
 export const mongo2: IModulePatcher = {
-    versionSpecifier: ">= 2.0.0 <= 2.3.0",
+    versionSpecifier: ">= 2.0.0 <= 2.2.x",
     patch: mongodbPatchFunction,
 };
 
