@@ -7,7 +7,7 @@
     },
     "dependencies": {
         "diagnostic-channel": "../src/diagnostic-channel",
-        "applicationinsights": "^0.19.0",
+        "applicationinsights": "^0.21.0",
         "diagnostic-channel-publishers": "../src/diagnostic-channel-publishers",
         "bunyan-sub": "../src/subs/bunyan-sub",
         "console-sub": "../src/subs/console-sub",

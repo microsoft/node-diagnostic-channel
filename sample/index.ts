@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 
 // This is for testing the overall integration
-import * as ApplicationInsights from "applicationinsights";
+import ApplicationInsights = require("applicationinsights");
 
 // For demo purposes: hook up AI context preserving
 // This is something that applicationinsights would do
