@@ -6,18 +6,30 @@ export interface IWinstonData {
     message: string;
     meta: any;
     level: string;
+    levelKind: string;
 }
 
 // register a "filter" with each logger that publishes the data about to be logged
 const winstonPatchFunction: PatchFunction = (originalWinston) => {
     const originalLog = originalWinston.Logger.prototype.log;
+    let curLevels: any;
+
     const loggingFilter = (level, message, meta) => {
-        channel.publish<IWinstonData>("winston", {level, message, meta});
+        let levelKind: string;
+        if (curLevels === originalWinston.config.npm.levels) {
+            levelKind = "npm";
+        } else if (curLevels === originalWinston.config.syslog.levels) {
+            levelKind = "syslog";
+        } else {
+            levelKind = "unknown";
+        }
+        channel.publish<IWinstonData>("winston", {level, message, meta, levelKind});
         return message;
     };
 
     // whenever someone logs, ensure our filter comes last
     originalWinston.Logger.prototype.log = function log() {
+        curLevels = this.levels;
         if (!this.filters || this.filters.length === 0) {
             this.filters = [loggingFilter];
         } else if (this.filters[this.filters.length - 1] !== loggingFilter) {

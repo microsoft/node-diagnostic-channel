@@ -11,7 +11,7 @@ import * as pg from "./pg.pub";
 import * as redis from "./redis.pub";
 import * as winston from "./winston.pub";
 
-export { bunyan, consolePub as console, mongodbCore, mongodb, mysql, redis, winston};
+export { bunyan, consolePub as console, mongodbCore, mongodb, mysql, redis, winston, pg, pgPool };
 
 export function enable() {
     bunyan.enable();
