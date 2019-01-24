@@ -33,7 +33,7 @@
     "tslint": "^5.0.0",
     "typescript": "^2.2.1",
     "winston": "^2.3.1",
-    "zone.js": "^0.8.5"
+    "zone.js": "0.8.5"
   },
   "peerDependencies": {
     "diagnostic-channel": "*"
