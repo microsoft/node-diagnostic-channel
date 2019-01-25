@@ -132,7 +132,7 @@ describe("pg@6.x", () => {
                     return done(bad);
                 }
 
-                client.query("SELECT $1", ["0"], (e2, r2) => {
+                client.query("SELECT nonexistant", ["0"], (e2, r2) => {
                     done(checkFailure({
                         res: r2,
                         err: e2,
@@ -259,7 +259,7 @@ describe("pg@6.x", () => {
                     throw bad;
                 }
             }).then(() => {
-                return client.query("SELECT $1", ["0"]).then(() => {
+                return client.query("SELECT nonexistant", ["0"]).then(() => {
                     assert.equal(child, Zone.current, "Context was not preserved");
                     throw new Error("bad query was successful");
                 }, (err) => {
@@ -300,7 +300,7 @@ describe("pg@6.x", () => {
                     throw bad;
                 }
             }).then(() => {
-                return client.query({text: "SELECT $1", values: ["0"]}).then(() => {
+                return client.query({text: "SELECT nonexistant", values: ["0"]}).then(() => {
                     assert.equal(child, Zone.current, "Context was not preserved");
                     throw new Error("bad query was successful");
                 }, (err) => {
