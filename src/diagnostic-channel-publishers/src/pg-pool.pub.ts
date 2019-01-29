@@ -2,16 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import {channel, IModulePatcher, PatchFunction} from "diagnostic-channel";
 import {EventEmitter} from "events";
+import * as pg from "pg";
 
 function postgresPool1PatchFunction(originalPgPool) {
     const originalConnect = originalPgPool.prototype.connect;
 
-    originalPgPool.prototype.connect = function connect(callback?: Function): void {
+    originalPgPool.prototype.connect = function connect(callback?: Function): void | Promise<pg.PoolClient> {
         if (callback) {
             arguments[0] = channel.bindToContext(callback);
         }
 
-        originalConnect.apply(this, arguments);
+        return originalConnect.apply(this, arguments);
     };
 
     return originalPgPool;

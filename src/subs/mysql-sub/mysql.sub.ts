@@ -6,7 +6,7 @@ import {channel, IStandardEvent} from "diagnostic-channel";
 import {mysql} from "diagnostic-channel-publishers";
 
 export const subscriber = (event: IStandardEvent<mysql.IMysqlData>) => {
-    if (ApplicationInsights.client) {
+    if (ApplicationInsights.defaultClient) {
         const queryObj = event.data.query || {};
         const sqlString = queryObj.sql || "Unknown query";
         const success = !event.data.err;
@@ -14,12 +14,15 @@ export const subscriber = (event: IStandardEvent<mysql.IMysqlData>) => {
         const connection = queryObj._connection || {};
         const connectionConfig = connection.config || {};
         const dbName = connectionConfig.socketPath ? connectionConfig.socketPath : `${connectionConfig.host || "localhost"}:${connectionConfig.port}`;
-        ApplicationInsights.client.trackDependency(
-                dbName,
-                sqlString,
-                Math.floor(event.data.duration),
-                success,
-                "mysql");
+        ApplicationInsights.defaultClient.trackDependency({
+                target: dbName,
+                name: sqlString,
+                data: sqlString,
+                duration: event.data.duration,
+                success: success,
+                // TODO: transmit result code from mysql
+                resultCode: success ? "0" : "1",
+                dependencyTypeName: "mysql"});
     }
 };
 

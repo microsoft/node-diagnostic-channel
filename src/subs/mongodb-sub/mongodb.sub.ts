@@ -6,19 +6,22 @@ import {channel, IStandardEvent} from "diagnostic-channel";
 import {mongodb} from "diagnostic-channel-publishers";
 
 export const subscriber = (event: IStandardEvent<mongodb.IMongoData>) => {
-    if (ApplicationInsights.client) {
+    if (ApplicationInsights.defaultClient) {
         const dbName = (event.data.startedData && event.data.startedData.databaseName) || "Unknown database";
-        ApplicationInsights.client
-            .trackDependency(
-                dbName,
-                event.data.event.commandName,
-                event.data.event.duration,
-                event.data.succeeded,
-                "mongodb");
+        ApplicationInsights.defaultClient
+            .trackDependency({
+                target: dbName,
+                name: event.data.event.commandName,
+                data: event.data.event.commandName,
+                duration: event.data.event.duration,
+                success: event.data.succeeded,
+                // TODO: transmit result code from mongo
+                resultCode: event.data.succeeded ? "0" : "1",
+                dependencyTypeName: "mongodb"});
 
         if (!event.data.succeeded) {
-            ApplicationInsights.client
-                .trackException(new Error(event.data.event.failure));
+            ApplicationInsights.defaultClient
+                .trackException({exception: new Error(event.data.event.failure)});
         }
     }
 };
