@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import {channel, IModulePatcher, PatchFunction} from "diagnostic-channel";
 
-const mongodbcorePatchFunction: PatchFunction = function(originalMongoCore) {
+const mongodbcore2PatchFunction: PatchFunction = function(originalMongoCore) {
     const originalConnect = originalMongoCore.Server.prototype.connect;
     originalMongoCore.Server.prototype.connect = function contextPreservingConnect() {
         const ret = originalConnect.apply(this, arguments);
@@ -34,9 +34,35 @@ const mongodbcorePatchFunction: PatchFunction = function(originalMongoCore) {
     return originalMongoCore;
 };
 
+const mongodbcore3PatchFunction: PatchFunction = function(originalMongoCore) {
+  const originalConnect = originalMongoCore.Server.prototype.connect;
+  originalMongoCore.Server.prototype.connect = function contextPreservingConnect() {
+    const ret = originalConnect.apply(this, arguments);
+
+    // Messages sent to mongo progress through a pool
+    // This can result in context getting mixed between different responses
+    // so we wrap the callbacks to wrap appropriate state
+    const originalWrite = this.s.pool.write;
+    this.s.pool.write = function contextPreservingWrite() {
+      const cbidx = typeof arguments[1] === "function" ? 1 : 2;
+      if (typeof arguments[cbidx] === "function") {
+        arguments[cbidx] = channel.bindToContext(arguments[cbidx]);
+      }
+      return originalWrite.apply(this, arguments);
+    }
+    return ret;
+  };
+  return originalMongoCore;
+}
+
 export const mongoCore2: IModulePatcher = {
-    versionSpecifier: ">= 2.0.0 < 2.2.0",
-    patch: mongodbcorePatchFunction,
+    versionSpecifier: "2.x",
+    patch: mongodbcore2PatchFunction,
+};
+
+export const mongoCore3: IModulePatcher = {
+  versionSpecifier: "3.x",
+  patch: mongodbcore3PatchFunction
 };
 
 export function enable() {

@@ -1,5 +1,0 @@
-*.ts
-*.js.map
-typings
-tests
-tsconfig.json
