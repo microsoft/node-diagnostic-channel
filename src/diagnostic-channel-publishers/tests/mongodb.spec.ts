@@ -21,14 +21,10 @@ enum Mode {
 let mode: Mode = Mode.REPLAY;
 
 describe("mongodb", function() {
-    const server = net.createServer();
-
     before(() => {
         enableCore();
         enableMongo();
-        server.listen({port: 27017});
     });
-    after(() => { server.close(); });
 
     it("should fire events when we communicate with a collection, and preserve context", function(done) {
         channel.addContextPreservation((cb) => Zone.current.wrap(cb, "context preservation"));
