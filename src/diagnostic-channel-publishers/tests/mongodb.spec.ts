@@ -56,8 +56,7 @@ describe("mongodb", function() {
                 events.length = 0;
             }
 
-
-            const collection = client.db('testdb').collection("documents");
+            const collection = client.db("testdb").collection("documents");
 
             if (Zone.current !== z1) {
                 return done(new Error("Context not preserved in connect"));
