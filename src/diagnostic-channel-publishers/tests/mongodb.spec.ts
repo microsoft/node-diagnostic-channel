@@ -4,8 +4,6 @@ import {channel, IStandardEvent} from "diagnostic-channel";
 
 import {enable as enableCore} from "../src/mongodb-core.pub";
 import {enable as enableMongo, IMongoData} from "../src/mongodb.pub";
-import {mongoCommunication, mongodbcoreConnectionRecordPatchFunction} from "./util/mongodbcore-mock-record";
-import {makeMongodbcoreConnectionReplayPatchFunction} from "./util/mongodbcore-mock-replay";
 
 import "zone.js";
 
@@ -33,19 +31,6 @@ describe("mongodb", function() {
     after(() => { server.close(); });
 
     it("should fire events when we communicate with a collection, and preserve context", function(done) {
-        const traceName = "mongodb.trace.json";
-        const tracePath = path.join(__dirname, "util", traceName);
-        // Note:
-        // We patch the underlying connection to record/replay a trace stored in util/mongodb.trace.json
-        // This lets us validate the behavior of our mock as long as the mongo commands below are left unchanged,
-        // or the trace is updated with a newly recorded version.
-        if (mode === Mode.REPLAY) {
-            const trace = require(tracePath);
-            channel.registerMonkeyPatch("mongodb-core", {versionSpecifier: "*", patch: makeMongodbcoreConnectionReplayPatchFunction(trace)});
-        } else {
-            assert.equal(mode, Mode.RECORD);
-            channel.registerMonkeyPatch("mongodb-core", {versionSpecifier: "*", patch: mongodbcoreConnectionRecordPatchFunction});
-        }
         channel.addContextPreservation((cb) => Zone.current.wrap(cb, "context preservation"));
 
         const events: Array<IStandardEvent<IMongoData>> = [];
@@ -57,11 +42,22 @@ describe("mongodb", function() {
 
         const z1 = Zone.current.fork({name: "1"});
         z1.run(() =>
-        mongodb.MongoClient.connect("mongodb://localhost:27017/testdb", function(err, db) {
+        mongodb.MongoClient.connect("mongodb://localhost:27017", { useNewUrlParser: true }, function(err, client) {
             if (err) {
                 done(err);
             }
-            const collection = db.collection("documents");
+
+            // ismaster event exists after connecting for 3.0.6+
+            if (events.length > 0) {
+                assert.equal(events.length, 1);
+                assert.equal(events[0].data.startedData.command.ismaster, true);
+                assert.equal(events[0].data.event.reply.ismaster, true);
+                assert.equal(events[0].data.succeeded, true);
+                events.length = 0;
+            }
+
+
+            const collection = client.db('testdb').collection("documents");
 
             if (Zone.current !== z1) {
                 return done(new Error("Context not preserved in connect"));
@@ -105,13 +101,6 @@ describe("mongodb", function() {
                     assert.equal(events[1].data.startedData.command.delete, "documents");
                     assert.equal(events[1].data.event.reply.n, 1);
                     assert.equal(events[1].data.succeeded, true);
-
-                    if (mode === Mode.RECORD) {
-                        // For recording traces
-                        // The mongoCommunications trace should consist of Buffer objects,
-                        // which retain relevant data when JSON.stringified
-                        fs.writeFileSync(tracePath, JSON.stringify(mongoCommunication));
-                    }
                 }).then(done, done));
             }));
         }));
