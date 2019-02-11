@@ -5,8 +5,8 @@ import * as assert from "assert";
 import {channel, IStandardEvent, makePatchingRequire} from "diagnostic-channel";
 import {Promise} from "q";
 import "zone.js";
-import {enable as enablePostgresPool} from "../src/pg-pool.pub";
-import {enable as enablePostgres, IPostgresData, IPostgresResult} from "../src/pg.pub";
+import {enable as enablePostgresPool} from "../../diagnostic-channel-publishers/src";
+import {enable as enablePostgres, IPostgresData, IPostgresResult} from "../../diagnostic-channel-publishers/src";
 
 interface IPostgresTest {
     text?: string;
@@ -20,7 +20,7 @@ interface IPostgresTest {
     res: IPostgresResult;
 }
 
-describe("pg@7.x", () => {
+describe("pg@6.x", () => {
     let pg;
     let actual: IPostgresData = null;
     let client;
@@ -111,39 +111,6 @@ describe("pg@7.x", () => {
 
     after((done) => {
         pool.end(done);
-    });
-
-    it("should not return a promise if no callback is provided", function test(done) {
-        const child = Zone.current.fork({name: "child"});
-
-        child.run(() => {
-            const res = client.query("SELECT NOW()", (e1, r1) => {
-                const bad = checkSuccess({
-                    res: r1,
-                    err: e1,
-                    zone: child,
-                    text: "SELECT NOW()",
-                });
-
-                if (bad) {
-                    return done(bad);
-                }
-
-                client.query("SELECT nonexistent", (e2, r2) => {
-                    done(checkFailure({
-                        res: r2,
-                        err: e2,
-                        zone: child,
-                        preparable: {
-                            text: "SELECT $1",
-                            args: ["0"],
-                        },
-                    }));
-                });
-            });
-
-            assert.equal(res, undefined, "No promise is returned");
-        });
     });
 
     it("should intercept client.query(text, values, callback)", function test(done) {
@@ -485,11 +452,6 @@ describe("pg@7.x", () => {
             }
 
             handlers += 1;
-            if (handlers === 5) {
-                assert.equal(events, 6, "subscriber called too many times");
-                assert.equal(handlers, 5, "callback called too many times");
-                done();
-            }
         };
         const config = {
             text: "SELECT NOW()",
@@ -497,34 +459,32 @@ describe("pg@7.x", () => {
         };
 
         channel.subscribe("postgres", counter);
-        client.query("SELECT NOW()");
-        client.query("SELECT NOW()", queryHandler);
 
-        client.query(config);
-        client.query(config);
-
-        client.query("SELECT NOW()", config.callback);
-        client.query("SELECT NOW()", config.callback);
-        // client.query("SELECT NOW()")
-        // .then(() => {
-        //     assert.equal(events, 6, "subscriber called too many times");
-        //     assert.equal(handlers, 5, "callback called too many times");
-        //     channel.unsubscribe("postgres", counter);
-        // }).then(done, done);
+        client.query("SELECT NOW()", queryHandler).then(() => {
+            return client.query("SELECT NOW()", queryHandler);
+        }).then(() => {
+            assert.equal(events, 2, "subscriber called too many times");
+            assert.equal(handlers, 2, "callback called too many times");
+            return client.query(config);
+        }).then(() => {
+            return client.query(config);
+        }).then(() => {
+            assert.equal(events, 4, "subscriber called too many times");
+            assert.equal(handlers, 4, "callback called too many times");
+        }).then(() => {
+            return client.query("SELECT NOW()", config.callback);
+        }).then(() => {
+            return client.query("SELECT NOW()", () => null);
+        }).then(() => {
+            assert.equal(events, 6, "subscriber called too many times");
+            assert.equal(handlers, 5, "callback called too many times");
+            channel.unsubscribe("postgres", counter);
+        }).then(done, done);
     });
 
     it("should preserve correct zones even when using the same callback in client.query()", function test(done) {
         function handler(err: Error, res: any) {
             zoneQueue.push(Zone.current);
-            if (zoneQueue.length >= 2) {
-                assert.ok(zoneQueue[0]);
-                assert.ok(z1);
-                assert.ok(zoneQueue[1]);
-                assert.ok(z2);
-                assert.equal(zoneQueue[0], z1, "First zoneQueue item is not z1");
-                assert.equal(zoneQueue[1], z2, "Second zoneQueue item is not z2");
-                done();
-            }
         }
         const zoneQueue: Zone[] = [];
         const z1 = Zone.current.fork({name: "z1"});
@@ -532,10 +492,14 @@ describe("pg@7.x", () => {
 
         z1.run<Promise<void>>(() => {
             return client.query("SELECT NOW()", handler);
-        });
-        z2.run<Promise<void>>(() => {
-            return client.query("SELECT NOW()", handler);
-        });
+        }).then(() => {
+            return z2.run<Promise<void>>(() => {
+                return client.query("SELECT NOW()", handler);
+            });
+        }).then(() => {
+            assert.equal(zoneQueue[0], z1, "First zoneQueue item is not z1");
+            assert.equal(zoneQueue[1], z2, "Second zoneQueue item is not z2");
+        }).then(done, done);
     });
 
     it("should preserve correct zones even when using the same callback in pool.connect()", function test(done) {
@@ -585,7 +549,7 @@ describe("pg@7.x", () => {
         }
 
         assert.throws(() => client.query(), assertPgError, "query with no arguments did not throw from pg");
-        // assert.doesNotThrow(() => client.query(1, ["0"], () => null), "query with invalid text should not immediately throw");
+        assert.doesNotThrow(() => client.query(1, ["0"], () => null), "query with invalid text should not immediately throw");
         assert.doesNotThrow(() => client.query({ random: "object" }, undefined, () => null), "query with invalid config object did not throw from pg");
     });
 });
