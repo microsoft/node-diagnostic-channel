@@ -97,7 +97,7 @@ export const mongo2: IModulePatcher = {
     patch: mongodbPatchFunction,
 };
 export const mongo3: IModulePatcher = {
-    versionSpecifier: "> 3.0.5",
+    versionSpecifier: "> 3.0.5 < 4.0.0",
     patch: mongodb3PatchFunction,
 };
 
