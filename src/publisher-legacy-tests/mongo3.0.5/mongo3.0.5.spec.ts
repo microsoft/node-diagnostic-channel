@@ -20,18 +20,13 @@ enum Mode {
 /* tslint:disable-next-line:prefer-const */
 let mode: Mode = Mode.REPLAY;
 
-describe("mongodb@3.0.5", function() {
-
+describe("mongodb@3.x", function() {
     before(() => {
         enableCore();
         enableMongo();
     });
 
     it("should fire events when we communicate with a collection, and preserve context", function(done) {
-        // Note:
-        // We patch the underlying connection to record/replay a trace stored in util/mongodb.trace.json
-        // This lets us validate the behavior of our mock as long as the mongo commands below are left unchanged,
-        // or the trace is updated with a newly recorded version.
         channel.addContextPreservation((cb) => Zone.current.wrap(cb, "context preservation"));
 
         const events: Array<IStandardEvent<IMongoData>> = [];
@@ -43,11 +38,12 @@ describe("mongodb@3.0.5", function() {
 
         const z1 = Zone.current.fork({name: "1"});
         z1.run(() =>
-        mongodb.MongoClient.connect("mongodb://localhost:27017/testdb", function(err, db) {
+        mongodb.MongoClient.connect("mongodb://localhost:27017", { useNewUrlParser: true }, function(err, client) {
             if (err) {
                 done(err);
             }
-            const collection = db.collection("documents");
+
+            const collection = client.db("testdb").collection("documents");
 
             if (Zone.current !== z1) {
                 return done(new Error("Context not preserved in connect"));
