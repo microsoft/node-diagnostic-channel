@@ -183,12 +183,6 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
                 data.duration = Math.ceil((end[0] * 1e3) + (end[1] / 1e6));
                 channel.publish("postgres", data);
 
-                // emulate weird internal behavior in pg@6
-                // on success, the callback is called *before* query events are emitted
-                // on failure, the callback is called *instead of* the query emitting events
-                // with no events, that means no promises (since the promise is resolved/rejected in an event handler)
-                // since we are always inserting ourselves as a callback, we have to restore the original
-                // behavior if the user didn't provide one themselves
                 if (err) {
                     if (cb) {
                         return cb.apply(this, arguments);
@@ -209,10 +203,9 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
             }
         }
 
-        // this function takes too many variations of arguments.
-        // this patches any provided callback or creates a new callback if one wasn't provided.
-        // since the callback is always called (if provided) in addition to always having a Promisified
-        // EventEmitter returned (well, sometimes -- see above), its safe to insert a callback if none was given
+        // Only try to wrap the callback if it is a function. We want to keep the same
+        // behavior of returning a promise only if no callback is provided. Wrapping
+        // a nonfunction makes it a function and pg will interpret it as a callback
         try {
             if (typeof config === "string") {
                 if (values instanceof Array) {
@@ -224,12 +217,6 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
                     callback = callback ? patchCallback(callback) : callback;
                 } else {
                     data.query.text = config;
-
-                    // pg v6 will, for some reason, accept both
-                    // client.query("...", undefined, () => {...})
-                    // **and**
-                    // client.query("...", () => {...});
-                    // Internally, precedence is given to the callback argument
                     if (callback) {
                         callbackProvided = typeof callback === "function";
                         callback = callbackProvided ? patchCallback(callback) : callback;
