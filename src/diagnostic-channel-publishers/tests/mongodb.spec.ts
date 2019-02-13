@@ -20,7 +20,7 @@ enum Mode {
 /* tslint:disable-next-line:prefer-const */
 let mode: Mode = Mode.REPLAY;
 
-describe("mongodb", function() {
+describe("mongodb@3.x", function() {
     before(() => {
         enableCore();
         enableMongo();

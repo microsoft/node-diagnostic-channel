@@ -4,8 +4,6 @@ import {channel, IStandardEvent} from "diagnostic-channel";
 
 import {enable as enableCore} from "../../diagnostic-channel-publishers/src/mongodb-core.pub";
 import {enable as enableMongo, IMongoData} from "../../diagnostic-channel-publishers/src/mongodb.pub";
-import {mongoCommunication, mongodbcoreConnectionRecordPatchFunction} from "./util/mongodbcore-mock-record";
-import {makeMongodbcoreConnectionReplayPatchFunction} from "./util/mongodbcore-mock-replay";
 
 import "zone.js";
 
@@ -22,7 +20,7 @@ enum Mode {
 /* tslint:disable-next-line:prefer-const */
 let mode: Mode = Mode.REPLAY;
 
-describe("mongodb", function() {
+describe("mongodb@3.0.5", function() {
 
     before(() => {
         enableCore();
@@ -30,8 +28,6 @@ describe("mongodb", function() {
     });
 
     it("should fire events when we communicate with a collection, and preserve context", function(done) {
-        const traceName = "mongodb.trace.json";
-        const tracePath = path.join(__dirname, "util", traceName);
         // Note:
         // We patch the underlying connection to record/replay a trace stored in util/mongodb.trace.json
         // This lets us validate the behavior of our mock as long as the mongo commands below are left unchanged,
@@ -95,13 +91,6 @@ describe("mongodb", function() {
                     assert.equal(events[1].data.startedData.command.delete, "documents");
                     assert.equal(events[1].data.event.reply.n, 1);
                     assert.equal(events[1].data.succeeded, true);
-
-                    if (mode === Mode.RECORD) {
-                        // For recording traces
-                        // The mongoCommunications trace should consist of Buffer objects,
-                        // which retain relevant data when JSON.stringified
-                        fs.writeFileSync(tracePath, JSON.stringify(mongoCommunication));
-                    }
                 }).then(done, done));
             }));
         }));

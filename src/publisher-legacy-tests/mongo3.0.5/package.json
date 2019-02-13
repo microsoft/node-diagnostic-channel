@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "tsc && cp ./util/*.json dist/publisher-legacy-tests/mongo3.0.5/util",
+    "build": "tsc",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "clean": "rimraf ./dist",
     "test": "mocha --recursive ./dist/{*.js,**/*.js}",
