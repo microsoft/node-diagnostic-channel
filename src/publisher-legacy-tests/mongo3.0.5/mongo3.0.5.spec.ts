@@ -36,7 +36,6 @@ describe("mongodb", function() {
         // We patch the underlying connection to record/replay a trace stored in util/mongodb.trace.json
         // This lets us validate the behavior of our mock as long as the mongo commands below are left unchanged,
         // or the trace is updated with a newly recorded version.
-        
         channel.addContextPreservation((cb) => Zone.current.wrap(cb, "context preservation"));
 
         const events: Array<IStandardEvent<IMongoData>> = [];
