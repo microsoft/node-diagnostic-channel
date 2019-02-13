@@ -8,12 +8,12 @@ import * as mongodb from "./mongodb.pub";
 import * as mysql from "./mysql.pub";
 import * as pgPool from "./pg-pool.pub";
 import * as pg from "./pg.pub";
+import { IPostgresData, IPostgresResult } from "./pg.pub";
 import * as redis from "./redis.pub";
 import * as winston from "./winston.pub";
-import { IPostgresData, IPostgresResult } from "./pg.pub";
 
 export { bunyan, consolePub as console, mongodbCore, mongodb, mysql, redis, winston, pg, pgPool,
-    IPostgresData, IPostgresResult
+    IPostgresData, IPostgresResult,
 };
 
 export function enable() {
