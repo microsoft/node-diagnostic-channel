@@ -55,14 +55,9 @@ const mongodbPatchFunction: PatchFunction = function(originalMongo) {
 };
 
 const mongodb3PatchFunction: PatchFunction = function(originalMongo) {
-    const listener = originalMongo.instrument({
-        operationIdGenerator: {
-            next: function() {
-                return channel.bindToContext((cb) => cb());
-            },
-        },
-    });
+    const listener = originalMongo.instrument();
     const eventMap = {};
+    const contextMap = {};
     listener.on("started", function(event) {
         if (eventMap[event.requestId]) {
             // Note: Mongo can generate 2 completely separate requests
@@ -70,6 +65,7 @@ const mongodb3PatchFunction: PatchFunction = function(originalMongo) {
             // For now, we accept that this can happen and potentially miss or mislabel some events.
             return;
         }
+        contextMap[event.requestId] = channel.bindToContext((cb) => cb());
         eventMap[event.requestId] = event;
     });
 
@@ -78,7 +74,11 @@ const mongodb3PatchFunction: PatchFunction = function(originalMongo) {
         if (startedData) {
             delete eventMap[event.requestId];
         }
-        channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: true});
+
+        if (typeof event === "object" && typeof contextMap[event.requestId] === "function") {
+            contextMap[event.requestId](() => channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: true}));
+            delete contextMap[event.requestId];
+        }
     });
 
     listener.on("failed", function(event) {
@@ -86,7 +86,11 @@ const mongodb3PatchFunction: PatchFunction = function(originalMongo) {
         if (startedData) {
             delete eventMap[event.requestId];
         }
-        channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: false});
+
+        if (typeof event === "object" && typeof contextMap[event.requestId] === "function") {
+            contextMap[event.requestId](() => channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: false}));
+            delete contextMap[event.requestId];
+        }
     });
 
     return originalMongo;
