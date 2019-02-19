@@ -44,8 +44,6 @@ const winston2PatchFunction: PatchFunction = (originalWinston) => {
 };
 
 const winston3PatchFunction: PatchFunction = (originalWinston) => {
-    const Transport = require("winston-transport");
-
     const mapLevelToKind = (winston, level: string) => {
         let levelKind: string;
         if (winston.config.npm.levels[level] != null) {
@@ -57,7 +55,7 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
         }
         return levelKind;
     };
-    class AppInsightsTransport extends Transport {
+    class AppInsightsTransport extends originalWinston.Transport {
         private winston;
 
         constructor(winston, opts?: any) {
