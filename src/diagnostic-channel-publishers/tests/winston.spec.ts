@@ -7,8 +7,8 @@ import {enable as enableWinston, IWinstonData} from "../src/winston.pub";
 
 function compareWinstonData(actual: IWinstonData, expected: IWinstonData): void {
     assert.strictEqual(actual.message, expected.message, "messages are not equal");
-    // meta is an object, but we can always use the same reference
-    assert.strictEqual(actual.meta, expected.meta, "meta objects are not equal");
+    // // meta is an object, but we can always use the same reference
+    assert.deepEqual(actual.meta, expected.meta, "meta objects are not equal");
     assert.strictEqual(actual.level, expected.level, "levels are not equal");
     assert.strictEqual(actual.levelKind, expected.levelKind, "level kinds are not equal");
 }
@@ -42,9 +42,9 @@ describe("winston", () => {
     });
 
     it("should intercept new loggers", () => {
-        const expected: IWinstonData = {message: "should intercept a new logger", meta: {testing: "new loggers"}, level: "info", levelKind: "npm"};
+        const expected: IWinstonData = {message: "should intercept a new logger", meta: {testing: "new loggers", another: "meta field"}, level: "info", levelKind: "npm"};
 
-        const loggerWithoutFilter = new winston.Logger({
+        const loggerWithoutFilter = new winston.createLogger({
             transports: [new winston.transports.Console()],
         });
         loggerWithoutFilter.info(expected.message, expected.meta);
@@ -52,13 +52,15 @@ describe("winston", () => {
     });
 
     it("should intercept loggers with pre-configured filters", () => {
-        const expected: IWinstonData = {message: "unfiltered", meta: {testing: "new loggers"}, level: "info", levelKind: "npm"};
+        const expected: IWinstonData = {message: "unfiltered", meta: {testing: "new loggers", another: "meta field"}, level: "info", levelKind: "npm"};
         const filteredMessage = "filtered";
+        const filterMessage = winston.format((info, opts) => {
+            info.message = filteredMessage;
+            return info;
+        });
 
-        const logger = new winston.Logger({
-            filters: [
-                (level, message, meta) => filteredMessage,
-            ],
+        const logger = new winston.createLogger({
+            format: winston.format.combine(filterMessage(), winston.format.json()),
             transports: [new winston.transports.Console()],
         });
         logger.log("info", "unfiltered", expected.meta);
@@ -68,58 +70,101 @@ describe("winston", () => {
 
     it("should always publish the most-filtered, most-rewritten message", () => {
         const expected: IWinstonData = {message: "unfiltered", meta: {rewritten: 0}, level: "info", levelKind: "npm"};
-
-        const logger = new winston.Logger({
-            filters: [
-                (level, message, meta) => "kinda filtered",
-            ],
-            rewriters: [
-                (level, message, meta) => { meta.rewritten = 1; return meta; },
-            ],
+        const filterMessage = winston.format((info, opts) => {
+            info.message = "filtered";
+            return info;
+        });
+        const rewriter = winston.format((info, opts) => {
+            info.meta = info.meta || {};
+            info.meta.rewritten = 1;
+            return info;
+        });
+        const logger = new winston.createLogger({
+            format: winston.format.combine(filterMessage(), rewriter(), winston.format.json()),
             transports: [new winston.transports.Console()],
         });
 
-        const rewritten2 = { rewritten: 2 };
-        logger.filters.push(() => "more filtered");
-        logger.rewriters.push((level, message, meta) => rewritten2);
+        const filterMessage2 = winston.format((info, opts) => {
+            info.message = "more filtered";
+            return info;
+        });
+        const rewriter2 = winston.format((info, opts) => {
+            info.meta = info.meta || {};
+            info.meta.rewritten = 2;
+            return info;
+        });
+        logger.configure({
+            format: winston.format.combine(filterMessage2(), rewriter2(), winston.format.json()),
+            transports: [new winston.transports.Console()],
+        });
         logger.log("info", "unfiltered", {});
-        compareWinstonData(actual, {message: "more filtered", meta: rewritten2, level: "info", levelKind: "npm"});
+        compareWinstonData(actual, {message: "more filtered", meta: {rewritten: 2}, level: "info", levelKind: "npm"});
 
-        const rewritten3 = { rewritten: 3 };
-        logger.filters.push(() => "even more filtered");
-        logger.rewriters.push((level, message, meta) => rewritten3);
+        const filterMessage3 = winston.format((info, opts) => {
+            info.message = "even more filtered";
+            return info;
+        });
+        const rewriter3 = winston.format((info, opts) => {
+            info.meta = info.meta || {};
+            info.meta.rewritten = 3;
+            return info;
+        });
+        logger.configure({
+            format: winston.format.combine(filterMessage3(), rewriter3(), winston.format.json()),
+            transports: [new winston.transports.Console()],
+        });
         logger.log("info", "unfiltered", {});
-        compareWinstonData(actual, {message: "even more filtered", meta: rewritten3, level: "info", levelKind: "npm"});
+        compareWinstonData(actual, {message: "even more filtered", meta: {rewritten: 3}, level: "info", levelKind: "npm"});
     });
 
-    it("should track changes to logging levels", () => {
+    it("should track different syslog logging levels", () => {
         const expected: IWinstonData = {message: "should intercept the default logger", meta: {}, level: "info", levelKind: "npm"};
-        const logger = new winston.Logger({
+        const logger = new winston.createLogger({
+            levels: winston.config.syslog.levels,
             transports: [
-                new winston.transports.Console({
-                    name: "default-console",
-                    level: "info",
-                }),
-                new winston.transports.Console({
-                    name: "levels-console",
-                    level: "l2",
-                }),
+                new winston.transports.Console(),
             ],
         });
 
-        logger.info(expected.message, expected.meta);
-        compareWinstonData(actual, expected);
-
-        logger.setLevels(winston.config.syslog.levels);
         expected.levelKind = "syslog";
         expected.level = "warning";
-        logger.warning(expected.message, expected.meta);
+        logger.log(expected.level, expected.message, expected.meta);
         compareWinstonData(actual, expected);
 
-        logger.setLevels({l0: 0, l1: 1, l2: 2, l3: 3});
-        expected.levelKind = "unknown";
-        expected.level = "l2";
-        logger.log("l2", expected.message, expected.meta);
+        expected.level = "alert";
+        logger.alert(expected.message, expected.meta);
         compareWinstonData(actual, expected);
+    });
+
+    it("should track custom logging levels", () => {
+        const expected: IWinstonData = {message: "should intercept the default logger", meta: {some: "meta"}, level: "info", levelKind: "unknown"};
+
+        const customLevels = {
+            foo: 0,
+            bar: 1,
+            baz: 2,
+            foobar: 3,
+          };
+
+        const logger = winston.createLogger({
+        levels: customLevels,
+        transports: [
+            new winston.transports.Console({
+            level: "foobar",
+            }),
+        ],
+        });
+
+        for (const level in customLevels) {
+            if (customLevels.hasOwnProperty) {
+                expected.level = level;
+
+                logger.log(level, expected.message, expected.meta);
+                compareWinstonData(actual, expected);
+
+                logger[level](expected.message, expected.meta);
+                compareWinstonData(actual, expected);
+            }
+        }
     });
 });
