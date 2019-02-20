@@ -9,7 +9,7 @@ function getDirectories() {
         './src/diagnostic-channel',
         './src/diagnostic-channel-publishers',
         './src/publisher-legacy-tests/pg6',
-        './src/publisher-legacy-tests/winston2'
+        './src/publisher-legacy-tests/winston2',
         './src/publisher-legacy-tests/mongo2',
         './src/publisher-legacy-tests/mongo3.0.5',
         './src/publisher-legacy-tests/pg6'
