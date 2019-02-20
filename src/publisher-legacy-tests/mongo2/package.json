@@ -1,13 +1,9 @@
 {
-  "name": "diagnostic-channel-publishers",
-  "version": "0.2.2",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
   "scripts": {
-    "build": "tsc && node copyTestAssets.js",
+    "build": "tsc",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "clean": "rimraf ./dist",
-    "test": "mocha ./dist/tests/{*.js,**/*.js}",
+    "test": "mocha --recursive ./dist/{*.js,**/*.js}",
     "debug": "mocha --inspect-brk ./dist/tests/{*.js,**/*.js}"
   },
   "homepage": "https://github.com/Microsoft/node-diagnostic-channel",
@@ -21,19 +17,15 @@
   "description": "A collection of pre-built module patches that enable existing npm modules to publish diagnostic data",
   "devDependencies": {
     "@types/mocha": "^2.2.40",
-    "@types/node": "^11.9.4",
+    "@types/node": "^7.0.12",
     "@types/pg": "^7.4.11",
     "diagnostic-channel": "0.2.0",
     "mocha": "^3.2.0",
-    "mongodb": "^3.1.13",
-    "mysql": "^2.16.0",
-    "pg": "^7.8.0",
+    "mongodb": "^2.0.0",
     "q": "1.5.0",
-    "redis": "^2.7.1",
     "rimraf": "^2.6.1",
     "tslint": "^5.0.0",
     "typescript": "^2.2.1",
-    "winston": "^3.2.1",
     "zone.js": "^0.8.5"
   },
   "peerDependencies": {

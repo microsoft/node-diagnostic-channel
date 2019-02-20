@@ -2,8 +2,9 @@ sudo: required
 language: node_js
 services:
   - docker
+  - mongodb
 node_js:
-  - 6
+  - 10
 install:
   - npm install
 before_script:
