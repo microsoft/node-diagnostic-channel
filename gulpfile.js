@@ -10,6 +10,7 @@ function getDirectories() {
         './src/diagnostic-channel-publishers',
         './src/publisher-legacy-tests/mongo2',
         './src/publisher-legacy-tests/mongo3.0.5',
+        './src/publisher-legacy-tests/pg6'
     ];
 }
 
@@ -64,6 +65,7 @@ gulp.task('install-main', function () {
     runNpmTask('install', './src/diagnostic-channel');
     runNpmTask('install', './src/publisher-legacy-tests/mongo2');
     runNpmTask('install', './src/publisher-legacy-tests/mongo3.0.5');
+    runNpmTask('install', './src/publisher-legacy-tests/pg6');
 });
 
 gulp.task('build-main', ['install-main'], function () {

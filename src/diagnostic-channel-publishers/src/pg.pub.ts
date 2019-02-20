@@ -150,11 +150,150 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
     return originalPg;
 }
 
+function postgres7PatchFunction(originalPg, originalPgPath) {
+    const originalClientQuery = originalPg.Client.prototype.query;
+    const diagnosticOriginalFunc = "__diagnosticOriginalFunc";
+
+    // wherever the callback is passed, find it, save it, and remove it from the call
+    // to the the original .query() function
+    originalPg.Client.prototype.query = function query(config, values, callback) {
+        let callbackProvided: boolean = !!callback; // Starting in pg@7.x+, Promise is returned only if !callbackProvided
+        const data: IPostgresData = {
+            query: {},
+            database: {
+                host: this.connectionParameters.host,
+                port: this.connectionParameters.port,
+            },
+            result: null,
+            error: null,
+            duration: 0,
+        };
+        const start = process.hrtime();
+        let queryResult;
+
+        function patchCallback(cb?: PostgresCallback): PostgresCallback {
+            if (cb && cb[diagnosticOriginalFunc]) {
+                cb = cb[diagnosticOriginalFunc];
+            }
+
+            const trackingCallback = channel.bindToContext(function(err: Error, res: IPostgresResult): any {
+                const end = process.hrtime(start);
+                data.result = res && { rowCount: res.rowCount, command: res.command };
+                data.error = err;
+                data.duration = Math.ceil((end[0] * 1e3) + (end[1] / 1e6));
+                channel.publish("postgres", data);
+
+                if (err) {
+                    if (cb) {
+                        return cb.apply(this, arguments);
+                    } else if (queryResult && queryResult instanceof EventEmitter) {
+                        queryResult.emit("error", err);
+                    }
+                } else if (cb) {
+                    cb.apply(this, arguments);
+                }
+            });
+
+            try {
+                Object.defineProperty(trackingCallback, diagnosticOriginalFunc, { value: cb });
+                return trackingCallback;
+            } catch (e) {
+                // this should never happen, but bailout in case it does
+                return cb;
+            }
+        }
+
+        // Only try to wrap the callback if it is a function. We want to keep the same
+        // behavior of returning a promise only if no callback is provided. Wrapping
+        // a nonfunction makes it a function and pg will interpret it as a callback
+        try {
+            if (typeof config === "string") {
+                if (values instanceof Array) {
+                    data.query.preparable = {
+                        text: config,
+                        args: values,
+                    };
+                    callbackProvided = typeof callback === "function";
+                    callback = callback ? patchCallback(callback) : callback;
+                } else {
+                    data.query.text = config;
+                    if (callback) {
+                        callbackProvided = typeof callback === "function";
+                        callback = callbackProvided ? patchCallback(callback) : callback;
+                    } else {
+                        callbackProvided = typeof values === "function";
+                        values = callbackProvided ? patchCallback(values) : values;
+                }
+                }
+            } else {
+                if (typeof config.name === "string") {
+                    data.query.plan = config.name;
+                } else if (config.values instanceof Array) {
+                    data.query.preparable = {
+                        text: config.text,
+                        args: config.values,
+                    };
+                } else {
+                    data.query.text = config.text;
+                }
+
+                if (callback) {
+                    callbackProvided = typeof callback === "function";
+                    callback = patchCallback(callback);
+                } else if (values) {
+                    callbackProvided = typeof values === "function";
+                    values = callbackProvided ? patchCallback(values) : values;
+                } else {
+                    callbackProvided = typeof config.callback === "function";
+                    config.callback = callbackProvided ? patchCallback(config.callback) : config.callback;
+                }
+            }
+        } catch (e) {
+            // if our logic here throws, bail out and just let pg do its thing
+            return originalClientQuery.apply(this, arguments);
+        }
+
+        arguments[0] = config;
+        arguments[1] = values;
+        arguments[2] = callback;
+        arguments.length = (arguments.length > 3) ? arguments.length : 3;
+
+        queryResult = originalClientQuery.apply(this, arguments);
+        if (!callbackProvided) {
+            // no callback, so create a pass along promise
+            return queryResult
+                // pass resolved promise after publishing the event
+                .then((result) => {
+                    patchCallback()(undefined, result);
+                    return new this._Promise((resolve, reject) => {
+                        resolve(result);
+                    });
+                })
+                // pass along rejected promise after publishing the error
+                .catch((error) => {
+                    patchCallback()(error, undefined);
+                    return new this._Promise((resolve, reject) => {
+                        reject(error);
+                    });
+                });
+        }
+        return queryResult;
+    };
+
+    return originalPg;
+}
+
 export const postgres6: IModulePatcher = {
-    versionSpecifier: "6.x",
+    versionSpecifier: "6.*",
     patch: postgres6PatchFunction,
+};
+
+export const postgres7: IModulePatcher = {
+    versionSpecifier: "7.*",
+    patch: postgres7PatchFunction,
 };
 
 export function enable() {
     channel.registerMonkeyPatch("pg", postgres6);
+    channel.registerMonkeyPatch("pg", postgres7);
 }
