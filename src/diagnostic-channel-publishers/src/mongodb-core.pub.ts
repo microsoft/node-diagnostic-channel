@@ -34,11 +34,11 @@ const mongodbcorePatchFunction: PatchFunction = function(originalMongoCore) {
     return originalMongoCore;
 };
 
-export const mongoCore2: IModulePatcher = {
-    versionSpecifier: ">= 2.0.0 < 2.2.0",
+export const mongoCore: IModulePatcher = {
+    versionSpecifier: ">= 2.0.0 < 4.0.0",
     patch: mongodbcorePatchFunction,
 };
 
 export function enable() {
-    channel.registerMonkeyPatch("mongodb-core", mongoCore2);
+    channel.registerMonkeyPatch("mongodb-core", mongoCore);
 }
