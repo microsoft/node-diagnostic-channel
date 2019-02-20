@@ -8,6 +8,7 @@ function getDirectories() {
     return [
         './src/diagnostic-channel',
         './src/diagnostic-channel-publishers',
+        './src/publisher-legacy-tests/pg6',
         './src/publisher-legacy-tests/winston2'
     ];
 }
@@ -62,6 +63,7 @@ gulp.task('install-main', function () {
     runNpmTask('install', './src/diagnostic-channel-publishers');
     runNpmTask('install', './src/diagnostic-channel');
     runNpmTask('install', './src/publisher-legacy-tests/winston2');
+    runNpmTask('install', './src/publisher-legacy-tests/pg6');
 });
 
 gulp.task('build-main', ['install-main'], function () {
