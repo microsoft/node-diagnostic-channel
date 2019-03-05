@@ -21,7 +21,7 @@
   "description": "A collection of pre-built module patches that enable existing npm modules to publish diagnostic data",
   "devDependencies": {
     "@types/mocha": "^2.2.40",
-    "@types/node": "^11.9.4",
+    "@types/node": "^10.0.0",
     "@types/pg": "^7.4.11",
     "diagnostic-channel": "0.2.0",
     "mocha": "^3.2.0",
