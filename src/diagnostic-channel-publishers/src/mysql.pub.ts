@@ -101,7 +101,7 @@ const mysqlPatchFunction: PatchFunction = function(originalMysql, originalMysqlP
 };
 
 export const mysql: IModulePatcher = {
-    versionSpecifier: ">= 2.0.0 <= 2.16.x",
+    versionSpecifier: ">= 2.0.0 < 3.0.0",
     patch: mysqlPatchFunction,
 };
 
