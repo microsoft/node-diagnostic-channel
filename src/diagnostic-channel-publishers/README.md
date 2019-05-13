@@ -12,6 +12,10 @@ data to the [diagnostic-channel](https://github.com/Microsoft/node-diagnostic-ch
 * [`winston`](https://github.com/winstonjs/winston) v2.x, v3.x
 
 ## Release notes
+### 0.3.2 - May 13, 2019
+* Fix issue with colorized Winston logging levels
+* Support new Winston [child loggers](https://github.com/winstonjs/winston/pull/1471) (`winston@3.2.0+`)
+
 ### 0.3.1 - April 22, 2019
 * Changed semver for mysql patching to `mysql@2.x`
 
