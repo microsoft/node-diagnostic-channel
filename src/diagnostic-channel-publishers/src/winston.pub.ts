@@ -70,14 +70,14 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
 
             const levelKind = mapLevelToKind(this.winston, level);
 
-            meta = meta || {};
+            meta = meta || {}; // Winston _somtimes_ puts metadata inside meta, so start from here
             for (const key in splat) {
                 if (splat.hasOwnProperty(key)) {
                     meta[key] = splat[key];
                 }
             }
 
-            channel.publish<IWinstonData>("winston", {  message, level, levelKind, meta });
+            channel.publish<IWinstonData>("winston", { message, level, levelKind, meta });
             callback();
         }
     }
