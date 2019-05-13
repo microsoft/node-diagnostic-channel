@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import * as assert from "assert";
-import {channel, IStandardEvent, makePatchingRequire} from "diagnostic-channel";
+import {channel, IStandardEvent } from "diagnostic-channel";
 
 import {enable as enableWinston, IWinstonData} from "../src/winston.pub";
 
@@ -115,6 +115,35 @@ describe("winston", () => {
         });
         logger.log("info", "unfiltered", {});
         compareWinstonData(actual, {message: "even more filtered", meta: {rewritten: 3}, level: "info", levelKind: "npm"});
+    });
+
+    it ("should track correct metadata for child loggers", () => {
+        const expected: IWinstonData = { message: "test message", level: "error", levelKind: "npm", meta: { some: "meta field", another: "metafield" } };
+        const logger = new winston.createLogger({
+            transports: [
+                new winston.transports.Console(),
+            ],
+        });
+
+        const childLogger = logger.child({
+            some: "meta field",
+        });
+        childLogger.error("test message", { another: "metafield" });
+
+        compareWinstonData(actual, expected);
+    });
+
+    it("should get correct levelKind even if colorized", () => {
+        const expected: IWinstonData = { message: "test message", level: "error", levelKind: "npm", meta: {} };
+        const logger = new winston.createLogger({
+            format: winston.format.combine(winston.format.colorize()),
+            transports: [
+                new winston.transports.Console(),
+            ],
+        });
+
+        logger.error("test message");
+        compareWinstonData(actual, expected);
     });
 
     it("should track different syslog logging levels", () => {
