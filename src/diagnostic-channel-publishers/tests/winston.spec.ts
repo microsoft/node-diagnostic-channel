@@ -117,6 +117,22 @@ describe("winston", () => {
         compareWinstonData(actual, {message: "even more filtered", meta: {rewritten: 3}, level: "info", levelKind: "npm"});
     });
 
+    it ("should track correct metadata for child loggers", () => {
+        const expected: IWinstonData = { message: "test message", level: "error", levelKind: "npm", meta: { some: "meta field", another: "metafield" } };
+        const logger = new winston.createLogger({
+            transports: [
+                new winston.transports.Console()
+            ],
+        });
+
+        const childLogger = logger.child({
+            some: "meta field",
+        });
+        childLogger.error("test message", { another: "metafield" });
+
+        compareWinstonData(actual, expected);
+    });
+
     it("should track different syslog logging levels", () => {
         const expected: IWinstonData = {message: "should intercept the default logger", meta: {}, level: "info", levelKind: "npm"};
         const logger = new winston.createLogger({

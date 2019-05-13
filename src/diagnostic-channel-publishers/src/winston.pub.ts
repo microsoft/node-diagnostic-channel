@@ -64,26 +64,20 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
         }
 
         public log(info: any, callback: any) {
-            const {message, level} = info;
-            const levelKind = mapLevelToKind(this.winston, level);
-            const meta = {};
+            // tslint:disable-next-line:prefer-const - try to obtain level from Symbol(level) afterwards
+            let { message, level, meta, ...splat } = info;
+            level = typeof Symbol["for"] === "function" ? info[Symbol["for"]("level")] : level; // Symbol(level) is uncolorized, so prefer getting it from here
 
-            // Remark: This check might not be necessary since winston 3.x does not support
-            // older node versions, but I think it should stay here so we aren't the reason winston breaks
-            // for these users.
-            if (typeof Symbol["for"] === "function") {
-                // By default, meta is placed in {"0" : {some: "field", another: "field"}}
-                // but "rewriters" move it to info.meta, so hack for this...
-                const metaSearch = info.meta ? [info.meta] : undefined || info[Symbol["for"]("splat")];
-                if (metaSearch) {
-                    for (const key in metaSearch[0]) {
-                        if (meta.hasOwnProperty) {
-                            meta[key] = metaSearch[0][key];
-                        }
-                    }
+            const levelKind = mapLevelToKind(this.winston, level);
+
+            meta = meta || {};
+            for (const key in splat) {
+                if (splat.hasOwnProperty(key)) {
+                    meta[key] = splat[key];
                 }
             }
-            channel.publish<IWinstonData>("winston", {message, level, levelKind, meta});
+
+            channel.publish<IWinstonData>("winston", {  message, level, levelKind, meta });
             callback();
         }
     }
