@@ -12,6 +12,7 @@ function getDirectories() {
         './src/publisher-legacy-tests/winston2',
         './src/publisher-legacy-tests/mongo2',
         './src/publisher-legacy-tests/mongo3.0.5',
+        './src/publisher-legacy-tests/mongo3.2.7',
         './src/publisher-legacy-tests/pg6'
     ];
 }
@@ -68,6 +69,7 @@ gulp.task('install-main', function () {
     runNpmTask('install', './src/publisher-legacy-tests/winston2');
     runNpmTask('install', './src/publisher-legacy-tests/mongo2');
     runNpmTask('install', './src/publisher-legacy-tests/mongo3.0.5');
+    runNpmTask('install', './src/publisher-legacy-tests/mongo3.2.7');
     runNpmTask('install', './src/publisher-legacy-tests/pg6');
 });
 
