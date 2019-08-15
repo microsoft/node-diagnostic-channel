@@ -12,6 +12,9 @@ data to the [diagnostic-channel](https://github.com/Microsoft/node-diagnostic-ch
 * [`winston`](https://github.com/winstonjs/winston) v2.x, v3.x
 
 ## Release notes
+### 0.3.3 - August 15, 2019
+* Fix patching issue with new [mongodb@3.3.0+](https://github.com/mongodb/node-mongodb-native/releases/tag/v3.3.0) driver
+
 ### 0.3.2 - May 13, 2019
 * Fix issue with colorized Winston logging levels
 * Support new Winston [child loggers](https://github.com/winstonjs/winston/pull/1471) (`winston@3.2.0+`)
