@@ -20,6 +20,10 @@
   },
   "description": "A collection of pre-built module patches that enable existing npm modules to publish diagnostic data",
   "devDependencies": {
+    "@azure/core-tracing": "^1.0.0-preview.1",
+    "@opentelemetry/types": "^0.1.0",
+    "@opentelemetry/tracing": "^0.1.0",
+    "@opentelemetry/node": "^0.1.0",
     "@types/mocha": "^2.2.40",
     "@types/node": "^10.0.0",
     "@types/pg": "^7.4.11",
@@ -32,7 +36,7 @@
     "redis": "^2.7.1",
     "rimraf": "^2.6.1",
     "tslint": "^5.0.0",
-    "typescript": "^2.2.1",
+    "typescript": "^3.6.3",
     "winston": "^3.2.1",
     "zone.js": "^0.8.5"
   },
