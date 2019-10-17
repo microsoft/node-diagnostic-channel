@@ -80,7 +80,7 @@ describe("mongodb@3.0.5", function() {
                         return;
                     }
 
-                    assert.equal(events.length, 2);
+                    assert.equal(events.length, 3);
                     assert.equal(events[0].data.startedData.command.insert, "documents");
                     assert.equal(events[0].data.event.reply.n, 3);
                     assert.equal(events[0].data.succeeded, true);

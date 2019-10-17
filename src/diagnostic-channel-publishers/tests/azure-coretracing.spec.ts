@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import {channel, IStandardEvent} from "diagnostic-channel";
-import {enable as enableAzureSDKTracing, DEFAULT_TRACER_TAG} from "../src/azure-coretracing.pub";
+import {enable as enableAzureSDKTracing, AzureMonitorSymbol} from "../src/azure-coretracing.pub";
 import * as assert from "assert";
 import * as coreTracingTypes from '@azure/core-tracing';
 
@@ -32,7 +32,7 @@ describe("@azure/core-tracing@1.0.0-preview4+", () => {
     });
 
     it("should fire events when a span is ended", (done) => {
-        assert.ok(tracer[DEFAULT_TRACER_TAG]);
+        assert.ok(tracer[AzureMonitorSymbol]);
         const span = tracer.startSpan('test span 1');
         assert.deepEqual(tracer.getCurrentSpan(), null);
         assertSpans(events, span);

@@ -2,8 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import { channel, IModulePatcher, PatchFunction } from "diagnostic-channel";
 import * as coreTracingTypes from "@azure/core-tracing";
+import * as tracingTypes from '@opentelemetry/tracing';
+import * as opentelemetryTypes from '@opentelemetry/types';
 
-export const DEFAULT_TRACER_TAG = "__AzureMonitorTracer__";
+export const AzureMonitorSymbol = Symbol("Azure Monitor Tracer");
 
 /**
  * By default, @azure/core-tracing default tracer is a NoopTracer.
@@ -14,28 +16,26 @@ export const DEFAULT_TRACER_TAG = "__AzureMonitorTracer__";
 const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTracingTypes) => {
     try {
         const BasicTracer = require('@opentelemetry/tracing').BasicTracer;
-        const tracer = new BasicTracer();
-        if (tracer) {
-            // Patch tracer.startSpan(...)
-            const origSpanStart = tracer.startSpan;
-            tracer.startSpan = function startSpan() {
-                const span: coreTracingTypes.Span = origSpanStart.apply(this, arguments);
-                span.addEvent("Application Insights Integration enabled");
-
-                // Patch span.end()
-                const origEnd = span.end;
-                span.end = function end(this: coreTracingTypes.Span) {
-                    const res = origEnd.apply(this, arguments);
-                    channel.publish("azure-coretracing", this);
-                    return res; // void;
-                }
-                return span;
-            }
-        }
-        tracer[DEFAULT_TRACER_TAG] = true;
-        coreTracing.setTracer(tracer)
+        const tracer: tracingTypes.BasicTracer = new BasicTracer();
+        tracer.addSpanProcessor(new AzureMonitorSpanProcessor());
+        tracer[AzureMonitorSymbol] = true;
+        coreTracing.setTracer(tracer as any)
     } finally {
         return coreTracing;
+    }
+}
+
+export class AzureMonitorSpanProcessor implements tracingTypes.SpanProcessor {
+    onStart(span: opentelemetryTypes.Span): void {
+        span.addEvent("Application Insights Integration enabled");
+    }
+
+    onEnd(span: opentelemetryTypes.Span): void {
+        channel.publish("azure-coretracing", this);
+    }
+
+    shutdown(): void {
+        // noop
     }
 }
 
