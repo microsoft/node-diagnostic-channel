@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
-import { channel, IModulePatcher, PatchFunction } from "diagnostic-channel";
 import * as coreTracingTypes from "@azure/core-tracing";
-import * as tracingTypes from '@opentelemetry/tracing';
-import * as opentelemetryTypes from '@opentelemetry/types';
+import * as tracingTypes from "@opentelemetry/tracing";
+import * as opentelemetryTypes from "@opentelemetry/types";
+import { channel, IModulePatcher, PatchFunction } from "diagnostic-channel";
 
 export const AzureMonitorSymbol = Symbol("Azure Monitor Tracer");
 
@@ -15,33 +15,34 @@ export const AzureMonitorSymbol = Symbol("Azure Monitor Tracer");
  */
 const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTracingTypes) => {
     try {
-        const BasicTracer = require('@opentelemetry/tracing').BasicTracer;
+        const BasicTracer = require("@opentelemetry/tracing").BasicTracer;
         const tracer: tracingTypes.BasicTracer = new BasicTracer();
         tracer.addSpanProcessor(new AzureMonitorSpanProcessor());
         tracer[AzureMonitorSymbol] = true;
-        coreTracing.setTracer(tracer as any)
-    } finally {
-        return coreTracing;
+        coreTracing.setTracer(tracer as any);
+    } catch (e) {
+        // squash errors
     }
-}
+    return coreTracing;
+};
 
-export class AzureMonitorSpanProcessor implements tracingTypes.SpanProcessor {
-    onStart(span: opentelemetryTypes.Span): void {
+class AzureMonitorSpanProcessor implements tracingTypes.SpanProcessor {
+    public onStart(span: opentelemetryTypes.Span): void {
         span.addEvent("Application Insights Integration enabled");
     }
 
-    onEnd(span: opentelemetryTypes.Span): void {
+    public onEnd(span: opentelemetryTypes.Span): void {
         channel.publish("azure-coretracing", span);
     }
 
-    shutdown(): void {
+    public shutdown(): void {
         // noop
     }
 }
 
 export const azureCoreTracing: IModulePatcher = {
     versionSpecifier: ">= 1.0.0 < 2.0.0",
-    patch: azureCoreTracingPatchFunction
+    patch: azureCoreTracingPatchFunction,
 };
 
 export function enable() {
