@@ -31,7 +31,7 @@ export class AzureMonitorSpanProcessor implements tracingTypes.SpanProcessor {
     }
 
     onEnd(span: opentelemetryTypes.Span): void {
-        channel.publish("azure-coretracing", this);
+        channel.publish("azure-coretracing", span);
     }
 
     shutdown(): void {
