@@ -86,7 +86,7 @@ describe("mongodb@3.0.5", function() {
                     assert.equal(events[0 + skipCounter].data.startedData.command.insert, "documents");
                     assert.equal(events[0 + skipCounter].data.event.reply.n, 3);
                     assert.equal(events[0 + skipCounter].data.succeeded, true);
-                    if (events[1 + skipCounter].data.event.commandName === 'endSessions') {
+                    if (events[1 + skipCounter].data.event.commandName === "endSessions") {
                         skipCounter += 1;
                     }
                     assert.equal(events[1 + skipCounter].data.startedData.command.delete, "documents");
