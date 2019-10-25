@@ -2,8 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import * as coreTracingTypes from "@azure/core-tracing";
 import * as assert from "assert";
-import * as opentelemetryAsyncHooks from "@opentelemetry/scope-async-hooks";
-import {channel, IStandardEvent} from "diagnostic-channel";
+import {channel, IStandardEvent, ParentOperationContextPreservationFunction} from "diagnostic-channel";
 import {AzureMonitorSymbol, enable as enableAzureSDKTracing} from "../src/azure-coretracing.pub";
 
 const assertSpans = (events, span) => {
@@ -17,10 +16,14 @@ describe("@azure/core-tracing@1.0.0-preview4+", () => {
     let coretracing: typeof coreTracingTypes;
     let events: Array<IStandardEvent<coreTracingTypes.Span>>;
     let tracer: coreTracingTypes.Tracer;
-    const scopeManager = new opentelemetryAsyncHooks.AsyncHooksScopeManager()
+    const traceparent = {
+        traceId: "242b113d433edc752d80a86cf28af791",
+        spanId: "87f1f98fbe876c24",
+    };
+    const mockContextPreservationFunction: ParentOperationContextPreservationFunction = () => traceparent;
 
     before(() => {
-        enableAzureSDKTracing(scopeManager);
+        enableAzureSDKTracing();
         channel.subscribe<coreTracingTypes.Span>("azure-coretracing", function(span) {
             events.push(span);
         });
@@ -33,7 +36,7 @@ describe("@azure/core-tracing@1.0.0-preview4+", () => {
     });
 
     it("should fire events when a span is ended", (done) => {
-        assert.ok(tracer[AzureMonitorSymbol]);
+        assert.equal(tracer[AzureMonitorSymbol], true);
         const span = tracer.startSpan("test span 1");
         assert.deepEqual(tracer.getCurrentSpan(), null);
         assertSpans(events, span);
@@ -41,19 +44,12 @@ describe("@azure/core-tracing@1.0.0-preview4+", () => {
         done();
     });
 
-    it("should propagate context across async span contexts", (done) => {
-        assert.ok(tracer[AzureMonitorSymbol]);
-        const operation = {
-            traceparent: {
-                traceId: "242b113d433edc752d80a86cf28af791",
-                spanId: "87f1f98fbe876c24",
-            }
-        };
-        scopeManager.with({ operation }, () => {
-            const span = tracer.startSpan("test span 1");
-            assert.equal(span.context().traceId, operation.traceparent.traceId);
-            assert.notEqual(span.context().spanId, operation.traceparent.spanId);
-            done();
-        });
+    it("should propagate context across async span contexts", () => {
+        assert.equal(tracer[AzureMonitorSymbol], true);
+        channel.setParentOperationContextPreservation(mockContextPreservationFunction);
+        const span = tracer.startSpan("test span 1");
+        assert.equal(span.context().traceId, traceparent.traceId);
+        assert.equal(span["parentSpanId"], traceparent.spanId);
+        assert.notEqual(span.context().spanId, traceparent.spanId);
     });
 });

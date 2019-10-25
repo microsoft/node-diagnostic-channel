@@ -5,6 +5,15 @@ import {IModulePatcher, IModulePatchMap, makePatchingRequire} from "./patchRequi
 
 export {PatchFunction, IModulePatcher, makePatchingRequire} from "./patchRequire";
 
+export interface SpanContext {
+    traceId: string;
+    spanId: string;
+    traceFlags?: string;
+    tracestate?: string;
+}
+
+export type ParentOperationContextPreservationFunction = () => (SpanContext | null);
+
 export interface IStandardEvent<T> {
     timestamp: number;
     data: T;
@@ -25,6 +34,8 @@ export interface IChannel {
     unsubscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void;
     bindToContext<T extends Function>(cb: T): T;
     addContextPreservation<T extends Function>(preserver: (cb: T) => T): void;
+    setParentOperationContextPreservationFunction: (preserver: ParentOperationContextPreservationFunction) => void;
+    getParentOperationContext: ParentOperationContextPreservationFunction;
     registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void;
 }
 
@@ -34,6 +45,7 @@ class ContextPreservingEventEmitter implements IChannel {
     public version: string = require("./../../package.json").version; // Allow for future versions to replace things?
     private subscribers: {[key: string]: Array<IFilteredSubscriber<any>>} = {};
     private contextPreservationFunction: <F extends Function>(cb: F) => F = (cb) => cb;
+    private parentOperationContextPreservationFunction: ParentOperationContextPreservationFunction;
     private knownPatches: IModulePatchMap = {};
 
     private currentlyPublishing: boolean = false;
@@ -108,6 +120,15 @@ class ContextPreservingEventEmitter implements IChannel {
     public addContextPreservation<T extends Function>(preserver: (cb: T) => T) {
         const previousPreservationStack = this.contextPreservationFunction;
         this.contextPreservationFunction = ((cb: T) => preserver(previousPreservationStack(cb))) as any;
+    }
+
+    public setParentOperationContextPreservationFunction(preserver: ParentOperationContextPreservationFunction) {
+        this.parentOperationContextPreservationFunction = preserver;
+    }
+
+    public getParentOperationContext(): SpanContext | null {
+        if (!this.parentOperationContextPreservationFunction) return null;
+        return this.parentOperationContextPreservationFunction();
     }
 
     public registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void {
