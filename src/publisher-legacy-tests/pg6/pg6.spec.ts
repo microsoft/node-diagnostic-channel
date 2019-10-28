@@ -5,8 +5,8 @@ import * as assert from "assert";
 import {channel, IStandardEvent, makePatchingRequire} from "diagnostic-channel";
 import {Promise} from "q";
 import "zone.js";
-import {enable as enablePostgresPool} from "../../diagnostic-channel-publishers/src";
-import {enable as enablePostgres, IPostgresData, IPostgresResult} from "../../diagnostic-channel-publishers/src";
+import {enable as enablePostgresPool} from "../../diagnostic-channel-publishers";
+import {enable as enablePostgres, IPostgresData, IPostgresResult} from "../../diagnostic-channel-publishers";
 
 interface IPostgresTest {
     text?: string;
