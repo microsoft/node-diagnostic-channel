@@ -11,10 +11,21 @@ import * as pg from "./pg.pub";
 import { IPostgresData, IPostgresResult } from "./pg.pub";
 import * as redis from "./redis.pub";
 import * as winston from "./winston.pub";
-import * as azuresdk from './azure-coretracing.pub';
+import * as azuresdk from "./azure-coretracing.pub";
 
-export { bunyan, consolePub as console, mongodbCore, mongodb, mysql, redis, winston, pg, pgPool, azuresdk,
-    IPostgresData, IPostgresResult,
+export {
+    bunyan,
+    consolePub as console,
+    mongodbCore,
+    mongodb,
+    mysql,
+    redis,
+    winston,
+    pg,
+    pgPool,
+    azuresdk,
+    IPostgresData,
+    IPostgresResult
 };
 
 export function enable() {
@@ -27,5 +38,5 @@ export function enable() {
     pgPool.enable();
     redis.enable();
     winston.enable();
-    // don't enable azuresdk tracing by default
+    azuresdk.enable();
 }

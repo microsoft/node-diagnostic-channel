@@ -46,7 +46,7 @@ describe("@azure/core-tracing@1.0.0-preview4+", () => {
 
     it("should propagate context across async span contexts", () => {
         assert.equal(tracer[AzureMonitorSymbol], true);
-        channel.setParentOperationContextPreservation(mockContextPreservationFunction);
+        channel.setParentOperationContextPreservationFunction(mockContextPreservationFunction);
         const span = tracer.startSpan("test span 1");
         assert.equal(span.context().traceId, traceparent.traceId);
         assert.equal(span["parentSpanId"], traceparent.spanId);
