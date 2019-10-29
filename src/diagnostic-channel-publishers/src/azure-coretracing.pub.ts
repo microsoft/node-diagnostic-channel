@@ -39,7 +39,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
             const span = startSpanOriginal.call(this, name, options);
             span.addEvent("Application Insights Integration enabled");
             return span;
-        }
+        };
 
         tracer.addSpanProcessor(new AzureMonitorSpanProcessor());
         tracer[AzureMonitorSymbol] = true;
