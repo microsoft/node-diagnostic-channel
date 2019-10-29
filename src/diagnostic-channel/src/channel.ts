@@ -5,14 +5,14 @@ import {IModulePatcher, IModulePatchMap, makePatchingRequire} from "./patchRequi
 
 export {PatchFunction, IModulePatcher, makePatchingRequire} from "./patchRequire";
 
-export interface SpanContext {
+export interface ISpanContext {
     traceId: string;
     spanId: string;
     traceFlags?: string;
     tracestate?: string;
 }
 
-export type ParentOperationContextPreservationFunction = () => (SpanContext | null);
+export type ParentOperationContextPreservationFunction = () => (ISpanContext | null);
 
 export interface IStandardEvent<T> {
     timestamp: number;
@@ -126,7 +126,7 @@ class ContextPreservingEventEmitter implements IChannel {
         this.parentOperationContextPreservationFunction = preserver;
     }
 
-    public getParentOperationContext(): SpanContext | null {
+    public getParentOperationContext(): ISpanContext | null {
         if (!this.parentOperationContextPreservationFunction) return null;
         return this.parentOperationContextPreservationFunction();
     }
