@@ -7,7 +7,7 @@
     "build": "tsc && node copyTestAssets.js",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "clean": "rimraf ./dist",
-    "test": "ts-mocha ./dist/tests/{*.js,**/*.js}",
+    "test": "mocha ./dist/tests/{*.js,**/*.js}",
     "debug": "mocha --inspect-brk ./dist/tests/{*.js,**/*.js}"
   },
   "homepage": "https://github.com/Microsoft/node-diagnostic-channel",
@@ -33,7 +33,6 @@
     "q": "1.5.0",
     "redis": "^2.7.1",
     "rimraf": "^2.6.1",
-    "ts-mocha": "^6.0.0",
     "tslint": "^5.0.0",
     "typescript": "^2.2.1",
     "winston": "^3.2.1",
