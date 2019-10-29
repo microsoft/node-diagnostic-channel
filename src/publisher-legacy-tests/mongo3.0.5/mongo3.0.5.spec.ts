@@ -80,13 +80,18 @@ describe("mongodb@3.0.5", function() {
                         return;
                     }
 
-                    assert.equal(events.length, 2);
-                    assert.equal(events[0].data.startedData.command.insert, "documents");
-                    assert.equal(events[0].data.event.reply.n, 3);
-                    assert.equal(events[0].data.succeeded, true);
-                    assert.equal(events[1].data.startedData.command.delete, "documents");
-                    assert.equal(events[1].data.event.reply.n, 1);
-                    assert.equal(events[1].data.succeeded, true);
+                    let skipCounter = 0; // skip reading of endSessions command (added in mongodb server 3.6)
+                    // https://docs.mongodb.com/manual/reference/command/endSessions/
+                    assert.equal(events.length, 3);
+                    assert.equal(events[0 + skipCounter].data.startedData.command.insert, "documents");
+                    assert.equal(events[0 + skipCounter].data.event.reply.n, 3);
+                    assert.equal(events[0 + skipCounter].data.succeeded, true);
+                    if (events[1 + skipCounter].data.event.commandName === "endSessions") {
+                        skipCounter += 1;
+                    }
+                    assert.equal(events[1 + skipCounter].data.startedData.command.delete, "documents");
+                    assert.equal(events[1 + skipCounter].data.event.reply.n, 1);
+                    assert.equal(events[1 + skipCounter].data.succeeded, true);
                 }).then(done, done));
             }));
         }));
