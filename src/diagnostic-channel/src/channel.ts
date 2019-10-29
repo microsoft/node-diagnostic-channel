@@ -127,7 +127,9 @@ class ContextPreservingEventEmitter implements IChannel {
     }
 
     public getParentOperationContext(): ISpanContext | null {
-        if (!this.parentOperationContextPreservationFunction) return null;
+        if (!this.parentOperationContextPreservationFunction) {
+            return null;
+        }
         return this.parentOperationContextPreservationFunction();
     }
 
