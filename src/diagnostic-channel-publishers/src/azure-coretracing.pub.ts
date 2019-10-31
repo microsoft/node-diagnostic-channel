@@ -17,20 +17,23 @@ export const AzureMonitorSymbol = "Azure_Monitor_Tracer";
 const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTracingTypes) => {
     try {
         const BasicTracer = require("@opentelemetry/tracing").BasicTracer;
-        const tracer = new BasicTracer() as coreTracingTypes.Tracer & { addSpanProcessor: Function };
+        const tracerConfig = channel.spanContextPropagator
+            ? { scopeManager: channel.spanContextPropagator }
+            : undefined;
+        const tracer = new BasicTracer(tracerConfig) as coreTracingTypes.Tracer & { addSpanProcessor: Function };
         // Patch startSpan instead of using spanProcessor.onStart because parentSpan must be
         // set while the span is constructed
         const startSpanOriginal = tracer.startSpan;
         tracer.startSpan = function(name: string, options?: coreTracingTypes.SpanOptions) {
             // if no parent span was provided, apply the current context
             if (!options || !options.parent) {
-                const parentOperation = channel.getParentOperationContext();
-                if (parentOperation) {
+                const parentOperation = tracer.getCurrentSpan();
+                if (parentOperation && parentOperation.operation && parentOperation.operation.traceparent) {
                     options = {
                         ...options,
                         parent: {
-                            traceId: parentOperation.traceId,
-                            spanId: parentOperation.spanId,
+                            traceId: parentOperation.operation.traceparent.traceId,
+                            spanId: parentOperation.operation.traceparent.spanId,
                         },
                     };
                 }

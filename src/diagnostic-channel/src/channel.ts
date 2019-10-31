@@ -12,7 +12,7 @@ export interface ISpanContext {
     tracestate?: string;
 }
 
-export type ParentOperationContextPreservationFunction = () => (ISpanContext | null);
+type ScopeManager = any;
 
 export interface IStandardEvent<T> {
     timestamp: number;
@@ -34,18 +34,17 @@ export interface IChannel {
     unsubscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void;
     bindToContext<T extends Function>(cb: T): T;
     addContextPreservation<T extends Function>(preserver: (cb: T) => T): void;
-    setParentOperationContextPreservationFunction: (preserver: ParentOperationContextPreservationFunction) => void;
-    getParentOperationContext: ParentOperationContextPreservationFunction;
     registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void;
+    spanContextPropagator: ScopeManager;
 }
 
 const trueFilter = (publishing: boolean) => true;
 
 class ContextPreservingEventEmitter implements IChannel {
     public version: string = require("./../../package.json").version; // Allow for future versions to replace things?
+    public spanContextPropagator: ScopeManager;
     private subscribers: {[key: string]: Array<IFilteredSubscriber<any>>} = {};
     private contextPreservationFunction: <F extends Function>(cb: F) => F = (cb) => cb;
-    private parentOperationContextPreservationFunction: ParentOperationContextPreservationFunction;
     private knownPatches: IModulePatchMap = {};
 
     private currentlyPublishing: boolean = false;
@@ -120,17 +119,6 @@ class ContextPreservingEventEmitter implements IChannel {
     public addContextPreservation<T extends Function>(preserver: (cb: T) => T) {
         const previousPreservationStack = this.contextPreservationFunction;
         this.contextPreservationFunction = ((cb: T) => preserver(previousPreservationStack(cb))) as any;
-    }
-
-    public setParentOperationContextPreservationFunction(preserver: ParentOperationContextPreservationFunction) {
-        this.parentOperationContextPreservationFunction = preserver;
-    }
-
-    public getParentOperationContext(): ISpanContext | null {
-        if (!this.parentOperationContextPreservationFunction) {
-            return null;
-        }
-        return this.parentOperationContextPreservationFunction();
     }
 
     public registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void {
