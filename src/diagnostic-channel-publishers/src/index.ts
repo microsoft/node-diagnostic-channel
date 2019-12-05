@@ -12,6 +12,7 @@ import * as pg from "./pg.pub";
 import { IPostgresData, IPostgresResult } from "./pg.pub";
 import * as redis from "./redis.pub";
 import * as winston from "./winston.pub";
+import * as tedious from "./tedious.pub";
 
 export {
     azuresdk,
@@ -24,6 +25,7 @@ export {
     winston,
     pg,
     pgPool,
+    tedious,
     IPostgresData,
     IPostgresResult,
 };
@@ -39,4 +41,5 @@ export function enable() {
     redis.enable();
     winston.enable();
     azuresdk.enable();
+    tedious.enable();
 }
