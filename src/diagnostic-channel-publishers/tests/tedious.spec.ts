@@ -2,30 +2,30 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 
 import * as assert from "assert";
-import {channel, IStandardEvent} from "diagnostic-channel";
-import "zone.js";
-import { enable as enableTedious, ITediousResult, ITediousData } from "../src/tedious.pub";
+import { channel, IStandardEvent } from "diagnostic-channel";
 import * as tediousTypes from "tedious";
+import "zone.js";
+import { enable as enableTedious, ITediousData } from "../src/tedious.pub";
 
 const config = {
-    server: 'localhost',
+    server: "localhost",
     options: {
         port: 14330,
-        database: "master"
+        database: "master",
     },
     authentication: {
-        type: 'default',
+        type: "default",
         options: {
-            userName: 'sa',
-            password: 'yourStrong(!)Password'
-      }
-    }
+            userName: "sa",
+            password: "yourStrong(!)Password",
+        },
+    },
 };
 
 describe("tedious@6.x", () => {
     let tedious: typeof tediousTypes;
     let actual: ITediousData = null;
-    let listener = (event: IStandardEvent<ITediousData>) => {
+    const listener = (event: IStandardEvent<ITediousData>) => {
         actual = event.data;
     };
     let connection: tediousTypes.Connection;
@@ -50,7 +50,7 @@ describe("tedious@6.x", () => {
     it("should intercept execSql", (done) => {
         const expectation: ITediousData = {
             query: {
-                text: "select 42, 'hello world'"
+                text: "select 42, 'hello world'",
             },
             database: {
                 host: "localhost",
@@ -60,9 +60,9 @@ describe("tedious@6.x", () => {
             error: null,
             result: {
                 rowCount: 1,
-                rows: []
-            }
-        }
+                rows: [],
+            },
+        };
         const child = Zone.current.fork({name: "child"});
         const handler = (err, rowCount) => {
             assert.ok(actual.duration > 0);
@@ -70,7 +70,7 @@ describe("tedious@6.x", () => {
             assert.deepEqual(Zone.current, child);
             assert.deepEqual(actual, { ...expectation, duration: actual.duration });
             done();
-        }
+        };
         const request = new tedious.Request("select 42, 'hello world'", handler);
         child.run(() => {
             connection.execSql(request);

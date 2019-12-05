@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
-import {channel, IModulePatcher, PatchFunction} from "diagnostic-channel";
-import * as tediousTypes from 'tedious';
+import { channel, IModulePatcher, PatchFunction } from "diagnostic-channel";
+import * as tediousTypes from "tedious";
 
 type CompletionCallback = (error: Error | null | undefined, rowCount?: number, rows?: any) => void;
 
@@ -37,7 +37,7 @@ const tediousPatchFunction: PatchFunction = (originalTedious: typeof tediousType
                 query: {},
                 database: {
                     host: null,
-                    port: null
+                    port: null,
                 },
                 result: null,
                 error: null,
@@ -52,10 +52,10 @@ const tediousPatchFunction: PatchFunction = (originalTedious: typeof tediousType
                     },
                     result: !err && { rowCount, rows },
                     query: {
-                        text: this.parametersByName.statement.value
+                        text: this.parametersByName.statement.value,
                     },
                     error: err,
-                    duration: Math.ceil((end[0] * 1e3) + (end[1] / 1e6))
+                    duration: Math.ceil((end[0] * 1e3) + (end[1] / 1e6)),
                 };
                 channel.publish<ITediousData>("tedious", data);
                 origCallback.call(this, err, rowCount, rows);
@@ -65,10 +65,9 @@ const tediousPatchFunction: PatchFunction = (originalTedious: typeof tediousType
         const request = arguments[0] as tediousTypes.Request & { callback: CompletionCallback };
         arguments[0].callback = getPatchedCallback(request.callback);
         originalMakeRequest.apply(this, arguments);
-    }
+    };
     return originalTedious;
-}
-
+};
 
 export const tedious: IModulePatcher = {
     versionSpecifier: "6.*",
