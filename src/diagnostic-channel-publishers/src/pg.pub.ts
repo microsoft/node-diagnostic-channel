@@ -214,7 +214,7 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
                         args: values,
                     };
                     callbackProvided = typeof callback === "function";
-                    callback = callback ? patchCallback(callback) : callback;
+                    callback = callbackProvided ? patchCallback(callback) : callback;
                 } else {
                     data.query.text = config;
                     if (callback) {
