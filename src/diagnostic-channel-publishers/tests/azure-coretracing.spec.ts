@@ -14,12 +14,12 @@ const assertSpans = (events, span) => {
 
 describe("@azure/core-tracing@1.0.0-preview4+", () => {
     let coretracing: typeof coreTracingTypes;
-    let events: Array<IStandardEvent<coreTracingTypes.Span>>;
-    let tracer: coreTracingTypes.Tracer;
+    let events: Array<IStandardEvent<any>>;
+    let tracer;
 
     before(() => {
         enableAzureSDKTracing();
-        channel.subscribe<coreTracingTypes.Span>("azure-coretracing", function(span) {
+        channel.subscribe("azure-coretracing", function(span) {
             events.push(span);
         });
         coretracing = require("@azure/core-tracing");
@@ -35,7 +35,6 @@ describe("@azure/core-tracing@1.0.0-preview4+", () => {
         const span = tracer.startSpan("test span 1");
         assert.deepEqual(tracer.getCurrentSpan(), null);
         assertSpans(events, span);
-        assert.deepEqual(span["events"][0].name, "Application Insights Integration enabled");
         done();
     });
 });

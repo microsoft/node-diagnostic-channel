@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import * as coreTracingTypes from "@azure/core-tracing";
+import * as opentelemetryTypes from "@opentelemetry/types";
 import { channel, IModulePatcher, PatchFunction } from "diagnostic-channel";
 
 export const AzureMonitorSymbol = "Azure_Monitor_Tracer";
@@ -16,15 +17,17 @@ export const AzureMonitorSymbol = "Azure_Monitor_Tracer";
  */
 const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTracingTypes) => {
     try {
-        const BasicTracer = require("@opentelemetry/tracing").BasicTracer;
+        const tracing = require("@opentelemetry/tracing");
         const tracerConfig = channel.spanContextPropagator
             ? { scopeManager: channel.spanContextPropagator }
             : undefined;
-        const tracer = new BasicTracer(tracerConfig) as coreTracingTypes.Tracer & { addSpanProcessor: Function };
+        const registry = new tracing.BasicTracerRegistry(tracerConfig);
+        const tracer = registry.getTracer("applicationinsights", undefined, tracerConfig);
+
         // Patch startSpan instead of using spanProcessor.onStart because parentSpan must be
         // set while the span is constructed
         const startSpanOriginal = tracer.startSpan;
-        tracer.startSpan = function(name: string, options?: coreTracingTypes.SpanOptions) {
+        tracer.startSpan = function(name: string, options?: opentelemetryTypes.SpanOptions) {
             // if no parent span was provided, apply the current context
             if (!options || !options.parent) {
                 const parentOperation = tracer.getCurrentSpan();
@@ -34,36 +37,25 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
                         parent: {
                             traceId: parentOperation.operation.traceparent.traceId,
                             spanId: parentOperation.operation.traceparent.spanId,
-                        },
-                    };
+                        }
+                    }
                 }
             }
-
             const span = startSpanOriginal.call(this, name, options);
-            span.addEvent("Application Insights Integration enabled");
+            const originalEnd = span.end;
+            span.end = function() {
+                const result = originalEnd.apply(this, arguments)
+                channel.publish("azure-coretracing", span);
+                return result;
+            }
             return span;
         };
 
-        tracer.addSpanProcessor(new AzureMonitorSpanProcessor());
         tracer[AzureMonitorSymbol] = true;
-        coreTracing.setTracer(tracer as any); // recordSpanData is not present on BasicTracer - cast to any
-    } catch (e) { /* squash errors */ }
+        coreTracing.setTracer(tracer); // recordSpanData is not present on BasicTracer - cast to any
+    } catch (e) { }
     return coreTracing;
 };
-
-class AzureMonitorSpanProcessor {
-    public onStart(span: coreTracingTypes.Span): void {
-        // noop since startSpan is already patched
-    }
-
-    public onEnd(span: coreTracingTypes.Span): void {
-        channel.publish("azure-coretracing", span);
-    }
-
-    public shutdown(): void {
-        // noop
-    }
-}
 
 export const azureCoreTracing: IModulePatcher = {
     versionSpecifier: ">= 1.0.0 < 2.0.0",

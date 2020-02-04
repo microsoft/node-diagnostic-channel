@@ -6,6 +6,7 @@
         "baseUrl": ".",
         "paths": {
             "@opencensus/web-types": [".sink.d.ts"],
+            "@opentelemetry/types": [".sink.d.ts"],
             "@azure/core-tracing": [".sink.d.ts"],
             "*": ["*"]
         }
