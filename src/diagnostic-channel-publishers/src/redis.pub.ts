@@ -8,6 +8,7 @@ export interface IRedisData {
     commandObj: any;
     err: Error;
     result: any;
+    time: Date;
 }
 
 const redisPatchFunction: PatchFunction = (originalRedis) => {
@@ -20,6 +21,7 @@ const redisPatchFunction: PatchFunction = (originalRedis) => {
             if (!cb || !cb.pubsubBound) {
                 const address = this.address;
                 const startTime = process.hrtime();
+                const startDate = new Date();
 
                 // Note: augmenting the callback on internal_send_command is correct for context
                 // tracking, but may be too low-level for dependency tracking. There are some 'errors'
@@ -29,7 +31,7 @@ const redisPatchFunction: PatchFunction = (originalRedis) => {
                     const hrDuration = process.hrtime(startTime);
                     /* tslint:disable-next-line:no-bitwise */
                     const duration = (hrDuration[0] * 1e3 + hrDuration[1] / 1e6) | 0;
-                    channel.publish<IRedisData>("redis", {duration, address, commandObj, err, result});
+                    channel.publish<IRedisData>("redis", {duration, address, commandObj, err, result, time: startDate});
 
                     if (typeof cb === "function") {
                         cb.apply(this, arguments);
