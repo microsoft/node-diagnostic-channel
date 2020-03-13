@@ -23,7 +23,7 @@
     "@azure/core-tracing": "^1.0.0-preview.5",
     "@opentelemetry/tracing": "^0.1.1",
     "@types/mocha": "^2.2.40",
-    "@types/node": "^10.0.0",
+    "@types/node": "^8.0.0",
     "@types/pg": "^7.4.11",
     "diagnostic-channel": "file:../diagnostic-channel",
     "mocha": "^3.2.0",
