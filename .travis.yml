@@ -11,6 +11,7 @@ before_script:
   - sudo service mysql stop
   - docker-compose version
   - docker-compose up -d
+  - docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 14330:1433 -d mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
 script:
   - gulp init
   - gulp lint
