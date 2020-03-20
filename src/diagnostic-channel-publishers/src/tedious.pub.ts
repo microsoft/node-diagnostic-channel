@@ -70,7 +70,7 @@ const tediousPatchFunction: PatchFunction = (originalTedious: typeof tediousType
 };
 
 export const tedious: IModulePatcher = {
-    versionSpecifier: "6.*",
+    versionSpecifier: ">= 6.0.0 < 9.0.0",
     patch: tediousPatchFunction,
 };
 

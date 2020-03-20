@@ -25,6 +25,7 @@ export interface IPostgresData {
     result?: IPostgresResult;
     duration: number;
     error?: Error;
+    time: Date;
 }
 
 type PostgresCallback = (err: Error, res: IPostgresResult) => any;
@@ -45,6 +46,7 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
             result: null,
             error: null,
             duration: 0,
+            time: new Date(),
         };
         const start = process.hrtime();
         let queryResult;
@@ -167,6 +169,7 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
             result: null,
             error: null,
             duration: 0,
+            time: new Date(),
         };
         const start = process.hrtime();
         let queryResult;
