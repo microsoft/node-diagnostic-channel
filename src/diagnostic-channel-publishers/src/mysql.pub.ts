@@ -6,6 +6,7 @@ import * as path from "path";
 interface IResultContainer {
     result: any;
     startTime: [number, number];
+    startDate: Date;
 }
 
 type CallbackWrapper<T extends Function> = (resultContainer: IResultContainer, cb: T) => T;
@@ -24,6 +25,7 @@ export interface IMysqlData {
     callbackArgs: IArguments;
     err: Error;
     duration: number;
+    time: Date;
 }
 
 const mysqlPatchFunction: PatchFunction = function(originalMysql, originalMysqlPath) {
@@ -46,13 +48,14 @@ const mysqlPatchFunction: PatchFunction = function(originalMysql, originalMysqlP
                     }
                     const cb = arguments[cbidx];
 
-                    const resultContainer = {result: null, startTime: null};
+                    const resultContainer = {result: null, startTime: null, startDate: null};
                     if (typeof cb === "function") {
                         // Preserve context on the callback.
                         // If this is one of the functions that we want to track,
                         // then wrap the callback with the tracking wrapper
                         if (cbWrapper) {
                             resultContainer.startTime = process.hrtime();
+                            resultContainer.startDate = new Date();
                             arguments[cbidx] = channel.bindToContext(cbWrapper(resultContainer, cb));
                         } else {
                             arguments[cbidx] = channel.bindToContext(cb);
@@ -85,7 +88,7 @@ const mysqlPatchFunction: PatchFunction = function(originalMysql, originalMysqlP
             const hrDuration = process.hrtime(resultContainer.startTime);
             /* tslint:disable-next-line:no-bitwise */
             const duration = (hrDuration[0] * 1e3 + hrDuration[1] / 1e6) | 0;
-            channel.publish<IMysqlData>("mysql", {query: resultContainer.result, callbackArgs: arguments, err, duration});
+            channel.publish<IMysqlData>("mysql", {query: resultContainer.result, callbackArgs: arguments, err, duration, time: resultContainer.startDate});
             cb.apply(this, arguments);
         };
     });

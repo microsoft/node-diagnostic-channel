@@ -6,6 +6,7 @@ export interface IMongoData {
     startedData: {
         databaseName?: string;
         command?: any;
+        time: Date;
     };
     event: {
         commandName?: string;
@@ -32,7 +33,7 @@ const mongodbPatchFunction: PatchFunction = function(originalMongo) {
             // For now, we accept that this can happen and potentially miss or mislabel some events.
             return;
         }
-        eventMap[event.requestId] = event;
+        eventMap[event.requestId] = { ...event, time: new Date() } as IMongoData["startedData"];
     });
 
     listener.on("succeeded", function(event) {
@@ -66,7 +67,7 @@ const mongodb3PatchFunction: PatchFunction = function(originalMongo) {
             return;
         }
         contextMap[event.requestId] = channel.bindToContext((cb) => cb());
-        eventMap[event.requestId] = event;
+        eventMap[event.requestId] = { ...event, time: new Date() } as IMongoData["startedData"];
     });
 
     listener.on("succeeded", function(event) {
