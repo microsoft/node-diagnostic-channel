@@ -41,7 +41,13 @@ const mongodbPatchFunction: PatchFunction = function(originalMongo) {
         if (startedData) {
             delete eventMap[event.requestId];
         }
-        event.operationId(() => channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: true}));
+
+        if (typeof event.operationId === "function") {
+            event.operationId(() => channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: true}));
+        } else {
+            // fallback -- correlation will not work here
+            channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: true});
+        }
     });
 
     listener.on("failed", function(event) {
@@ -49,7 +55,14 @@ const mongodbPatchFunction: PatchFunction = function(originalMongo) {
         if (startedData) {
             delete eventMap[event.requestId];
         }
-        event.operationId(() => channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: false}));
+
+        if (typeof event.operationId === "function") {
+            event.operationId(() => channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: false}));
+        } else {
+            // fallback -- correlation will not work here
+            channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: false});
+        }
+
     });
 
     return originalMongo;
