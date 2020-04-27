@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import * as coreTracingTypes from "@azure/core-tracing";
-import * as opentelemetryTypes from "@opentelemetry/types";
+import * as tracingTypes from "@opentelemetry/tracing";
+import * as opentelemetryTypes from "@opentelemetry/api";
 import { channel, IModulePatcher, PatchFunction } from "diagnostic-channel";
+import { SpanOptions } from "@opentelemetry/api";
 
 export const AzureMonitorSymbol = "Azure_Monitor_Tracer";
 
@@ -17,26 +19,28 @@ export const AzureMonitorSymbol = "Azure_Monitor_Tracer";
  */
 const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTracingTypes) => {
     try {
-        const tracing = require("@opentelemetry/tracing");
-        const tracerConfig = channel.spanContextPropagator
-            ? { scopeManager: channel.spanContextPropagator }
+        const tracing = require("@opentelemetry/tracing") as typeof tracingTypes;
+        const opentelemetry = require("@opentelemetry/api") as typeof opentelemetryTypes;
+        const tracerConfig: tracingTypes.SDKRegistrationConfig = channel.spanContextPropagator
+            ? { contextManager: channel.spanContextPropagator }
             : undefined;
-        const registry = new tracing.BasicTracerRegistry(tracerConfig);
-        const tracer = registry.getTracer("applicationinsights", undefined, tracerConfig);
+        new tracing.BasicTracerProvider().register(tracerConfig);
+        const tracer = opentelemetry.trace.getTracer('applicationinsights tracer');
 
         // Patch startSpan instead of using spanProcessor.onStart because parentSpan must be
         // set while the span is constructed
         const startSpanOriginal = tracer.startSpan;
-        tracer.startSpan = function(name: string, options?: opentelemetryTypes.SpanOptions) {
+        tracer.startSpan = function(name: string, options?: SpanOptions) {
             // if no parent span was provided, apply the current context
             if (!options || !options.parent) {
-                const parentOperation = tracer.getCurrentSpan();
+                const parentOperation = tracer.getCurrentSpan() as any;
                 if (parentOperation && parentOperation.operation && parentOperation.operation.traceparent) {
                     options = {
                         ...options,
                         parent: {
                             traceId: parentOperation.operation.traceparent.traceId,
                             spanId: parentOperation.operation.traceparent.spanId,
+                            traceFlags: 1 // Sampled in
                         }
                     }
                 }
@@ -52,7 +56,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
         };
 
         tracer[AzureMonitorSymbol] = true;
-        coreTracing.setTracer(tracer); // recordSpanData is not present on BasicTracer - cast to any
+        coreTracing.setTracer(tracer as any); // recordSpanData is not present on BasicTracer - cast to any
     } catch (e) { }
     return coreTracing;
 };

@@ -12,7 +12,7 @@ const assertSpans = (events, span) => {
     assert.deepEqual(events[0].data, span);
 };
 
-describe("@azure/core-tracing@1.0.0-preview4+", () => {
+describe("@azure/core-tracing@1.0.0-preview9+", () => {
     let coretracing: typeof coreTracingTypes;
     let events: Array<IStandardEvent<any>>;
     let tracer;
