@@ -5,8 +5,9 @@
         "declaration": true,
         "baseUrl": ".",
         "paths": {
-            "@opencensus/web-types": [".sink.d.ts"],
-            "@opentelemetry/types": [".sink.d.ts"],
+            "@opentelemetry/tracing": [".sink.d.ts"],
+            "@opentelemetry/context-base": [".sink.d.ts"],
+            "@opentelemetry/api": [".sink.d.ts"],
             "@azure/core-tracing": [".sink.d.ts"],
             "*": ["*"]
         }
