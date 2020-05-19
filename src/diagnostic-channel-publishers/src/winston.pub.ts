@@ -3,7 +3,7 @@
 import {channel, IModulePatcher, PatchFunction} from "diagnostic-channel";
 
 export interface IWinstonData {
-    message: string;
+    message: string | Error;
     meta: any;
     level: string;
     levelKind: string;
@@ -67,6 +67,7 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
             // tslint:disable-next-line:prefer-const - try to obtain level from Symbol(level) afterwards
             let { message, level, meta, ...splat } = info;
             level = typeof Symbol["for"] === "function" ? info[Symbol["for"]("level")] : level; // Symbol(level) is uncolorized, so prefer getting it from here
+            message = info instanceof Error ? info : message; // Winston places Errors at info, strings at info.message
 
             const levelKind = mapLevelToKind(this.winston, level);
 
