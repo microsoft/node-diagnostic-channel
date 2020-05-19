@@ -51,6 +51,26 @@ describe("winston", () => {
         compareWinstonData(actual, expected);
     });
 
+    it("should send Error message as Error instance", () => {
+        const expected: IWinstonData = {message: new Error("a caught error"), meta: {foo: "bar"}, level: "info", levelKind: "npm"};
+
+        const logger = new winston.createLogger({
+            transports: [new winston.transports.Console()]
+        });
+        logger.info(expected.message, expected.meta);
+        compareWinstonData(actual, expected);
+    });
+
+    it("should send string message as string", () => {
+        const expected: IWinstonData = {message: "test message", meta: {foo: "bar"}, level: "info", levelKind: "npm"};
+
+        const logger = new winston.createLogger({
+            transports: [new winston.transports.Console()]
+        });
+        logger.info(expected.message, expected.meta);
+        compareWinstonData(actual, expected);
+    })
+
     it("should intercept loggers with pre-configured filters", () => {
         const expected: IWinstonData = {message: "unfiltered", meta: {testing: "new loggers", another: "meta field"}, level: "info", levelKind: "npm"};
         const filteredMessage = "filtered";
