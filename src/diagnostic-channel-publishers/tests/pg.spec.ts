@@ -20,7 +20,7 @@ interface IPostgresTest {
     res: IPostgresResult;
 }
 
-describe("pg@7.x", () => {
+describe("pg@8.x", () => {
     let pg;
     let actual: IPostgresData = null;
     let client;
