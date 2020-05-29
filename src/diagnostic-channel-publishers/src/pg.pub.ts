@@ -292,7 +292,7 @@ export const postgres6: IModulePatcher = {
 };
 
 export const postgres7: IModulePatcher = {
-    versionSpecifier: "7.*",
+    versionSpecifier: ">=7.* <=8.*",
     patch: postgres7PatchFunction,
 };
 
