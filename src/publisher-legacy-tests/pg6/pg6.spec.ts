@@ -83,6 +83,10 @@ describe("pg@6.x", () => {
     };
 
     before(() => {
+        if (parseInt(process.versions.node.split('.')[0], 10) >= 14) {
+            // pg6 will not connect on node14+
+            this.skip();
+        }
         enablePostgres();
         enablePostgresPool();
         channel.addContextPreservation((cb) => Zone.current.wrap(cb, "context preservation"));
