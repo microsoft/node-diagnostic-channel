@@ -5,6 +5,8 @@ services:
   - mongodb
 node_js:
   - 10
+  - 12
+  - 14
 install:
   - npm install
 before_script:
