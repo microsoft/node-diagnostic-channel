@@ -25,6 +25,7 @@ export interface IPostgresData {
     result?: IPostgresResult;
     duration: number;
     error?: Error;
+    time: Date;
 }
 
 type PostgresCallback = (err: Error, res: IPostgresResult) => any;
@@ -45,6 +46,7 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
             result: null,
             error: null,
             duration: 0,
+            time: new Date(),
         };
         const start = process.hrtime();
         let queryResult;
@@ -167,6 +169,7 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
             result: null,
             error: null,
             duration: 0,
+            time: new Date(),
         };
         const start = process.hrtime();
         let queryResult;
@@ -214,7 +217,7 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
                         args: values,
                     };
                     callbackProvided = typeof callback === "function";
-                    callback = callback ? patchCallback(callback) : callback;
+                    callback = callbackProvided ? patchCallback(callback) : callback;
                 } else {
                     data.query.text = config;
                     if (callback) {
@@ -289,7 +292,7 @@ export const postgres6: IModulePatcher = {
 };
 
 export const postgres7: IModulePatcher = {
-    versionSpecifier: "7.*",
+    versionSpecifier: ">=7.* <=8.*",
     patch: postgres7PatchFunction,
 };
 

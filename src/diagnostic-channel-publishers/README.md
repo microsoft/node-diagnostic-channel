@@ -3,15 +3,18 @@ Provides a set of patches for common Node.js modules to publish instrumentation
 data to the [diagnostic-channel](https://github.com/Microsoft/node-diagnostic-channel) channel.
 
 ## Currently-supported modules
-* [`redis`](https://github.com/NodeRedis/node_redis) v2.x
+* [`redis`](https://github.com/NodeRedis/node_redis) v2.x, v3.x
 * [`mysql`](https://github.com/mysqljs/mysql) v2.x
 * [`mongodb`](https://github.com/mongodb/node-mongodb-native) v2.x, v3.x
-* [`pg`](https://github.com/brianc/node-postgres) v6.x, v7.x
+* [`pg`](https://github.com/brianc/node-postgres) v6.x, v7.x, v8.x
 * [`pg-pool`](https://github.com/brianc/node-pg-pool) v1.x, v2.x
 * [`bunyan`](https://github.com/trentm/node-bunyan) v1.x
 * [`winston`](https://github.com/winstonjs/winston) v2.x, v3.x
 
 ## Release notes
+### 0.3.5 June 8, 2020
+* Add support for `redis@3.x` and `pg@8.x`
+
 ### 0.3.3 - August 15, 2019
 * Fix patching issue with new [mongodb@3.3.0+](https://github.com/mongodb/node-mongodb-native/releases/tag/v3.3.0) driver
 

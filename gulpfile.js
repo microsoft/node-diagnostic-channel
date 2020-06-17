@@ -61,7 +61,7 @@ function runNpmTasks(taskName, dirs) {
     }
 }
 
-gulp.task('install-main', function () {
+gulp.task('install-main', gulp.series(function (done) {
     runNpmTask('link', './src/diagnostic-channel');
     runNpmTask('link diagnostic-channel', './src/diagnostic-channel-publishers');
     runNpmTask('install', './src/diagnostic-channel-publishers');
@@ -71,32 +71,39 @@ gulp.task('install-main', function () {
     runNpmTask('install', './src/publisher-legacy-tests/mongo3.0.5');
     runNpmTask('install', './src/publisher-legacy-tests/mongo3.2.7');
     runNpmTask('install', './src/publisher-legacy-tests/pg6');
-});
+    done();
+}));
 
-gulp.task('build-main', ['install-main'], function () {
-    runNpmTasks('run build', getDirectories())
-});
+gulp.task('build-main', gulp.series('install-main', function (done) {
+    runNpmTasks('run build', getDirectories());
+    done();
+}));
 
-gulp.task('clean', function () {
+gulp.task('clean', gulp.series(function (done) {
     runNpmTasks('run clean', getDirectories());
-});
+    done();
+}));
 
-gulp.task('install-subs', ['build-main'], function () {
+gulp.task('install-subs', gulp.series('build-main', function (done) {
     // runNpmTasks('link diagnostic-channel', getAdditionalDirectories());
     // runNpmTasks('link diagnostic-channel-publishers', getAdditionalDirectories());
     runNpmTasks('install', getAdditionalDirectories());
-});
+    done();
+}));
 
-gulp.task('build-subs', ['install-subs'], function () {
+gulp.task('build-subs', gulp.series('install-subs', function (done) {
     runNpmTasks('run build', getAdditionalDirectories());
-});
+    done();
+}));
 
-gulp.task('init', ['build-subs']);
+gulp.task('init', gulp.series('build-subs'));
 
-gulp.task('test', ['build-main'], function () {
+gulp.task('test', gulp.series('build-main', function (done) {
     runNpmTasks('run test', getDirectories());
-});
+    done();
+}));
 
-gulp.task('lint', function () {
+gulp.task('lint', function (done) {
     runNpmTasks('run lint', getDirectories().concat(getAdditionalDirectories()));
+    done();
 });

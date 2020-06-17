@@ -6,6 +6,7 @@ export interface IMongoData {
     startedData: {
         databaseName?: string;
         command?: any;
+        time: Date;
     };
     event: {
         commandName?: string;
@@ -32,7 +33,7 @@ const mongodbPatchFunction: PatchFunction = function(originalMongo) {
             // For now, we accept that this can happen and potentially miss or mislabel some events.
             return;
         }
-        eventMap[event.requestId] = event;
+        eventMap[event.requestId] = { ...event, time: new Date() } as IMongoData["startedData"];
     });
 
     listener.on("succeeded", function(event) {
@@ -40,7 +41,13 @@ const mongodbPatchFunction: PatchFunction = function(originalMongo) {
         if (startedData) {
             delete eventMap[event.requestId];
         }
-        event.operationId(() => channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: true}));
+
+        if (typeof event.operationId === "function") {
+            event.operationId(() => channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: true}));
+        } else {
+            // fallback -- correlation will not work here
+            channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: true});
+        }
     });
 
     listener.on("failed", function(event) {
@@ -48,7 +55,14 @@ const mongodbPatchFunction: PatchFunction = function(originalMongo) {
         if (startedData) {
             delete eventMap[event.requestId];
         }
-        event.operationId(() => channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: false}));
+
+        if (typeof event.operationId === "function") {
+            event.operationId(() => channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: false}));
+        } else {
+            // fallback -- correlation will not work here
+            channel.publish<IMongoData>("mongodb", {startedData, event, succeeded: false});
+        }
+
     });
 
     return originalMongo;
@@ -66,7 +80,7 @@ const mongodb3PatchFunction: PatchFunction = function(originalMongo) {
             return;
         }
         contextMap[event.requestId] = channel.bindToContext((cb) => cb());
-        eventMap[event.requestId] = event;
+        eventMap[event.requestId] = { ...event, time: new Date() } as IMongoData["startedData"];
     });
 
     listener.on("succeeded", function(event) {
