@@ -14,7 +14,7 @@ data to the [diagnostic-channel](https://github.com/Microsoft/node-diagnostic-ch
 
 ## Release notes
 
-### Jun 18, 2020
+### 0.4.0 Jun 18, 2020
 * Add support for all [Azure SDKs](https://azure.github.io/azure-sdk/releases/latest/index.html#javascript)
   - You must manually install [`@opentelemetry/tracing`](https://npmjs.com/package/@opentelemetry/tracing) to enable this automatic tracing. No additional configuration is required
 
