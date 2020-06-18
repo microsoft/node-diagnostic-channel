@@ -3,6 +3,7 @@ Provides a set of patches for common Node.js modules to publish instrumentation
 data to the [diagnostic-channel](https://github.com/Microsoft/node-diagnostic-channel) channel.
 
 ## Currently-supported modules
+* [`@azure/*`](https://azure.github.io/azure-sdk/releases/latest/index.html#javascript) latest
 * [`redis`](https://github.com/NodeRedis/node_redis) v2.x, v3.x
 * [`mysql`](https://github.com/mysqljs/mysql) v2.x
 * [`mongodb`](https://github.com/mongodb/node-mongodb-native) v2.x, v3.x
@@ -12,6 +13,11 @@ data to the [diagnostic-channel](https://github.com/Microsoft/node-diagnostic-ch
 * [`winston`](https://github.com/winstonjs/winston) v2.x, v3.x
 
 ## Release notes
+
+### 0.4.0 Jun 18, 2020
+* Add support for all [Azure SDKs](https://azure.github.io/azure-sdk/releases/latest/index.html#javascript)
+  - You must manually install [`@opentelemetry/tracing`](https://npmjs.com/package/@opentelemetry/tracing) to enable this automatic tracing. No additional configuration is required
+
 ### 0.3.5 June 8, 2020
 * Add support for `redis@3.x` and `pg@8.x`
 
