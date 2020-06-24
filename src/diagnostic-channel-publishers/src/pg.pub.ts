@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import {channel, IModulePatcher, PatchFunction} from "diagnostic-channel";
 import {EventEmitter} from "events";
+import {CopyStreamQuery, CopyToStreamQuery} from "pg-copy-streams";
 
 // copy the pg.Result type: https://node-postgres.com/api/result
 export interface IPostgresResult {
@@ -28,7 +29,7 @@ export interface IPostgresData {
     time: Date;
 }
 
-type PostgresCallback = (err: Error, res: IPostgresResult) => any;
+type PostgresCallback = (err: Error | null, res?: IPostgresResult, shouldEmitError?: boolean) => any;
 
 function postgres6PatchFunction(originalPg, originalPgPath) {
     const originalClientQuery = originalPg.Client.prototype.query;
@@ -152,7 +153,7 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
     return originalPg;
 }
 
-function postgres7PatchFunction(originalPg, originalPgPath) {
+function postgres8PatchFunction(originalPg, originalPgPath) {
     const originalClientQuery = originalPg.Client.prototype.query;
     const diagnosticOriginalFunc = "__diagnosticOriginalFunc";
 
@@ -172,14 +173,14 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
             time: new Date(),
         };
         const start = process.hrtime();
-        let queryResult;
+        let queryResult: Promise<any> | CopyStreamQuery | CopyToStreamQuery;
 
         function patchCallback(cb?: PostgresCallback): PostgresCallback {
             if (cb && cb[diagnosticOriginalFunc]) {
                 cb = cb[diagnosticOriginalFunc];
             }
 
-            const trackingCallback = channel.bindToContext(function(err: Error, res: IPostgresResult): any {
+            const trackingCallback = channel.bindToContext(function(err: Error | null, res?: IPostgresResult, shouldEmitError = true): any {
                 const end = process.hrtime(start);
                 data.result = res && { rowCount: res.rowCount, command: res.command };
                 data.error = err;
@@ -189,7 +190,7 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
                 if (err) {
                     if (cb) {
                         return cb.apply(this, arguments);
-                    } else if (queryResult && queryResult instanceof EventEmitter) {
+                    } else if (queryResult && queryResult instanceof EventEmitter && shouldEmitError) {
                         queryResult.emit("error", err);
                     }
                 } else if (cb) {
@@ -263,8 +264,9 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
 
         queryResult = originalClientQuery.apply(this, arguments);
         if (!callbackProvided) {
-            // no callback, so create a pass along promise
-            return queryResult
+            if (typeof (queryResult as Promise<any>).then === "function") {
+                // no callback, so create a pass along promise
+                return (queryResult as Promise<any>)
                 // pass resolved promise after publishing the event
                 .then((result) => {
                     patchCallback()(undefined, result);
@@ -279,6 +281,19 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
                         reject(error);
                     });
                 });
+            } else if (typeof (queryResult as CopyStreamQuery | CopyToStreamQuery).on === "function") {
+                const res: IPostgresResult = {
+                    command: data.query.text,
+                    rowCount: 0,
+                };
+                (queryResult as CopyStreamQuery | CopyToStreamQuery).on("finish", () => {
+                    patchCallback()(undefined, res, false);
+                });
+
+                (queryResult as CopyStreamQuery | CopyToStreamQuery).on("error", (err) => {
+                    patchCallback()(err, res, false);
+                });
+            }
         }
         return queryResult;
     };
@@ -293,7 +308,7 @@ export const postgres6: IModulePatcher = {
 
 export const postgres7: IModulePatcher = {
     versionSpecifier: ">=7.* <=8.*",
-    patch: postgres7PatchFunction,
+    patch: postgres8PatchFunction,
 };
 
 export function enable() {

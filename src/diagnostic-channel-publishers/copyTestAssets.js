@@ -12,7 +12,7 @@ fs.readdir(sourcePath, (err, files) => {
     }
 
     files.forEach((file) => {
-        if (file.match(/\.json/)) {
+        if (file.match(/\.json/) || file.match(/\.tsv/)) {
             fs.readFile(path.join(sourcePath, file), (err, buffer) => {
                 if (err) {
                     throw err;

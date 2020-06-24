@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 
 import * as assert from "assert";
-import {channel, IStandardEvent, makePatchingRequire} from "diagnostic-channel";
+import {channel, IStandardEvent} from "diagnostic-channel";
+import * as fs from "fs";
+import * as path from "path";
 import {Promise} from "q";
 import "zone.js";
 import {enable as enablePostgresPool} from "../src/pg-pool.pub";
@@ -22,6 +24,7 @@ interface IPostgresTest {
 
 describe("pg@8.x", () => {
     let pg;
+    let copyFrom;
     let actual: IPostgresData = null;
     let client;
     let pool;
@@ -73,6 +76,9 @@ describe("pg@8.x", () => {
                 return new Error("No error returned by bad query");
             }
 
+            if (data.res) {
+                assert.deepEqual(data.res, actual.result);
+            }
             assert.equal(data.err, actual.error, "Error returned to callback does not match actual error");
             assert.equal(data.zone, Zone.current, "Context was not preserved");
             actual = null;
@@ -87,6 +93,7 @@ describe("pg@8.x", () => {
         enablePostgresPool();
         channel.addContextPreservation((cb) => Zone.current.wrap(cb, "context preservation"));
         pg = require("pg");
+        copyFrom = require("pg-copy-streams").from;
         pool = new pg.Pool({
             user: dbSettings.user,
             password: dbSettings.password,
@@ -111,6 +118,28 @@ describe("pg@8.x", () => {
 
     after((done) => {
         pool.end(done);
+    });
+
+    it("should instrument pg-copy-streams", (done) => {
+        const child = Zone.current.fork({name: "child"});
+        child.run(() => {
+            const stream = client.query(copyFrom("COPY postgres FROM STDIN"));
+            const fileStream = fs.createReadStream(path.join(__dirname, "util", "some_table.tsv"));
+
+            const runAssertions = (err: Error | null) => {
+                done(checkFailure({
+                    res: { command: "COPY postgres FROM STDIN", rowCount: 0},
+                    err: err,
+                    zone: child,
+                }));
+            };
+
+            // @todo: run assertions on "finish" after setting up proper DB
+            stream.on("error", (err) => {
+                runAssertions(err);
+            });
+            fileStream.pipe(stream);
+        });
     });
 
     it("should not return a promise if no callback is provided", function test(done) {
