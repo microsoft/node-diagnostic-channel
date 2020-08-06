@@ -6,6 +6,7 @@ import * as tracingTypes from "@opentelemetry/tracing";
 import { channel, IModulePatcher, PatchFunction } from "diagnostic-channel";
 
 export const AzureMonitorSymbol = "Azure_Monitor_Tracer";
+let isPatched = false;
 
 /**
  * By default, @azure/core-tracing default tracer is a NoopTracer.
@@ -17,6 +18,11 @@ export const AzureMonitorSymbol = "Azure_Monitor_Tracer";
  * @param coreTracing
  */
 const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTracingTypes) => {
+    if (isPatched) {
+        // tracer is already cached -- noop
+        return coreTracing;
+    }
+
     try {
         const tracing = require("@opentelemetry/tracing") as typeof tracingTypes;
         const opentelemetry = require("@opentelemetry/api") as typeof opentelemetryTypes;
@@ -56,6 +62,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
 
         tracer[AzureMonitorSymbol] = true;
         coreTracing.setTracer(tracer as any); // recordSpanData is not present on BasicTracer - cast to any
+        isPatched = true;
     } catch (e) { /* squash errors */ }
     return coreTracing;
 };
