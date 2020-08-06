@@ -14,6 +14,10 @@ data to the [diagnostic-channel](https://github.com/Microsoft/node-diagnostic-ch
 
 ## Release notes
 
+### 0.4.1 Aug 6, 2020
+
+* Fix case where Azure SDK clients could be patched twice if different versions of `@azure/core-tracing` are installed
+
 ### 0.4.0 Jun 18, 2020
 * Add support for all [Azure SDKs](https://azure.github.io/azure-sdk/releases/latest/index.html#javascript)
   - You must manually install [`@opentelemetry/tracing`](https://npmjs.com/package/@opentelemetry/tracing) to enable this automatic tracing. No additional configuration is required
