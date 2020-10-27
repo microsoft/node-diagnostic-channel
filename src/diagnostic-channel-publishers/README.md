@@ -14,6 +14,10 @@ data to the [diagnostic-channel](https://github.com/Microsoft/node-diagnostic-ch
 
 ## Release notes
 
+### 0.4.2 Oct 27, 2020
+
+* Fix case where calling `winston.configure(...) would not properly configure a custom transport
+
 ### 0.4.1 Aug 6, 2020
 
 * Fix case where Azure SDK clients could be patched twice if different versions of `@azure/core-tracing` are installed
