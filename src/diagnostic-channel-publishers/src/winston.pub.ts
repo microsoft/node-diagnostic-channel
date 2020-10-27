@@ -125,7 +125,7 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
         return result;
     };
 
-    const origRootConfigure = originalWinston.createLogger;
+    const origRootConfigure = originalWinston.configure;
     originalWinston.configure = function() {
         origRootConfigure.apply(this, arguments);
         patchedConfigure.apply(this, arguments);
