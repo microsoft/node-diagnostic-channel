@@ -1,6 +1,6 @@
 {
   "name": "diagnostic-channel-publishers",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
@@ -21,9 +21,9 @@
   "description": "A collection of pre-built module patches that enable existing npm modules to publish diagnostic data",
   "devDependencies": {
     "@azure/core-tracing": "^1.0.0-preview.8",
-    "@opentelemetry/api": "^0.8.3",
-    "@opentelemetry/context-base": "^0.8.3",
-    "@opentelemetry/tracing": "^0.8.3",
+    "@opentelemetry/api": "^0.12.0",
+    "@opentelemetry/context-base": "0.12.0",
+    "@opentelemetry/tracing": "^0.12.0",
     "@types/mocha": "^2.2.40",
     "@types/node": "~8.0.0",
     "@types/pg": "^7.4.11",

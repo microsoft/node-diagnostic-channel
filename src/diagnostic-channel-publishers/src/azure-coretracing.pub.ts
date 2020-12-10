@@ -60,6 +60,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
             return span;
         };
 
+        tracer.getCurrentSpan(); // seed OpenTelemetryScopeManagerWrapper with "active" symbol
         tracer[AzureMonitorSymbol] = true;
         coreTracing.setTracer(tracer as any); // recordSpanData is not present on BasicTracer - cast to any
         isPatched = true;
