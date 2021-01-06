@@ -14,9 +14,9 @@ data to the [diagnostic-channel](https://github.com/Microsoft/node-diagnostic-ch
 
 ## Release notes
 
-### 0.4.3 Nob 17, 2020
+### 0.4.3 Dec 17, 2020
 
-* Fix case where Azure SDK integration caused suppressed spans to be created
+* Fix case where Azure SDK integration caused suppressed spans to be created 
 
 ### 0.4.2 Oct 27, 2020
 
