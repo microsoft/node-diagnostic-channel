@@ -16,6 +16,9 @@ export class BasicTracerProvider {
 }
 
 export const trace: any;
+export const context: any;
 
 export const setTracer: Function;
 export const getTracer: Function;
+export const getSpan: Function;
+
