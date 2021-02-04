@@ -14,6 +14,10 @@ data to the [diagnostic-channel](https://github.com/Microsoft/node-diagnostic-ch
 
 ## Release notes
 
+### 0.4.4 Jan 5, 2021
+
+* Updating @azure and @opentelemetry dependencies 
+
 ### 0.4.3 Dec 17, 2020
 
 * Fix case where Azure SDK integration caused suppressed spans to be created 
