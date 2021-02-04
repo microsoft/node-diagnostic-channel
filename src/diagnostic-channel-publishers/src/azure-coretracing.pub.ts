@@ -25,12 +25,12 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
 
     try {
         const tracing = require("@opentelemetry/tracing") as typeof tracingTypes;
-        const opentelemetry = require("@opentelemetry/api") as typeof opentelemetryTypes;
+        const api = require("@opentelemetry/api") as typeof opentelemetryTypes;
         const tracerConfig: tracingTypes.SDKRegistrationConfig = channel.spanContextPropagator
             ? { contextManager: channel.spanContextPropagator }
             : undefined;
         new tracing.BasicTracerProvider().register(tracerConfig);
-        const tracer = opentelemetry.trace.getTracer("applicationinsights tracer");
+        const tracer = api.trace.getTracer("applicationinsights tracer");
 
         // Patch startSpan instead of using spanProcessor.onStart because parentSpan must be
         // set while the span is constructed
@@ -38,7 +38,8 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
         tracer.startSpan = function(name: string, options?: opentelemetryTypes.SpanOptions) {
             // if no parent span was provided, apply the current context
             if (!options || !options.parent) {
-                const parentOperation = tracer.getCurrentSpan();
+                
+                var parentOperation = api.getSpan(api.context.active());
                 if (parentOperation && parentOperation.operation && parentOperation.operation.traceparent) {
                     options = {
                         ...options,
@@ -60,7 +61,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
             return span;
         };
 
-        tracer.getCurrentSpan(); // seed OpenTelemetryScopeManagerWrapper with "active" symbol
+        api.getSpan(api.context.active()); // seed OpenTelemetryScopeManagerWrapper with "active" symbol
         tracer[AzureMonitorSymbol] = true;
         coreTracing.setTracer(tracer as any); // recordSpanData is not present on BasicTracer - cast to any
         isPatched = true;
