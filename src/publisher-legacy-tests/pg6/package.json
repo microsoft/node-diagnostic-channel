@@ -18,7 +18,7 @@
   "devDependencies": {
     "@types/mocha": "^2.2.40",
     "@types/node": "~8.0.12",
-    "@types/pg": "^7.4.11",
+    "@types/pg": "7.4.11",
     "diagnostic-channel": "0.2.0",
     "mocha": "^3.2.0",
     "pg": "^6.4.1",
