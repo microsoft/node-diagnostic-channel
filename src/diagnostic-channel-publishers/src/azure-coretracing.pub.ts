@@ -35,11 +35,10 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
         // Patch startSpan instead of using spanProcessor.onStart because parentSpan must be
         // set while the span is constructed
         const startSpanOriginal = tracer.startSpan;
-        tracer.startSpan = function(name: string, options?: opentelemetryTypes.SpanOptions) {
+        tracer.startSpan = function (name: string, options?: opentelemetryTypes.SpanOptions) {
             // if no parent span was provided, apply the current context
             if (!options || !options.parent) {
-                
-                var parentOperation = api.getSpan(api.context.active());
+                const parentOperation = api.getSpan(api.context.active());
                 if (parentOperation && parentOperation.operation && parentOperation.operation.traceparent) {
                     options = {
                         ...options,
@@ -53,7 +52,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
             }
             const span = startSpanOriginal.call(this, name, options);
             const originalEnd = span.end;
-            span.end = function() {
+            span.end = function () {
                 const result = originalEnd.apply(this, arguments);
                 channel.publish("azure-coretracing", span);
                 return result;
