@@ -38,8 +38,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
         tracer.startSpan = function(name: string, options?: opentelemetryTypes.SpanOptions) {
             // if no parent span was provided, apply the current context
             if (!options || !options.parent) {
-                
-                var parentOperation = api.getSpan(api.context.active());
+                const parentOperation = api.getSpan(api.context.active());
                 if (parentOperation && parentOperation.operation && parentOperation.operation.traceparent) {
                     options = {
                         ...options,
