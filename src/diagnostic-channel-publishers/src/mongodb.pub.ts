@@ -192,7 +192,7 @@ export const mongo2: IModulePatcher = {
     patch: mongodbPatchFunction,
 };
 export const mongo3: IModulePatcher = {
-    versionSpecifier: "> 3.1.13 < 3.3.0",
+    versionSpecifier: "> 3.0.5 < 3.3.0",
     patch: mongodb3PatchFunction,
 };
 export const mongo330: IModulePatcher = {
