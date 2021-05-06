@@ -187,6 +187,10 @@ const mongodb330PatchFunction: PatchFunction = function(originalMongo) {
     return originalMongo;
 };
 
+export const mongo2: IModulePatcher = {
+    versionSpecifier: ">= 2.0.0 <= 3.0.5",
+    patch: mongodbPatchFunction,
+};
 export const mongo3: IModulePatcher = {
     versionSpecifier: "> 3.1.13 < 3.3.0",
     patch: mongodb3PatchFunction,
@@ -197,6 +201,7 @@ export const mongo330: IModulePatcher = {
 };
 
 export function enable() {
+    channel.registerMonkeyPatch("mongodb", mongo2);
     channel.registerMonkeyPatch("mongodb", mongo3);
     channel.registerMonkeyPatch("mongodb", mongo330);
 }
