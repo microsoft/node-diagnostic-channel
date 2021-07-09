@@ -31,6 +31,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
 
         // Patch Azure SDK setTracer
         const setTracerOriginal = coreTracing.setTracer;
+        
         coreTracing.setTracer = function(tracer: any) {
             // Patch startSpan instead of using spanProcessor.onStart because parentSpan must be
             // set while the span is constructed
