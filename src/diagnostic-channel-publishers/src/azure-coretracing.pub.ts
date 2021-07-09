@@ -26,19 +26,19 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
     try {
         const tracing = require("@opentelemetry/tracing") as typeof tracingTypes;
         const api = require("@opentelemetry/api") as typeof opentelemetryTypes;
-        let provider = new tracing.BasicTracerProvider();
-        let defaultTracer = provider.getTracer("applicationinsights tracer");
+        const provider = new tracing.BasicTracerProvider();
+        const defaultTracer = provider.getTracer("applicationinsights tracer");
 
         // Patch Azure SDK setTracer
         const setTracerOriginal = coreTracing.setTracer;
-        coreTracing.setTracer = function (tracer: any) {
+        coreTracing.setTracer = function(tracer: any) {
             // Patch startSpan instead of using spanProcessor.onStart because parentSpan must be
             // set while the span is constructed
             const startSpanOriginal = tracer.startSpan;
-            tracer.startSpan = function (name: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
+            tracer.startSpan = function(name: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
                 const span = startSpanOriginal.call(this, name, options, context);
                 const originalEnd = span.end;
-                span.end = function () {
+                span.end = function() {
                     const result = originalEnd.apply(this, arguments);
                     channel.publish("azure-coretracing", span);
                     return result;
