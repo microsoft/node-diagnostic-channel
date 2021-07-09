@@ -31,8 +31,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
 
         // Patch Azure SDK setTracer
         const setTracerOriginal = coreTracing.setTracer;
-        coreTracing.setTracer = function (t: any) {
-            const tracer = setTracerOriginal.call(this, t);
+        coreTracing.setTracer = function (tracer: any) {
             // Patch startSpan instead of using spanProcessor.onStart because parentSpan must be
             // set while the span is constructed
             const startSpanOriginal = tracer.startSpan;
@@ -47,7 +46,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
                 return span;
             };
             tracer[AzureMonitorSymbol] = true;
-            return tracer;
+            setTracerOriginal.call(this, tracer);
         };
         api.trace.getSpan(api.context.active()); // seed OpenTelemetryScopeManagerWrapper with "active" symbol
         coreTracing.setTracer(defaultTracer);
