@@ -36,7 +36,7 @@ describe("@azure/core-tracing@1.0.0-preview9+", () => {
     it("should fire events when a span is ended", (done) => {
         assert.equal(tracer[AzureMonitorSymbol], true);
         const span = tracer.startSpan("test span 1");
-        assert.deepEqual(api.getSpan(api.context.active()), null);
+        assert.deepEqual(api.trace.getSpan(api.context.active()), null);
         assertSpans(events, span);
         done();
     });
