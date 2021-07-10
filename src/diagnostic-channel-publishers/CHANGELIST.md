@@ -1,5 +1,11 @@
 # Diagnostic Channel Publishers Change List
 
+### 1.0.1 July 9, 2021
+
+* Update OpenTelemetry and Azure SDK dependencies to latest.
+  OpenTelemetry API 1.0.0
+  @azure/core-tracing 1.0.0-preview.12
+
 ### 1.0.0 May 10, 2021
 
 * Updating @azure, @opentelemetry dependencies and increasing typescript version to 4.1.2
