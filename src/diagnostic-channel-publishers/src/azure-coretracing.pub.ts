@@ -71,10 +71,10 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
                     tracer[AzureMonitorSymbol] = true;
                     return tracer;
                 };
-                return setGlobalTracerProviderOriginal.call(tracerProvider);
+                return setGlobalTracerProviderOriginal.call(this, tracerProvider);
             };
+            defaultProvider.register();
             api.trace.getSpan(api.context.active()); // seed OpenTelemetryScopeManagerWrapper with "active" symbol
-            api.trace.setGlobalTracerProvider(defaultProvider);
         }
 
         isPatched = true;
