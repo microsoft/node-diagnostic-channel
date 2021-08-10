@@ -32,14 +32,14 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
         // Patch Azure SDK setTracer, @azure/core-tracing <= 1.0.0-preview.12
         if (coreTracing.setTracer) {
             const setTracerOriginal = coreTracing.setTracer;
-            coreTracing.setTracer = function (tracer: any) {
+            coreTracing.setTracer = function(tracer: any) {
                 // Patch startSpan instead of using spanProcessor.onStart because parentSpan must be
                 // set while the span is constructed
                 const startSpanOriginal = tracer.startSpan;
-                tracer.startSpan = function (name: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
+                tracer.startSpan = function(name: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
                     const span = startSpanOriginal.call(this, name, options, context);
                     const originalEnd = span.end;
-                    span.end = function () {
+                    span.end = function() {
                         const result = originalEnd.apply(this, arguments);
                         channel.publish("azure-coretracing", span);
                         return result;
@@ -51,19 +51,17 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
             };
             api.trace.getSpan(api.context.active()); // seed OpenTelemetryScopeManagerWrapper with "active" symbol
             coreTracing.setTracer(defaultTracer);
-        }
-        // Patch OpenTelemetry setGlobalTracerProvider  @azure/core-tracing > 1.0.0-preview.13
-        else {
+        } else { // Patch OpenTelemetry setGlobalTracerProvider  @azure/core-tracing > 1.0.0-preview.13
             const setGlobalTracerProviderOriginal = api.trace.setGlobalTracerProvider;
-            api.trace.setGlobalTracerProvider = function (tracerProvider: opentelemetryTypes.TracerProvider) {
+            api.trace.setGlobalTracerProvider = function(tracerProvider: opentelemetryTypes.TracerProvider) {
                 const getTracerOriginal = tracerProvider.getTracer;
-                tracerProvider.getTracer = function (name, version) {
-                    let tracer = getTracerOriginal.call(this, name, version);
+                tracerProvider.getTracer = function(tracerName, version) {
+                    const tracer = getTracerOriginal.call(this, tracerName, version);
                     const startSpanOriginal = tracer.startSpan;
-                    tracer.startSpan = function (name: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
-                        const span = startSpanOriginal.call(this, name, options, context);
+                    tracer.startSpan = function(spanName: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
+                        const span = startSpanOriginal.call(this, spanName, options, context);
                         const originalEnd = span.end;
-                        span.end = function () {
+                        span.end = function() {
                             const result = originalEnd.apply(this, arguments);
                             channel.publish("azure-coretracing", span);
                             return result;
@@ -72,7 +70,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
                     };
                     tracer[AzureMonitorSymbol] = true;
                     return tracer;
-                }
+                };
                 return setGlobalTracerProviderOriginal.call(tracerProvider);
             };
             api.trace.getSpan(api.context.active()); // seed OpenTelemetryScopeManagerWrapper with "active" symbol
