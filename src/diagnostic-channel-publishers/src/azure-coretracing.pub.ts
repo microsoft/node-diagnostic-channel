@@ -26,31 +26,57 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
     try {
         const tracing = require("@opentelemetry/tracing") as typeof tracingTypes;
         const api = require("@opentelemetry/api") as typeof opentelemetryTypes;
-        const provider = new tracing.BasicTracerProvider();
-        const defaultTracer = provider.getTracer("applicationinsights tracer");
+        const defaultProvider = new tracing.BasicTracerProvider();
+        const defaultTracer = defaultProvider.getTracer("applicationinsights tracer");
 
-        // Patch Azure SDK setTracer
-        const setTracerOriginal = coreTracing.setTracer;
-
-        coreTracing.setTracer = function(tracer: any) {
-            // Patch startSpan instead of using spanProcessor.onStart because parentSpan must be
-            // set while the span is constructed
-            const startSpanOriginal = tracer.startSpan;
-            tracer.startSpan = function(name: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
-                const span = startSpanOriginal.call(this, name, options, context);
-                const originalEnd = span.end;
-                span.end = function() {
-                    const result = originalEnd.apply(this, arguments);
-                    channel.publish("azure-coretracing", span);
-                    return result;
+        // Patch Azure SDK setTracer, @azure/core-tracing <= 1.0.0-preview.12
+        if (coreTracing.setTracer) {
+            const setTracerOriginal = coreTracing.setTracer;
+            coreTracing.setTracer = function(tracer: any) {
+                // Patch startSpan instead of using spanProcessor.onStart because parentSpan must be
+                // set while the span is constructed
+                const startSpanOriginal = tracer.startSpan;
+                tracer.startSpan = function(name: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
+                    const span = startSpanOriginal.call(this, name, options, context);
+                    const originalEnd = span.end;
+                    span.end = function() {
+                        const result = originalEnd.apply(this, arguments);
+                        channel.publish("azure-coretracing", span);
+                        return result;
+                    };
+                    return span;
                 };
-                return span;
+                tracer[AzureMonitorSymbol] = true;
+                setTracerOriginal.call(this, tracer);
             };
-            tracer[AzureMonitorSymbol] = true;
-            setTracerOriginal.call(this, tracer);
-        };
-        api.trace.getSpan(api.context.active()); // seed OpenTelemetryScopeManagerWrapper with "active" symbol
-        coreTracing.setTracer(defaultTracer);
+            api.trace.getSpan(api.context.active()); // seed OpenTelemetryScopeManagerWrapper with "active" symbol
+            coreTracing.setTracer(defaultTracer);
+        } else { // Patch OpenTelemetry setGlobalTracerProvider  @azure/core-tracing > 1.0.0-preview.13
+            const setGlobalTracerProviderOriginal = api.trace.setGlobalTracerProvider;
+            api.trace.setGlobalTracerProvider = function(tracerProvider: opentelemetryTypes.TracerProvider) {
+                const getTracerOriginal = tracerProvider.getTracer;
+                tracerProvider.getTracer = function(tracerName, version) {
+                    const tracer = getTracerOriginal.call(this, tracerName, version);
+                    const startSpanOriginal = tracer.startSpan;
+                    tracer.startSpan = function(spanName: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
+                        const span = startSpanOriginal.call(this, spanName, options, context);
+                        const originalEnd = span.end;
+                        span.end = function() {
+                            const result = originalEnd.apply(this, arguments);
+                            channel.publish("azure-coretracing", span);
+                            return result;
+                        };
+                        return span;
+                    };
+                    tracer[AzureMonitorSymbol] = true;
+                    return tracer;
+                };
+                return setGlobalTracerProviderOriginal.call(this, tracerProvider);
+            };
+            defaultProvider.register();
+            api.trace.getSpan(api.context.active()); // seed OpenTelemetryScopeManagerWrapper with "active" symbol
+        }
+
         isPatched = true;
     } catch (e) { /* squash errors */ }
     return coreTracing;
