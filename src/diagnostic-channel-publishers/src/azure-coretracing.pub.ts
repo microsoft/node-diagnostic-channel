@@ -57,18 +57,20 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
                 const getTracerOriginal = tracerProvider.getTracer;
                 tracerProvider.getTracer = function(tracerName, version) {
                     const tracer = getTracerOriginal.call(this, tracerName, version);
-                    const startSpanOriginal = tracer.startSpan;
-                    tracer.startSpan = function(spanName: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
-                        const span = startSpanOriginal.call(this, spanName, options, context);
-                        const originalEnd = span.end;
-                        span.end = function() {
-                            const result = originalEnd.apply(this, arguments);
-                            channel.publish("azure-coretracing", span);
-                            return result;
+                    if (!tracer[exports.AzureMonitorSymbol]) { // Avoid patching multiple times
+                        const startSpanOriginal = tracer.startSpan;
+                        tracer.startSpan = function(spanName: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
+                            const span = startSpanOriginal.call(this, spanName, options, context);
+                            const originalEnd = span.end;
+                            span.end = function() {
+                                const result = originalEnd.apply(this, arguments);
+                                channel.publish("azure-coretracing", span);
+                                return result;
+                            };
+                            return span;
                         };
-                        return span;
-                    };
-                    tracer[AzureMonitorSymbol] = true;
+                        tracer[AzureMonitorSymbol] = true;
+                    }
                     return tracer;
                 };
                 return setGlobalTracerProviderOriginal.call(this, tracerProvider);
