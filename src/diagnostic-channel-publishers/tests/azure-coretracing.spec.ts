@@ -26,7 +26,7 @@ describe("@azure/core-tracing@1.0.0-preview9+", () => {
         });
         coretracing = require("@azure/core-tracing");
         api = require("@opentelemetry/api");
-        tracer = coretracing.getTracer();
+        tracer = (<any>coretracing).getTracer();
     });
 
     beforeEach(() => {
