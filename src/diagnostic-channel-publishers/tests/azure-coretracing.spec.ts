@@ -19,7 +19,7 @@ describe("@azure/core-tracing@1.0.0-preview9+", () => {
 
     before(() => {
         enableAzureSDKTracing();
-        channel.subscribe("azure-coretracing", function (span) {
+        channel.subscribe("azure-coretracing", function(span) {
             events.push(span);
         });
         api = require("@opentelemetry/api");

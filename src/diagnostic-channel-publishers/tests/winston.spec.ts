@@ -187,7 +187,8 @@ describe("winston", () => {
 
     it("should not throw when createLogger is created without arguments", () => {
         assert.doesNotThrow(() => {
-            new winston.createLogger();
+            const logger = new winston.createLogger();
+            assert.ok(logger);
         });
     });
 

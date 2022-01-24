@@ -123,7 +123,7 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
         result.add(new AppInsightsTransport(originalWinston, { level: lastLevel }));
 
         const origConfigure = result.configure;
-        result.configure = function () {
+        result.configure = function() {
             origConfigure.apply(this, arguments);
             patchedConfigure.apply(this, arguments);
         };
@@ -132,7 +132,7 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
     };
 
     const origRootConfigure = originalWinston.configure;
-    originalWinston.configure = function () {
+    originalWinston.configure = function() {
         origRootConfigure.apply(this, arguments);
         patchedConfigure.apply(this, arguments);
     };
