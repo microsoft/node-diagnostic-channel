@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
-import * as coreTracingTypes from "@azure/core-tracing";
-import * as apiTypes from "@opentelemetry/api";
+import api from "@opentelemetry/api";
 import * as assert from "assert";
 import { channel, IStandardEvent } from "diagnostic-channel";
 import { AzureMonitorSymbol, enable as enableAzureSDKTracing } from "../src/azure-coretracing.pub";
@@ -14,17 +13,17 @@ const assertSpans = (events, span) => {
 };
 
 describe("@azure/core-tracing@1.0.0-preview9+", () => {
-    let api: typeof apiTypes;
     let events: Array<IStandardEvent<any>>;
     let tracer;
 
     before(() => {
         enableAzureSDKTracing();
-        channel.subscribe("azure-coretracing", function(span) {
+        channel.subscribe("azure-coretracing", function (span) {
             events.push(span);
         });
-        api = require("@opentelemetry/api");
+        const coreTracing = require("@azure/core-tracing");
         tracer = api.trace.getTracerProvider().getTracer("Test Tracer");
+        coreTracing.setTracer(tracer);
     });
 
     beforeEach(() => {
