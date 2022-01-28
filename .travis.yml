@@ -11,7 +11,6 @@ node_js:
 install:
   - npm install
 before_script:
-  - psql -c 'create database postgres;' -U postgres
   - sudo service mysql stop
   - docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 14330:1433 -d mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
 script:
