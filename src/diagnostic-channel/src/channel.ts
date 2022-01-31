@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 
-import {IModulePatcher, IModulePatchMap, makePatchingRequire} from "./patchRequire";
+import { IModulePatcher, IModulePatchMap, makePatchingRequire } from "./patchRequire";
 
-export {PatchFunction, IModulePatcher, makePatchingRequire} from "./patchRequire";
+export { PatchFunction, IModulePatcher, makePatchingRequire } from "./patchRequire";
 
 export interface ISpanContext {
     traceId: string;
@@ -21,38 +21,47 @@ export interface IStandardEvent<T> {
 
 export type ISubscriber<T> = (event: IStandardEvent<T>) => void;
 export type IFilter = (publishing: boolean) => boolean;
+export type IPatchedCallback = (moduleName: string, version: string) => void;
 
 interface IFilteredSubscriber<T> {
     listener: ISubscriber<T>;
     filter: IFilter;
+    patchCallback?: IPatchedCallback;
+}
+
+interface IPatchedModule {
+    name: string;
+    version: string;
 }
 
 export interface IChannel {
     shouldPublish(name: string): boolean;
     publish<T>(name: string, event: T): void;
-    subscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void;
+    subscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter, patchCallback?: IPatchedCallback): void;
     unsubscribe<T>(name: string, listener: ISubscriber<T>, filter?: IFilter): void;
     bindToContext<T extends Function>(cb: T): T;
     addContextPreservation<T extends Function>(preserver: (cb: T) => T): void;
     registerMonkeyPatch(packageName: string, patcher: IModulePatcher): void;
-    spanContextPropagator: ScopeManager;
+    getPatchesObject(): IModulePatchMap;
+    addPatchedModule(moduleName: string, version: string): void;
 }
 
-const trueFilter = (publishing: boolean) => true;
+export const trueFilter = (publishing: boolean) => true;
 
-class ContextPreservingEventEmitter implements IChannel {
+export class ContextPreservingEventEmitter implements IChannel {
     public version: string = require("./../../package.json").version; // Allow for future versions to replace things?
     public spanContextPropagator: ScopeManager;
-    private subscribers: {[key: string]: Array<IFilteredSubscriber<any>>} = {};
+    private subscribers: { [key: string]: Array<IFilteredSubscriber<any>> } = {};
     private contextPreservationFunction: <F extends Function>(cb: F) => F = (cb) => cb;
     private knownPatches: IModulePatchMap = {};
+    public modulesPatched: IPatchedModule[] = [];
 
     private currentlyPublishing: boolean = false;
 
     public shouldPublish(name: string): boolean {
         const listeners = this.subscribers[name];
         if (listeners) {
-            return listeners.some(({filter}) => !filter || filter(false));
+            return listeners.some(({ filter }) => !filter || filter(false));
         }
         return false;
     }
@@ -69,7 +78,7 @@ class ContextPreservingEventEmitter implements IChannel {
                 data: event,
             };
             this.currentlyPublishing = true;
-            listeners.forEach(({listener, filter}) => {
+            listeners.forEach(({ listener, filter }) => {
                 try {
                     if (filter && filter(true)) {
                         listener(standardEvent);
@@ -82,12 +91,16 @@ class ContextPreservingEventEmitter implements IChannel {
         }
     }
 
-    public subscribe<T>(name: string, listener: ISubscriber<T>, filter: IFilter = trueFilter): void {
+    public subscribe<T>(name: string, listener: ISubscriber<T>, filter: IFilter = trueFilter, patchCallback?: IPatchedCallback): void {
         if (!this.subscribers[name]) {
             this.subscribers[name] = [];
         }
 
-        this.subscribers[name].push({listener, filter});
+        this.subscribers[name].push({ listener, filter, patchCallback });
+        const patched = this.checkIfModuleIsAlreadyPatched(name);
+        if (patched && patchCallback) {
+            patchCallback(patched.name, patched.version);
+        }
     }
 
     public unsubscribe<T>(name: string, listener: ISubscriber<T>, filter: IFilter = trueFilter): boolean {
@@ -132,9 +145,36 @@ class ContextPreservingEventEmitter implements IChannel {
     public getPatchesObject(): IModulePatchMap {
         return this.knownPatches;
     }
+
+    public addPatchedModule(name: string, version: string): void {
+        for (const module of this.modulesPatched) {
+            if (module.name === name) {
+                return;
+            }
+        }
+        // If new patch notify listeners
+        this.modulesPatched.push({ name, version });
+        const listeners = this.subscribers[name];
+        if (listeners) {
+            listeners.forEach((listener) => {
+                if (listener.patchCallback) {
+                    listener.patchCallback(name, version);
+                }
+            });
+        }
+    }
+
+    private checkIfModuleIsAlreadyPatched(name: string): IPatchedModule | null {
+        for (const module of this.modulesPatched) {
+            if (module.name === name) {
+                return module;
+            }
+        }
+        return null;
+    }
 }
 
-declare const global: {diagnosticsSource: ContextPreservingEventEmitter};
+declare const global: { diagnosticsSource: ContextPreservingEventEmitter };
 
 if (!global.diagnosticsSource) {
     global.diagnosticsSource = new ContextPreservingEventEmitter();

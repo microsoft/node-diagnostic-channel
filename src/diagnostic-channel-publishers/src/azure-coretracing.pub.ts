@@ -6,6 +6,7 @@ import * as tracingTypes from "@opentelemetry/sdk-trace-base";
 import { channel, IModulePatcher, PatchFunction } from "diagnostic-channel";
 
 export const AzureMonitorSymbol = "Azure_Monitor_Tracer";
+const publisherName = "azure-coretracing";
 let isPatched = false;
 
 /**
@@ -41,7 +42,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
                     const originalEnd = span.end;
                     span.end = function() {
                         const result = originalEnd.apply(this, arguments);
-                        channel.publish("azure-coretracing", span);
+                        channel.publish(publisherName, span);
                         return result;
                     };
                     return span;
@@ -64,7 +65,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
                             const originalEnd = span.end;
                             span.end = function() {
                                 const result = originalEnd.apply(this, arguments);
-                                channel.publish("azure-coretracing", span);
+                                channel.publish(publisherName, span);
                                 return result;
                             };
                             return span;
@@ -87,6 +88,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
 export const azureCoreTracing: IModulePatcher = {
     versionSpecifier: ">= 1.0.0 < 2.0.0",
     patch: azureCoreTracingPatchFunction,
+    publisherName: publisherName,
 };
 
 export function enable() {

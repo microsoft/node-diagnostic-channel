@@ -3,6 +3,8 @@
 import {channel, IModulePatcher, PatchFunction} from "diagnostic-channel";
 import {EventEmitter} from "events";
 
+const publisherName = "postgres";
+
 // copy the pg.Result type: https://node-postgres.com/api/result
 export interface IPostgresResult {
     rowCount: number;
@@ -61,7 +63,7 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
                 data.result = res && { rowCount: res.rowCount, command: res.command };
                 data.error = err;
                 data.duration = Math.ceil((end[0] * 1e3) + (end[1] / 1e6));
-                channel.publish("postgres", data);
+                channel.publish(publisherName, data);
 
                 // emulate weird internal behavior in pg@6
                 // on success, the callback is called *before* query events are emitted
@@ -184,7 +186,7 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
                 data.result = res && { rowCount: res.rowCount, command: res.command };
                 data.error = err;
                 data.duration = Math.ceil((end[0] * 1e3) + (end[1] / 1e6));
-                channel.publish("postgres", data);
+                channel.publish(publisherName, data);
 
                 if (err) {
                     if (cb) {
@@ -294,6 +296,7 @@ export const postgres6: IModulePatcher = {
 export const postgres7: IModulePatcher = {
     versionSpecifier: ">=7.* <=8.*",
     patch: postgres7PatchFunction,
+    publisherName: publisherName,
 };
 
 export function enable() {
