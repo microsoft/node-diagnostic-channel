@@ -37,7 +37,7 @@ describe("pg@6.x", () => {
         password: "test",
         database: "postgres",
         host: "127.0.0.1",
-        port: 14200,
+        port: 5432,
     };
     const checkSuccess = (data: IPostgresTest): Error => {
         try {
