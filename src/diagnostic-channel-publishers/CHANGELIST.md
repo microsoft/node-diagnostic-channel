@@ -1,5 +1,11 @@
 # Diagnostic Channel Publishers Change List
 
+### 1.0.4 January, 2022
+
+* Update OpenTelemetry dependencies.
+* Fix exception in Winston when Logger is created without arguments
+* Add callback to notify about patched modules
+
 ### 1.0.1 July 9, 2021
 
 * Update OpenTelemetry and Azure SDK dependencies to latest.
