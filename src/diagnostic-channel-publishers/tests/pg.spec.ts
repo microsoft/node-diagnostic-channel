@@ -150,13 +150,13 @@ describe("pg@8.x", () => {
         const child = Zone.current.fork({name: "child"});
 
         child.run(() => {
-            client.query("SELECT $1", ["0"], (e1, r1) => {
+            client.query("SELECT $1::text", ["0"], (e1, r1) => {
                 const bad = checkSuccess({
                     res: r1,
                     err: e1,
                     zone: child,
                     preparable: {
-                        text: "SELECT $1",
+                        text: "SELECT $1::text",
                         args: ["0"],
                     },
                 });
@@ -409,13 +409,13 @@ describe("pg@8.x", () => {
         const child = Zone.current.fork({name: "child"});
 
         child.run(() => {
-            pool.query("SELECT $1", ["0"]).then((res) => {
+            pool.query("SELECT $1::text", ["0"]).then((res) => {
                 done(checkSuccess({
                     res: res,
                     err: null,
                     zone: child,
                     preparable: {
-                        text: "SELECT $1",
+                        text: "SELECT $1::text",
                         args: ["0"],
                     },
                 }));
