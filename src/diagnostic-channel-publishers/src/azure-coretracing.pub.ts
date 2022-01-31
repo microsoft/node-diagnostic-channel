@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import * as coreTracingTypes from "@azure/core-tracing";
 import * as opentelemetryTypes from "@opentelemetry/api";
-import * as tracingTypes from "@opentelemetry/tracing";
+import * as tracingTypes from "@opentelemetry/sdk-trace-base";
 import { channel, IModulePatcher, PatchFunction } from "diagnostic-channel";
 
 export const AzureMonitorSymbol = "Azure_Monitor_Tracer";
@@ -24,15 +24,15 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
     }
 
     try {
-        const tracing = require("@opentelemetry/tracing") as typeof tracingTypes;
+        const tracing = require("@opentelemetry/sdk-trace-base") as typeof tracingTypes;
         const api = require("@opentelemetry/api") as typeof opentelemetryTypes;
         const defaultProvider = new tracing.BasicTracerProvider();
         const defaultTracer = defaultProvider.getTracer("applicationinsights tracer");
 
         // Patch Azure SDK setTracer, @azure/core-tracing <= 1.0.0-preview.12
-        if (coreTracing.setTracer) {
-            const setTracerOriginal = coreTracing.setTracer;
-            coreTracing.setTracer = function(tracer: any) {
+        if ((coreTracing as any).setTracer) {
+            const setTracerOriginal = (coreTracing as any).setTracer;
+            (coreTracing as any).setTracer = function(tracer: any) {
                 // Patch startSpan instead of using spanProcessor.onStart because parentSpan must be
                 // set while the span is constructed
                 const startSpanOriginal = tracer.startSpan;
@@ -50,7 +50,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
                 setTracerOriginal.call(this, tracer);
             };
             api.trace.getSpan(api.context.active()); // seed OpenTelemetryScopeManagerWrapper with "active" symbol
-            coreTracing.setTracer(defaultTracer);
+            (coreTracing as any).setTracer(defaultTracer);
         } else { // Patch OpenTelemetry setGlobalTracerProvider  @azure/core-tracing > 1.0.0-preview.13
             const setGlobalTracerProviderOriginal = api.trace.setGlobalTracerProvider;
             api.trace.setGlobalTracerProvider = function(tracerProvider: opentelemetryTypes.TracerProvider) {
