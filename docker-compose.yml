@@ -1,8 +1,0 @@
-version: "2"
-services:
-  postgres:
-    image: "postgres:alpine"
-    ports:
-      - "14200:5432"
-    environment:
-      - POSTGRES_PASSWORD=test
