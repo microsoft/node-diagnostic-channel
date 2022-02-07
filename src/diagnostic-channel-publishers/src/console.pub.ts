@@ -61,7 +61,7 @@ const consolePatchFunction: PatchFunction = (originalConsole) => {
 
 export const console: IModulePatcher = {
     versionSpecifier: ">= 4.0.0",
-    patch: consolePatchFunction,
+    patch: consolePatchFunction
 };
 
 export function enable() {

@@ -20,7 +20,7 @@ function postgresPool1PatchFunction(originalPgPool) {
 
 export const postgresPool1: IModulePatcher = {
     versionSpecifier: ">= 1.0.0 < 3.0.0",
-    patch: postgresPool1PatchFunction,
+    patch: postgresPool1PatchFunction
 };
 
 export function enable() {

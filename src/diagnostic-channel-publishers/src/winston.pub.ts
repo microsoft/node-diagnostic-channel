@@ -143,12 +143,12 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
 
 export const winston3: IModulePatcher = {
     versionSpecifier: "3.x",
-    patch: winston3PatchFunction,
+    patch: winston3PatchFunction
 };
 
 export const winston2: IModulePatcher = {
     versionSpecifier: "2.x",
-    patch: winston2PatchFunction,
+    patch: winston2PatchFunction
 };
 
 export function enable() {

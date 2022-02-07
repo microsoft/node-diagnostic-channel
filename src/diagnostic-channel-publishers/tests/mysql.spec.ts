@@ -55,7 +55,7 @@ describe("mysql", function() {
             host: "localhost",
             user: "root",
             password: "secret",
-            database: "test",
+            database: "test"
         });
 
         const z1 = Zone.current.fork({name: "1"});
@@ -81,7 +81,7 @@ describe("mysql", function() {
                             return;
                         }
                         resolve();
-                    }),
+                    })
                 ));
             }
         });
@@ -103,7 +103,7 @@ describe("mysql", function() {
                         }
                         resolve();
 
-                    }),
+                    })
                 ));
             }
         });

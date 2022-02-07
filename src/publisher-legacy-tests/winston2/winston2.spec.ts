@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import * as assert from "assert";
-import {channel, IStandardEvent, makePatchingRequire} from "diagnostic-channel";
+import {channel, IStandardEvent} from "diagnostic-channel";
 
 import {enable as enableWinston, IWinstonData} from "../../diagnostic-channel-publishers/src/winston.pub";
 
@@ -45,7 +45,7 @@ describe("winston@2.x", () => {
         const expected: IWinstonData = {message: "should intercept a new logger", meta: {testing: "new loggers"}, level: "info", levelKind: "npm"};
 
         const loggerWithoutFilter = new winston.Logger({
-            transports: [new winston.transports.Console()],
+            transports: [new winston.transports.Console()]
         });
         loggerWithoutFilter.info(expected.message, expected.meta);
         compareWinstonData(actual, expected);
@@ -57,9 +57,9 @@ describe("winston@2.x", () => {
 
         const logger = new winston.Logger({
             filters: [
-                (level, message, meta) => filteredMessage,
+                (level, message, meta) => filteredMessage
             ],
-            transports: [new winston.transports.Console()],
+            transports: [new winston.transports.Console()]
         });
         logger.log("info", "unfiltered", expected.meta);
         expected.message = filteredMessage;
@@ -67,16 +67,14 @@ describe("winston@2.x", () => {
     });
 
     it("should always publish the most-filtered, most-rewritten message", () => {
-        const expected: IWinstonData = {message: "unfiltered", meta: {rewritten: 0}, level: "info", levelKind: "npm"};
-
         const logger = new winston.Logger({
             filters: [
-                (level, message, meta) => "kinda filtered",
+                (level, message, meta) => "kinda filtered"
             ],
             rewriters: [
-                (level, message, meta) => { meta.rewritten = 1; return meta; },
+                (level, message, meta) => { meta.rewritten = 1; return meta; }
             ],
-            transports: [new winston.transports.Console()],
+            transports: [new winston.transports.Console()]
         });
 
         const rewritten2 = { rewritten: 2 };
@@ -98,13 +96,13 @@ describe("winston@2.x", () => {
             transports: [
                 new winston.transports.Console({
                     name: "default-console",
-                    level: "info",
+                    level: "info"
                 }),
                 new winston.transports.Console({
                     name: "levels-console",
-                    level: "l2",
-                }),
-            ],
+                    level: "l2"
+                })
+            ]
         });
 
         logger.info(expected.message, expected.meta);

@@ -34,8 +34,8 @@ describe("patchRequire", function() {
                 patch: function(originalModule) {
                     assert.strictEqual(originalModule, fs, "Invoked with wrong package");
                     return mock;
-                },
-            }],
+                }
+            }]
         });
 
         assert.strictEqual(patchedRequire("fs"), mock);
@@ -48,8 +48,8 @@ describe("patchRequire", function() {
                 versionSpecifier: "< 0.0.0",
                 patch: function(originalModule) {
                     throw new Error("Patching function called with incorrect version");
-                },
-            }],
+                }
+            }]
         });
 
         assert.strictEqual(patchedRequire("fs"), fs);
@@ -65,22 +65,22 @@ describe("patchRequire", function() {
                 versionSpecifier: `< ${nodeVersion}`,
                 patch: function(originalModule) {
                     throw new Error("Patching with wrong version");
-                },
+                }
             },
             {
                 versionSpecifier: `${nodeVersion}`,
                 patch: function(originalModule) {
                     assert.equal(originalModule, fs);
                     return mock1;
-                },
+                }
             },
             {
                 versionSpecifier: `>= ${nodeVersion}`,
                 patch: function(originalModule) {
                     assert.equal(originalModule, mock1, "Patching out of order!");
                     return mock2;
-                },
-            }],
+                }
+            }]
         });
 
         assert.strictEqual(patchedRequire("fs"), mock2);
@@ -95,9 +95,9 @@ describe("patchRequire", function() {
                     versionSpecifier: `>= ${nodeVersionWithoutPrerelease}`,
                     patch: function(originalModule) {
                         return mock;
-                    },
-                },
-            ],
+                    }
+                }
+            ]
         });
 
         moduleModule.prototype.require = patchedRequire;
@@ -115,8 +115,8 @@ describe("patchRequire", function() {
                 patch: function(originalModule) {
                     assert.equal(originalModule, originalSemver);
                     return mock;
-                },
-            }],
+                }
+            }]
         });
 
         moduleModule.prototype.require = patchedRequire;
@@ -131,8 +131,8 @@ describe("patchRequire", function() {
                 versionSpecifier: ">= 5.3.0 < 6.0.0",
                 patch: function(originalModule) {
                     return originalModule;
-                },
-            }],
+                }
+            }]
         });
         moduleModule.prototype.require = patchedRequire;
         const semver = require("semver");
@@ -150,8 +150,8 @@ describe("patchRequire", function() {
                 patch: function(originalModule) {
                     return originalModule;
                 },
-                publisherName: "MyPublisherName",
-            }],
+                publisherName: "MyPublisherName"
+            }]
         });
         moduleModule.prototype.require = patchedRequire;
         const console = require("console");

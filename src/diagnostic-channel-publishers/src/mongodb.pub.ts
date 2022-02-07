@@ -22,8 +22,8 @@ const mongodbPatchFunction: PatchFunction = function(originalMongo) {
         operationIdGenerator: {
             next: function() {
                 return channel.bindToContext((cb) => cb());
-            },
-        },
+            }
+        }
     });
     const eventMap = {};
     listener.on("started", function(event) {
@@ -189,15 +189,15 @@ const mongodb330PatchFunction: PatchFunction = function(originalMongo) {
 
 export const mongo2: IModulePatcher = {
     versionSpecifier: ">= 2.0.0 <= 3.0.5",
-    patch: mongodbPatchFunction,
+    patch: mongodbPatchFunction
 };
 export const mongo3: IModulePatcher = {
     versionSpecifier: "> 3.0.5 < 3.3.0",
-    patch: mongodb3PatchFunction,
+    patch: mongodb3PatchFunction
 };
 export const mongo330: IModulePatcher = {
     versionSpecifier: ">= 3.3.0 < 4.0.0",
-    patch: mongodb330PatchFunction,
+    patch: mongodb330PatchFunction
 };
 
 export function enable() {
