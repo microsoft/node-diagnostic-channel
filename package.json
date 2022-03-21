@@ -11,10 +11,10 @@
     "test": "gulp test"
   },
   "dependencies": {
+    "@azure/opentelemetry-instrumentation-azure-sdk": "^1.0.0-beta.1",
     "@types/node": "^8.0.0",
     "gulp": "^4.0.2"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Microsoft/node-diagnostic-channel.git"
