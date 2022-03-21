@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
-import {channel, IModulePatcher, PatchFunction} from "diagnostic-channel";
+import { channel, IModulePatcher, PatchFunction } from "diagnostic-channel";
 
 export interface IWinstonData {
     message: string | Error;
@@ -23,7 +23,7 @@ const winston2PatchFunction: PatchFunction = (originalWinston) => {
         } else {
             levelKind = "unknown";
         }
-        channel.publish<IWinstonData>("winston", {level, message, meta, levelKind});
+        channel.publish<IWinstonData>("winston", { level, message, meta, levelKind });
         return message;
     };
 
@@ -86,20 +86,26 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
     // Patch this function
     function patchedConfigure() {
         // Grab highest sev logging level in case of custom logging levels
-        const levels = arguments[0].levels || originalWinston.config.npm.levels;
+        let levels = originalWinston.config.npm.levels;
+        if (arguments && arguments[0] && arguments[0].levels) {
+            levels = arguments[0].levels;
+        }
         let lastLevel;
         for (const level in levels) {
             if (levels.hasOwnProperty(level)) {
                 lastLevel = lastLevel === undefined || levels[level] > levels[lastLevel] ? level : lastLevel;
             }
         }
-        this.add(new AppInsightsTransport(originalWinston, {level: lastLevel}));
+        this.add(new AppInsightsTransport(originalWinston, { level: lastLevel }));
     }
 
     const origCreate = originalWinston.createLogger;
     originalWinston.createLogger = function patchedCreate() {
         // Grab highest sev logging level in case of custom logging levels
-        const levels = arguments[0].levels || originalWinston.config.npm.levels;
+        let levels = originalWinston.config.npm.levels;
+        if (arguments && arguments[0] && arguments[0].levels) {
+            levels = arguments[0].levels;
+        }
         let lastLevel;
         for (const level in levels) {
             if (levels.hasOwnProperty(level)) {
@@ -114,7 +120,7 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
         // again after createLogger, but that would cause configure to be called
         // twice per create.
         const result = origCreate.apply(this, arguments);
-        result.add(new AppInsightsTransport(originalWinston, {level: lastLevel}));
+        result.add(new AppInsightsTransport(originalWinston, { level: lastLevel }));
 
         const origConfigure = result.configure;
         result.configure = function() {
@@ -137,12 +143,12 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
 
 export const winston3: IModulePatcher = {
     versionSpecifier: "3.x",
-    patch: winston3PatchFunction,
+    patch: winston3PatchFunction
 };
 
 export const winston2: IModulePatcher = {
     versionSpecifier: "2.x",
-    patch: winston2PatchFunction,
+    patch: winston2PatchFunction
 };
 
 export function enable() {

@@ -49,7 +49,7 @@ const redisPatchFunction: PatchFunction = (originalRedis) => {
 
 export const redis: IModulePatcher = {
     versionSpecifier: ">= 2.0.0 < 4.0.0",
-    patch: redisPatchFunction,
+    patch: redisPatchFunction
 };
 
 export function enable() {

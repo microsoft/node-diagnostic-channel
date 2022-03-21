@@ -4,10 +4,13 @@
 import * as path from "path";
 import * as semver from "semver";
 
+import { channel } from "./channel";
+
 export type PatchFunction = (module: any, path: string) => any;
 export interface IModulePatcher {
     versionSpecifier: string;
     patch: PatchFunction;
+    publisherName?: string;
 }
 export interface IModulePatchMap {
     [key: string]: IModulePatcher[];
@@ -22,7 +25,7 @@ const originalRequire = moduleModule.prototype.require;
 
 export function makePatchingRequire(knownPatches: IModulePatchMap) {
 
-    const patchedModules: {[path: string]: any} = {};
+    const patchedModules: { [path: string]: any } = {};
 
     return function patchedRequire(moduleId: string): any {
         const originalModule = originalRequire.apply(this, arguments);
@@ -62,6 +65,10 @@ export function makePatchingRequire(knownPatches: IModulePatchMap) {
             for (const modulePatcher of knownPatches[moduleId]) {
                 if (semver.satisfies(moduleVersion, modulePatcher.versionSpecifier)) {
                     modifiedModule = modulePatcher.patch(modifiedModule, modulePath);
+                    if (channel) {
+                        const name = modulePatcher.publisherName || moduleId;
+                        channel.addPatchedModule(name, moduleVersion);
+                    }
                 }
             }
             return patchedModules[modulePath] = modifiedModule;

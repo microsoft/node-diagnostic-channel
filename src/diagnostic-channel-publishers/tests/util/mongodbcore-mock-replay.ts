@@ -24,7 +24,7 @@ export const makeMongodbcoreConnectionReplayPatchFunction: (mongoCommunication: 
             Object.defineProperty(this, "connection", {
                 get: function() { return connection; },
                 set: function() {/* empty */},
-                configurable: true,
+                configurable: true
             });
 
             oConnect.apply(this, arguments);

@@ -1,17 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import * as assert from "assert";
-import {makePatchingRequire} from "../src/patchRequire";
+import * as sinon from "sinon";
+
+import { channel } from "../src/channel";
+import { makePatchingRequire } from "../src/patchRequire";
 
 describe("patchRequire", function() {
+    let sandbox: sinon.SinonSandbox;
     const nodeVersionWithoutPrerelease = process.version.match(/v([^-]*)/)[1];
     let originalRequire;
     before(() => {
         originalRequire = require("module").prototype.require;
+        sandbox = sinon.sandbox.create();
     });
 
     afterEach(() => {
         require("module").prototype.require = originalRequire;
+        sandbox.restore();
     });
 
     it("should produce a require-like function", function() {
@@ -28,8 +34,8 @@ describe("patchRequire", function() {
                 patch: function(originalModule) {
                     assert.strictEqual(originalModule, fs, "Invoked with wrong package");
                     return mock;
-                },
-            }],
+                }
+            }]
         });
 
         assert.strictEqual(patchedRequire("fs"), mock);
@@ -42,8 +48,8 @@ describe("patchRequire", function() {
                 versionSpecifier: "< 0.0.0",
                 patch: function(originalModule) {
                     throw new Error("Patching function called with incorrect version");
-                },
-            }],
+                }
+            }]
         });
 
         assert.strictEqual(patchedRequire("fs"), fs);
@@ -51,30 +57,30 @@ describe("patchRequire", function() {
 
     it("should call applicable patching functions in turn", function() {
         const fs = require("fs");
-        const mock1 = {x: 1};
-        const mock2 = {x: 2};
+        const mock1 = { x: 1 };
+        const mock2 = { x: 2 };
         const nodeVersion = nodeVersionWithoutPrerelease;
         const patchedRequire = makePatchingRequire({
             fs: [{
                 versionSpecifier: `< ${nodeVersion}`,
                 patch: function(originalModule) {
                     throw new Error("Patching with wrong version");
-                },
+                }
             },
             {
                 versionSpecifier: `${nodeVersion}`,
                 patch: function(originalModule) {
                     assert.equal(originalModule, fs);
                     return mock1;
-                },
+                }
             },
             {
                 versionSpecifier: `>= ${nodeVersion}`,
                 patch: function(originalModule) {
                     assert.equal(originalModule, mock1, "Patching out of order!");
                     return mock2;
-                },
-            }],
+                }
+            }]
         });
 
         assert.strictEqual(patchedRequire("fs"), mock2);
@@ -89,9 +95,9 @@ describe("patchRequire", function() {
                     versionSpecifier: `>= ${nodeVersionWithoutPrerelease}`,
                     patch: function(originalModule) {
                         return mock;
-                    },
-                },
-            ],
+                    }
+                }
+            ]
         });
 
         moduleModule.prototype.require = patchedRequire;
@@ -109,11 +115,47 @@ describe("patchRequire", function() {
                 patch: function(originalModule) {
                     assert.equal(originalModule, originalSemver);
                     return mock;
-                },
-            }],
+                }
+            }]
         });
 
         moduleModule.prototype.require = patchedRequire;
         assert.strictEqual(require("semver"), mock);
+    });
+
+    it("should add patched module in channel", function() {
+        const patch = sandbox.stub(channel, "addPatchedModule");
+        const moduleModule = require("module");
+        const patchedRequire = makePatchingRequire({
+            semver: [{
+                versionSpecifier: ">= 5.3.0 < 6.0.0",
+                patch: function(originalModule) {
+                    return originalModule;
+                }
+            }]
+        });
+        moduleModule.prototype.require = patchedRequire;
+        const semver = require("semver");
+        assert.ok(patch.called, "Add path method not executed");
+        assert.equal(patch.args[0][0], "semver");
+        assert.ok(semver.valid(patch.args[0][1]));
+    });
+
+    it("should use publisher name if provided when this is different to package name", function() {
+        const patch = sandbox.stub(channel, "addPatchedModule");
+        const moduleModule = require("module");
+        const patchedRequire = makePatchingRequire({
+            console: [{
+                versionSpecifier: ">0",
+                patch: function(originalModule) {
+                    return originalModule;
+                },
+                publisherName: "MyPublisherName"
+            }]
+        });
+        moduleModule.prototype.require = patchedRequire;
+        const console = require("console");
+        assert.ok(patch.called, "Add path method not executed");
+        assert.equal(patch.args[0][0], "MyPublisherName");
     });
 });
