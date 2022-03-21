@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 
 import * as assert from "assert";
-import {channel, IStandardEvent, makePatchingRequire} from "diagnostic-channel";
+import {channel, IStandardEvent} from "diagnostic-channel";
 import {Promise} from "q";
 import "zone.js";
 import {enable as enablePostgresPool} from "../../diagnostic-channel-publishers/src/pg-pool.pub";
@@ -37,7 +37,7 @@ describe("pg@6.x", () => {
         password: "test",
         database: "postgres",
         host: "127.0.0.1",
-        port: 5432,
+        port: 5432
     };
     const checkSuccess = (data: IPostgresTest): Error => {
         try {
@@ -97,7 +97,7 @@ describe("pg@6.x", () => {
             database: dbSettings.database,
             host: dbSettings.host,
             port: dbSettings.port,
-            max: 2,
+            max: 2
         });
     });
 
@@ -128,8 +128,8 @@ describe("pg@6.x", () => {
                     zone: child,
                     preparable: {
                         text: "SELECT $1::text",
-                        args: ["0"],
-                    },
+                        args: ["0"]
+                    }
                 });
 
                 if (bad) {
@@ -143,8 +143,8 @@ describe("pg@6.x", () => {
                         zone: child,
                         preparable: {
                             text: "SELECT $1",
-                            args: ["0"],
-                        },
+                            args: ["0"]
+                        }
                     }));
                 });
             });
@@ -160,7 +160,7 @@ describe("pg@6.x", () => {
                     res: r1,
                     err: e1,
                     zone: child,
-                    text: "SELECT NOW()",
+                    text: "SELECT NOW()"
                 });
 
                 if (bad) {
@@ -174,8 +174,8 @@ describe("pg@6.x", () => {
                         zone: child,
                         preparable: {
                             text: "SELECT $1",
-                            args: ["0"],
-                        },
+                            args: ["0"]
+                        }
                     }));
                 });
             });
@@ -191,7 +191,7 @@ describe("pg@6.x", () => {
                     res: r1,
                     err: e1,
                     zone: child,
-                    text: "SELECT NOW()",
+                    text: "SELECT NOW()"
                 });
 
                 if (bad) {
@@ -205,8 +205,8 @@ describe("pg@6.x", () => {
                         zone: child,
                         preparable: {
                             text: "SELECT $1",
-                            args: ["0"],
-                        },
+                            args: ["0"]
+                        }
                     }));
                 }});
             }});
@@ -222,7 +222,7 @@ describe("pg@6.x", () => {
                     res: r1,
                     err: e1,
                     zone: child,
-                    text: "SELECT NOW()",
+                    text: "SELECT NOW()"
                 });
 
                 if (bad) {
@@ -236,8 +236,8 @@ describe("pg@6.x", () => {
                         zone: child,
                         preparable: {
                             text: "SELECT $1",
-                            args: ["0"],
-                        },
+                            args: ["0"]
+                        }
                     }));
                 });
             });
@@ -255,8 +255,8 @@ describe("pg@6.x", () => {
                     zone: child,
                     preparable: {
                         text: "SELECT $1::text",
-                        args: ["0"],
-                    },
+                        args: ["0"]
+                    }
                 });
 
                 if (bad) {
@@ -273,8 +273,8 @@ describe("pg@6.x", () => {
                         zone: child,
                         preparable: {
                             text: "SELECT $1",
-                            args: ["0"],
-                        },
+                            args: ["0"]
+                        }
                     });
 
                     if (bad) {
@@ -296,8 +296,8 @@ describe("pg@6.x", () => {
                     zone: child,
                     preparable: {
                         text: "SELECT $1::text",
-                        args: ["0"],
-                    },
+                        args: ["0"]
+                    }
                 });
 
                 if (bad) {
@@ -314,8 +314,8 @@ describe("pg@6.x", () => {
                         zone: child,
                         preparable: {
                             text: "SELECT $1",
-                            args: ["0"],
-                        },
+                            args: ["0"]
+                        }
                     });
 
                     if (bad) {
@@ -335,7 +335,7 @@ describe("pg@6.x", () => {
                     res: res,
                     err: null,
                     zone: child,
-                    text: "SELECT NOW()",
+                    text: "SELECT NOW()"
                 });
 
                 if (bad) {
@@ -350,7 +350,7 @@ describe("pg@6.x", () => {
                         res: null,
                         err,
                         zone: child,
-                        text: "SELECT nonexistent",
+                        text: "SELECT nonexistent"
                     });
 
                     if (bad) {
@@ -370,7 +370,7 @@ describe("pg@6.x", () => {
                     res: res,
                     err: null,
                     zone: child,
-                    text: "SELECT NOW()",
+                    text: "SELECT NOW()"
                 }));
             }, done);
         });
@@ -387,8 +387,8 @@ describe("pg@6.x", () => {
                     zone: child,
                     preparable: {
                         text: "SELECT $1::text",
-                        args: ["0"],
-                    },
+                        args: ["0"]
+                    }
                 }));
             }, done);
         });
@@ -422,7 +422,7 @@ describe("pg@6.x", () => {
                                 res,
                                 err,
                                 zone: child,
-                                text: "SELECT NOW()",
+                                text: "SELECT NOW()"
                             }));
                         });
                     });
@@ -434,11 +434,10 @@ describe("pg@6.x", () => {
                         res,
                         err: null,
                         zone: child,
-                        text: "SELECT NOW()",
+                        text: "SELECT NOW()"
                     });
                 }, (e) => {
                     c1.release();
-                    c1err = e;
                 });
             });
         });
@@ -459,7 +458,7 @@ describe("pg@6.x", () => {
         };
         const config = {
             text: "SELECT NOW()",
-            callback: queryHandler,
+            callback: queryHandler
         };
 
         channel.subscribe("postgres", counter);

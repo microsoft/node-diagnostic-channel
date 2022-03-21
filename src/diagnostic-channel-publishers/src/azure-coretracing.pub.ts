@@ -88,7 +88,7 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
 export const azureCoreTracing: IModulePatcher = {
     versionSpecifier: ">= 1.0.0 < 2.0.0",
     patch: azureCoreTracingPatchFunction,
-    publisherName: publisherName,
+    publisherName: publisherName
 };
 
 export function enable() {

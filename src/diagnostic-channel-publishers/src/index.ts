@@ -27,7 +27,7 @@ export {
     pgPool,
     tedious,
     IPostgresData,
-    IPostgresResult,
+    IPostgresResult
 };
 
 export function enable() {

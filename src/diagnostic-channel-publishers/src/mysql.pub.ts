@@ -76,7 +76,7 @@ const mysqlPatchFunction: PatchFunction = function(originalMysql, originalMysqlP
 
     const connectionCallbackFunctions = [
         "connect", "changeUser",
-        "ping", "statistics", "end",
+        "ping", "statistics", "end"
     ];
 
     const connectionClass = require(`${path.dirname(originalMysqlPath)}/lib/Connection`);
@@ -94,7 +94,7 @@ const mysqlPatchFunction: PatchFunction = function(originalMysql, originalMysqlP
     });
 
     const poolCallbackFunctions = [
-        "_enqueueCallback",
+        "_enqueueCallback"
     ];
     const poolClass = require(`${path.dirname(originalMysqlPath)}/lib/Pool`);
 
@@ -105,7 +105,7 @@ const mysqlPatchFunction: PatchFunction = function(originalMysql, originalMysqlP
 
 export const mysql: IModulePatcher = {
     versionSpecifier: ">= 2.0.0 < 3.0.0",
-    patch: mysqlPatchFunction,
+    patch: mysqlPatchFunction
 };
 
 export function enable() {

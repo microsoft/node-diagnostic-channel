@@ -45,7 +45,7 @@ describe("winston", () => {
         const expected: IWinstonData = { message: "should intercept a new logger", meta: { testing: "new loggers", another: "meta field" }, level: "info", levelKind: "npm" };
 
         const loggerWithoutFilter = new winston.createLogger({
-            transports: [new winston.transports.Console()],
+            transports: [new winston.transports.Console()]
         });
         loggerWithoutFilter.info(expected.message, expected.meta);
         compareWinstonData(actual, expected);
@@ -55,7 +55,7 @@ describe("winston", () => {
         const expected: IWinstonData = { message: new Error("a caught error"), meta: { foo: "bar" }, level: "info", levelKind: "npm" };
 
         const logger = new winston.createLogger({
-            transports: [new winston.transports.Console()],
+            transports: [new winston.transports.Console()]
         });
         logger.info(expected.message, expected.meta);
         compareWinstonData(actual, expected);
@@ -65,7 +65,7 @@ describe("winston", () => {
         const expected: IWinstonData = { message: "test message", meta: { foo: "bar" }, level: "info", levelKind: "npm" };
 
         const logger = new winston.createLogger({
-            transports: [new winston.transports.Console()],
+            transports: [new winston.transports.Console()]
         });
         logger.info(expected.message, expected.meta);
         compareWinstonData(actual, expected);
@@ -81,7 +81,7 @@ describe("winston", () => {
 
         const logger = new winston.createLogger({
             format: winston.format.combine(filterMessage(), winston.format.json()),
-            transports: [new winston.transports.Console()],
+            transports: [new winston.transports.Console()]
         });
         logger.log("info", "unfiltered", expected.meta);
         expected.message = filteredMessage;
@@ -101,7 +101,7 @@ describe("winston", () => {
         });
         const logger = new winston.createLogger({
             format: winston.format.combine(filterMessage(), rewriter(), winston.format.json()),
-            transports: [new winston.transports.Console()],
+            transports: [new winston.transports.Console()]
         });
 
         const filterMessage2 = winston.format((info, opts) => {
@@ -115,7 +115,7 @@ describe("winston", () => {
         });
         logger.configure({
             format: winston.format.combine(filterMessage2(), rewriter2(), winston.format.json()),
-            transports: [new winston.transports.Console()],
+            transports: [new winston.transports.Console()]
         });
         logger.log("info", "unfiltered", {});
         compareWinstonData(actual, { message: "more filtered", meta: { rewritten: 2 }, level: "info", levelKind: "npm" });
@@ -131,7 +131,7 @@ describe("winston", () => {
         });
         logger.configure({
             format: winston.format.combine(filterMessage3(), rewriter3(), winston.format.json()),
-            transports: [new winston.transports.Console()],
+            transports: [new winston.transports.Console()]
         });
         logger.log("info", "unfiltered", {});
         compareWinstonData(actual, { message: "even more filtered", meta: { rewritten: 3 }, level: "info", levelKind: "npm" });
@@ -141,12 +141,12 @@ describe("winston", () => {
         const expected: IWinstonData = { message: "test message", level: "error", levelKind: "npm", meta: { some: "meta field", another: "metafield" } };
         const logger = new winston.createLogger({
             transports: [
-                new winston.transports.Console(),
-            ],
+                new winston.transports.Console()
+            ]
         });
 
         const childLogger = logger.child({
-            some: "meta field",
+            some: "meta field"
         });
         childLogger.error("test message", { another: "metafield" });
 
@@ -158,8 +158,8 @@ describe("winston", () => {
         const logger = new winston.createLogger({
             format: winston.format.combine(winston.format.colorize()),
             transports: [
-                new winston.transports.Console(),
-            ],
+                new winston.transports.Console()
+            ]
         });
 
         logger.error("test message");
@@ -171,8 +171,8 @@ describe("winston", () => {
         const logger = new winston.createLogger({
             levels: winston.config.syslog.levels,
             transports: [
-                new winston.transports.Console(),
-            ],
+                new winston.transports.Console()
+            ]
         });
 
         expected.levelKind = "syslog";
@@ -199,16 +199,16 @@ describe("winston", () => {
             foo: 0,
             bar: 1,
             baz: 2,
-            foobar: 3,
+            foobar: 3
         };
 
         const logger = winston.createLogger({
             levels: customLevels,
             transports: [
                 new winston.transports.Console({
-                    level: "foobar",
-                }),
-            ],
+                    level: "foobar"
+                })
+            ]
         });
 
         for (const level in customLevels) {

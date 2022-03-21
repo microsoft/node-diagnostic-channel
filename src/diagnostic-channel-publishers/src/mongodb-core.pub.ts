@@ -36,7 +36,7 @@ const mongodbcorePatchFunction: PatchFunction = function(originalMongoCore) {
 
 export const mongoCore: IModulePatcher = {
     versionSpecifier: ">= 2.0.0 < 4.0.0",
-    patch: mongodbcorePatchFunction,
+    patch: mongodbcorePatchFunction
 };
 
 export function enable() {

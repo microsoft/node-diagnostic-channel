@@ -27,7 +27,7 @@ const bunyanPatchFunction: PatchFunction = (originalBunyan) => {
 
 export const bunyan: IModulePatcher = {
     versionSpecifier: ">= 1.0.0 < 2.0.0",
-    patch: bunyanPatchFunction,
+    patch: bunyanPatchFunction
 };
 
 export function enable() {

@@ -75,7 +75,7 @@ export class ContextPreservingEventEmitter implements IChannel {
         if (listeners) {
             const standardEvent = {
                 timestamp: Date.now(),
-                data: event,
+                data: event
             };
             this.currentlyPublishing = true;
             listeners.forEach(({ listener, filter }) => {

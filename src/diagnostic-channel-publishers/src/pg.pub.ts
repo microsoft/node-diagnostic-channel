@@ -43,12 +43,12 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
             query: {},
             database: {
                 host: this.connectionParameters.host,
-                port: this.connectionParameters.port,
+                port: this.connectionParameters.port
             },
             result: null,
             error: null,
             duration: 0,
-            time: new Date(),
+            time: new Date()
         };
         const start = process.hrtime();
         let queryResult;
@@ -100,7 +100,7 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
                 if (values instanceof Array) {
                     data.query.preparable = {
                         text: config,
-                        args: values,
+                        args: values
                     };
                     callback = patchCallback(callback);
                 } else {
@@ -123,7 +123,7 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
                 } else if (config.values instanceof Array) {
                     data.query.preparable = {
                         text: config.text,
-                        args: config.values,
+                        args: config.values
                     };
                 } else {
                     data.query.text = config.text;
@@ -166,12 +166,12 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
             query: {},
             database: {
                 host: this.connectionParameters.host,
-                port: this.connectionParameters.port,
+                port: this.connectionParameters.port
             },
             result: null,
             error: null,
             duration: 0,
-            time: new Date(),
+            time: new Date()
         };
         const start = process.hrtime();
         let queryResult;
@@ -216,7 +216,7 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
                 if (values instanceof Array) {
                     data.query.preparable = {
                         text: config,
-                        args: values,
+                        args: values
                     };
                     callbackProvided = typeof callback === "function";
                     callback = callbackProvided ? patchCallback(callback) : callback;
@@ -236,7 +236,7 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
                 } else if (config.values instanceof Array) {
                     data.query.preparable = {
                         text: config.text,
-                        args: config.values,
+                        args: config.values
                     };
                 } else {
                     data.query.text = config.text;
@@ -290,13 +290,13 @@ function postgres7PatchFunction(originalPg, originalPgPath) {
 
 export const postgres6: IModulePatcher = {
     versionSpecifier: "6.*",
-    patch: postgres6PatchFunction,
+    patch: postgres6PatchFunction
 };
 
 export const postgres7: IModulePatcher = {
     versionSpecifier: ">=7.* <=8.*",
     patch: postgres7PatchFunction,
-    publisherName: publisherName,
+    publisherName: publisherName
 };
 
 export function enable() {

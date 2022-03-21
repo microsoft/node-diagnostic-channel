@@ -11,15 +11,15 @@ const config = {
     server: "localhost",
     options: {
         port: 14330,
-        database: "master",
+        database: "master"
     },
     authentication: {
         type: "default",
         options: {
             userName: "sa",
-            password: "yourStrong(!)Password",
-        },
-    },
+            password: "yourStrong(!)Password"
+        }
+    }
 };
 
 describe("tedious@6.x", () => {
@@ -50,18 +50,18 @@ describe("tedious@6.x", () => {
     it("should intercept execSql", (done) => {
         const expectation: ITediousData = {
             query: {
-                text: "select 42, 'hello world'",
+                text: "select 42, 'hello world'"
             },
             database: {
                 host: "localhost",
-                port: "14330",
+                port: "14330"
             },
             duration: null, // Duration is not checked by tests
             error: null,
             result: {
                 rowCount: 1,
-                rows: [],
-            },
+                rows: []
+            }
         };
         const child = Zone.current.fork({name: "child"});
         const handler = (err, rowCount) => {
