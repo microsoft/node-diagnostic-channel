@@ -21,8 +21,7 @@ describe("@azure/core-tracing@1.0.0-preview9+", () => {
         channel.subscribe("azure-coretracing", function(span) {
             events.push(span);
         });
-        coretracing = require("@azure/core-tracing");
-        api = require("@opentelemetry/api");
+        const coretracing = require("@azure/core-tracing");
         tracer = (<any>coretracing).getTracer();
     });
 

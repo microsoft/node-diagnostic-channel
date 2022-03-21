@@ -89,8 +89,8 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
             const azureSdkInstr = require("@azure/opentelemetry-instrumentation-azure-sdk") as typeof azureSdkInstrTypes;
             openTelemetryInstr.registerInstrumentations({
                 instrumentations: [
-                    azureSdkInstr.createAzureSdkInstrumentation(),
-                ],
+                    azureSdkInstr.createAzureSdkInstrumentation()
+                ]
             });
         }
 
