@@ -11,7 +11,7 @@ const config = {
     server: "localhost",
     options: {
         port: 14330,
-        database: "master"
+        database: "test_db"
     },
     authentication: {
         type: "default",
