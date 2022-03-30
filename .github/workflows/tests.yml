@@ -33,9 +33,16 @@ jobs:
       run: |
           sudo systemctl start postgresql.service
           pg_isready
+    - name: Create PostgreSQL testuser user
+      run: |
+        sudo -u postgres psql --command="CREATE USER testuser PASSWORD 'testpassword'" --command="\du"
     - name: Set up MySQL
       run: |
         sudo /etc/init.d/mysql start
         mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+    - name: Start SQL Server
+      run: |
+        docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 14330:1433 -d mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
     - run: npm install
     - run: gulp test
+

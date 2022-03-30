@@ -29,8 +29,8 @@ describe("pg@8.x", () => {
         actual = event.data;
     };
     const dbSettings = {
-        user: "postgres",
-        password: "test",
+        user: "testuser",
+        password: "testpassword",
         database: "postgres",
         host: "127.0.0.1",
         port: 5432
