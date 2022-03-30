@@ -1,8 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 import * as coreTracingTypes from "@azure/core-tracing";
+import * as azureSdkInstrTypes from "@azure/opentelemetry-instrumentation-azure-sdk";
 import * as opentelemetryTypes from "@opentelemetry/api";
+import * as opentelemetryInstrTypes from "@opentelemetry/instrumentation";
 import * as tracingTypes from "@opentelemetry/sdk-trace-base";
+
 import { channel, IModulePatcher, PatchFunction } from "diagnostic-channel";
 
 export const AzureMonitorSymbol = "Azure_Monitor_Tracer";
@@ -37,10 +40,10 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
                 // Patch startSpan instead of using spanProcessor.onStart because parentSpan must be
                 // set while the span is constructed
                 const startSpanOriginal = tracer.startSpan;
-                tracer.startSpan = function(name: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
+                tracer.startSpan = function (name: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
                     const span = startSpanOriginal.call(this, name, options, context);
                     const originalEnd = span.end;
-                    span.end = function() {
+                    span.end = function () {
                         const result = originalEnd.apply(this, arguments);
                         channel.publish(publisherName, span);
                         return result;
@@ -54,22 +57,24 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
             (coreTracing as any).setTracer(defaultTracer);
         } else { // Patch OpenTelemetry setGlobalTracerProvider  @azure/core-tracing > 1.0.0-preview.13
             const setGlobalTracerProviderOriginal = api.trace.setGlobalTracerProvider;
-            api.trace.setGlobalTracerProvider = function(tracerProvider: opentelemetryTypes.TracerProvider) {
+            api.trace.setGlobalTracerProvider = function (tracerProvider: opentelemetryTypes.TracerProvider) {
                 const getTracerOriginal = tracerProvider.getTracer;
-                tracerProvider.getTracer = function(tracerName, version) {
+                tracerProvider.getTracer = function (tracerName, version) {
                     const tracer = getTracerOriginal.call(this, tracerName, version);
                     if (!tracer[exports.AzureMonitorSymbol]) { // Avoid patching multiple times
                         const startSpanOriginal = tracer.startSpan;
-                        tracer.startSpan = function(spanName: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
+                        tracer.startSpan = function (spanName: string, options?: opentelemetryTypes.SpanOptions, context?: opentelemetryTypes.Context) {
                             const span = startSpanOriginal.call(this, spanName, options, context);
                             const originalEnd = span.end;
-                            span.end = function() {
+                            span.end = function () {
                                 const result = originalEnd.apply(this, arguments);
                                 channel.publish(publisherName, span);
                                 return result;
                             };
                             return span;
                         };
+
+
                         tracer[AzureMonitorSymbol] = true;
                     }
                     return tracer;
@@ -78,6 +83,15 @@ const azureCoreTracingPatchFunction: PatchFunction = (coreTracing: typeof coreTr
             };
             defaultProvider.register();
             api.trace.getSpan(api.context.active()); // seed OpenTelemetryScopeManagerWrapper with "active" symbol
+
+            // Register Azure SDK instrumentation
+            const openTelemetryInstr = require("@opentelemetry/instrumentation") as typeof opentelemetryInstrTypes;
+            const azureSdkInstr = require("@azure/opentelemetry-instrumentation-azure-sdk") as typeof azureSdkInstrTypes;
+            openTelemetryInstr.registerInstrumentations({
+                instrumentations: [
+                    azureSdkInstr.createAzureSdkInstrumentation()
+                ]
+            });
         }
 
         isPatched = true;

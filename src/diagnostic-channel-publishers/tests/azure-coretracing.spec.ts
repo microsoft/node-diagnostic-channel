@@ -21,9 +21,8 @@ describe("@azure/core-tracing@1.0.0-preview9+", () => {
         channel.subscribe("azure-coretracing", function(span) {
             events.push(span);
         });
-        const coreTracing = require("@azure/core-tracing");
-        tracer = api.trace.getTracerProvider().getTracer("Test Tracer");
-        coreTracing.setTracer(tracer);
+        const coretracing = require("@azure/core-tracing");
+        tracer = (<any>coretracing).getTracer();
     });
 
     beforeEach(() => {
