@@ -38,6 +38,5 @@ jobs:
         sudo /etc/init.d/mysql start
         mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
     - run: npm install -g gulp
-    - run: gulp clean
     - run: gulp init
     - run: gulp test
