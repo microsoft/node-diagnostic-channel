@@ -29,7 +29,6 @@ describe("mysql", function() {
 
     before(() => {
         enableMysql();
-        server.listen({port: 3306});
     });
     after(() => { server.close(); });
 
