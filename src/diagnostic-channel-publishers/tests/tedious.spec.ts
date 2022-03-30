@@ -10,7 +10,7 @@ import { enable as enableTedious, ITediousData } from "../src/tedious.pub";
 const config = {
     server: "localhost",
     options: {
-        port: 14330,
+        port: 3306,
         database: "test_db"
     },
     authentication: {
