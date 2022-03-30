@@ -37,7 +37,7 @@ jobs:
         docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 14330:1433 -d mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
     - name: Start Postgres
       run: |
-        docker run --name myPostgresDb -p 5455:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=test -e POSTGRES_DB=postgres POSTGRES_HOST=127.0.0.1 -d postgres
+        docker run -e 'POSTGRES_USER=postgres' -e 'POSTGRES_PASSWORD=test' -e 'POSTGRES_DB=postgres' -e 'POSTGRES_HOST=127.0.0.1' -p 5455:5432 -d postgres
     - run: npm install
     - run: gulp test
 
