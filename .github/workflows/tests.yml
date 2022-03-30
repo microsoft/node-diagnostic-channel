@@ -19,6 +19,20 @@ jobs:
       DB_USER: root
       DB_PASSWORD: root
 
+    services:
+      # label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres:latest
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: test
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+        ports:
+          # maps tcp port 5432 on service container to the host
+          - 5432:5432
+
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
@@ -29,13 +43,6 @@ jobs:
       uses: supercharge/mongodb-github-action@1.7.0
       with:
         mongodb-version: ${{ matrix.mongodb-version }}
-    - name: Setup PostgreSQL on Ubuntu
-      run: |
-          sudo systemctl start postgresql.service
-          pg_isready
-    - name: Create PostgreSQL testuser user
-      run: |
-        sudo -u postgres psql --command="CREATE USER testuser PASSWORD 'testpassword'" --command="\du"
     - name: Set up MySQL
       run: |
         sudo /etc/init.d/mysql start
