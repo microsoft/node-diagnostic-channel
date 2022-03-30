@@ -14,6 +14,10 @@ jobs:
         # node-version: [10.x, 12.x, 14.x]
         node-version: [10.x]
         mongodb-version: ['4.4']
+    env:
+      DB_DATABASE: test_db
+      DB_USER: root
+      DB_PASSWORD: root
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
@@ -27,7 +31,7 @@ jobs:
     - name: Set up MySQL
       run: |
         sudo /etc/init.d/mysql start
-        mysql -e 'CREATE DATABASE ${{ test_db }};' -u${{ root }} -p${{ root }}
+        mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
     - name: Start SQL Server
       run: |
         docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 14330:1433 -d mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
