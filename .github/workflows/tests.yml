@@ -14,26 +14,6 @@ jobs:
         # node-version: [10.x, 12.x, 14.x]
         node-version: [10.x]
         mongodb-version: ['4.4']
-    env:
-      DB_DATABASE: test_db
-      DB_USER: root
-      DB_PASSWORD: root
-
-    services:
-      # label used to access the service container
-      postgres:
-        # Docker Hub image
-        image: postgres:latest
-        env:
-          POSTGRES_DB: postgres
-          POSTGRES_PASSWORD: test
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-          POSTGRES_HOST: 127.0.0.1
-        ports:
-          # maps tcp port 5432 on service container to the host
-          - 5432:5432
-
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
@@ -47,10 +27,13 @@ jobs:
     - name: Set up MySQL
       run: |
         sudo /etc/init.d/mysql start
-        mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+        mysql -e 'CREATE DATABASE ${{ test_db }};' -u${{ root }} -p${{ root }}
     - name: Start SQL Server
       run: |
         docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 14330:1433 -d mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
+    - name: Start Postgres
+      run: |
+        docker run --name myPostgresDb -p 5455:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=test -e POSTGRES_DB=postgres POSTGRES_HOST=127.0.0.1 -d postgres
     - run: npm install
     - run: gulp test
 
