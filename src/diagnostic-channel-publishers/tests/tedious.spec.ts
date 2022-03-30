@@ -16,8 +16,8 @@ const config = {
     authentication: {
         type: "default",
         options: {
-            userName: "sa",
-            password: "yourStrong(!)Password"
+            userName: "root",
+            password: "root"
         }
     }
 };

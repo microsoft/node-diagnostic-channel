@@ -11,12 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x]
+        # node-version: [10.x, 12.x, 14.x]
+        node-version: [10.x]
         mongodb-version: ['4.4']
     env:
       DB_DATABASE: test_db
-      DB_USER: sa
-      DB_PASSWORD: yourStrong(!)Password
+      DB_USER: root
+      DB_PASSWORD: root
 
     steps:
     - uses: actions/checkout@v2
@@ -28,14 +29,14 @@ jobs:
       uses: supercharge/mongodb-github-action@1.7.0
       with:
         mongodb-version: ${{ matrix.mongodb-version }}
-    - name: Set up MySQL
-      run: |
-        sudo /etc/init.d/mysql start
-        mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
     - name: Setup PostgreSQL on Ubuntu
       run: |
           sudo systemctl start postgresql.service
           pg_isready
+    - name: Set up MySQL
+      run: |
+        sudo /etc/init.d/mysql start
+        mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
     - run: npm ci
     - run: gulp init
     - run: gulp test
