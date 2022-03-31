@@ -1,5 +1,9 @@
 # Diagnostic Channel Publishers Change List
 
+### 1.0.5 March, 2022
+
+* Integrate with latest changes in Azure SDK.
+
 ### 1.0.4 January, 2022
 
 * Update OpenTelemetry dependencies.

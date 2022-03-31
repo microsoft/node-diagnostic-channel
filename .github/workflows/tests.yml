@@ -1,0 +1,45 @@
+name: Integration Tests CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x]
+        mongodb-version: ['4.4']
+    env:
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      SQL_SERVER_PASSWORD: yourStrong(!)Password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Start MongoDB
+      uses: supercharge/mongodb-github-action@1.7.0
+      with:
+        mongodb-version: ${{ matrix.mongodb-version }}
+    - name: Set up MySQL
+      run: |
+        sudo /etc/init.d/mysql start
+        mysql -e 'CREATE DATABASE ${{ env.MYSQL_DATABASE }};' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
+    - name: Start SQL Server
+      run: |
+        docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=${{ env.SQL_SERVER_PASSWORD }}' -p 14330:1433 -d mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
+    - name: Start Postgres
+      run: |
+        docker run -e 'POSTGRES_USER=${{ env.POSTGRES_USER }}' -e 'POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }}' -e 'POSTGRES_DB=postgres' -e 'POSTGRES_HOST=127.0.0.1' -p 5455:5432 -d postgres
+    - run: npm install
+    - run: gulp test
+
