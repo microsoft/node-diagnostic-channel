@@ -66,7 +66,6 @@ gulp.task('install-main', gulp.series(function (done) {
     runNpmTask('install', './src/diagnostic-channel');
     runNpmTask('install', './src/publisher-legacy-tests/winston2');
     runNpmTask('install', './src/publisher-legacy-tests/mongo3.2.7');
-    runNpmTask('install', './src/publisher-legacy-tests/pg6');
     done();
 }));
 
