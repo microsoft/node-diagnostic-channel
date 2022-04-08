@@ -84,7 +84,7 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
     }
 
     // Helper function which returns either set level or highest level
-    function getLogLevel (opts) {
+    function getLogLevel(opts) {
         // Check whether a level has been provided
         if (opts?.level) {
             return opts.level;
