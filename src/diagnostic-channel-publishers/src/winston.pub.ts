@@ -83,44 +83,36 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
         }
     }
 
-    // Patch this function
-    function patchedConfigure() {
+    // Helper function which returns either set level or highest level
+    function getLogLevel (opts) {
+        // Check whether a level has been provided
+        if (opts?.level) {
+            return opts.level;
+        }
+
         // Grab highest sev logging level in case of custom logging levels
-        let levels = originalWinston.config.npm.levels;
-        if (arguments && arguments[0] && arguments[0].levels) {
-            levels = arguments[0].levels;
-        }
-        let lastLevel;
-        for (const level in levels) {
-            if (levels.hasOwnProperty(level)) {
-                lastLevel = lastLevel === undefined || levels[level] > levels[lastLevel] ? level : lastLevel;
-            }
-        }
-        this.add(new AppInsightsTransport(originalWinston, { level: lastLevel }));
+        const levels = opts?.levels ?? originalWinston.config.npm.levels;
+        const maxEntry = Object.entries(levels).reduce((a, b) => {
+            return (a && a[1] > b[1]) ? a : b;
+        });
+        return maxEntry[0];
+    }
+
+    // Patch this function
+    function patchedConfigure(opts) {
+        this.add(new AppInsightsTransport(originalWinston, { level: getLogLevel(opts) }));
     }
 
     const origCreate = originalWinston.createLogger;
-    originalWinston.createLogger = function patchedCreate() {
-        // Grab highest sev logging level in case of custom logging levels
-        let levels = originalWinston.config.npm.levels;
-        if (arguments && arguments[0] && arguments[0].levels) {
-            levels = arguments[0].levels;
-        }
-        let lastLevel;
-        for (const level in levels) {
-            if (levels.hasOwnProperty(level)) {
-                lastLevel = lastLevel === undefined || levels[level] > levels[lastLevel] ? level : lastLevel;
-            }
-        }
-
+    originalWinston.createLogger = function patchedCreate(opts) {
         // Add custom app insights transport to the end
         // Remark: Configure is not available until after createLogger()
         // and the Logger prototype is not exported in winston 3.x, so
         // patch both createLogger and configure. Could also call configure
         // again after createLogger, but that would cause configure to be called
         // twice per create.
-        const result = origCreate.apply(this, arguments);
-        result.add(new AppInsightsTransport(originalWinston, { level: lastLevel }));
+        const result = origCreate.call(this, opts);
+        result.add(new AppInsightsTransport(originalWinston, { level: getLogLevel(opts) }));
 
         const origConfigure = result.configure;
         result.configure = function() {
