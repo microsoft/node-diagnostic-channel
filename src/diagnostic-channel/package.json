@@ -5,7 +5,7 @@
   "types": "./dist/src/channel.d.ts",
   "scripts": {
     "build": "tsc",
-    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "lint": "eslint ./ --fix",
     "clean": "rimraf ./dist",
     "test": "mocha ./dist/tests/**/*.js",
     "debug": "mocha --inspect-brk ./dist/tests/**/*.js"

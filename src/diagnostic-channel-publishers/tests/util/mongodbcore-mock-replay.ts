@@ -39,14 +39,13 @@ export const makeMongodbcoreConnectionReplayPatchFunction: (mongoCommunication: 
             const next = mongoCommunication.shift();
             if (next.send) {
                 const expected = new Buffer(next.send);
-                if (true || expected.compare(buffer) === 0) {
-                    if (mongoCommunication[0].recv) {
-                        const data = new Buffer(mongoCommunication.shift().recv);
-                        setTimeout(() => {
-                            this.connection.emit("data", data);
-                        }, 0);
-                    }
-                }/*
+                if (mongoCommunication[0].recv) {
+                    const data = new Buffer(mongoCommunication.shift().recv);
+                    setTimeout(() => {
+                        this.connection.emit("data", data);
+                    }, 0);
+                }
+                /*
                 // TODO: add additional validation that the test doesn't get broken by changes in mongo's communication approach?
                 else {
                     console.log(expected.toString());
