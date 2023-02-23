@@ -23,7 +23,6 @@
         "no-useless-escape": "off",                                 // Suppressing Error -- need to Review Later
         "no-trailing-spaces": [ "warn", { "skipBlankLines": true }],// Enabled for auto fixing
         "no-const-assign": "error",
-        "no-constant-condition": "off",
         "comma-dangle": [ "error", "never" ],                       // Enabled for auto fixing
         "security/detect-object-injection": "off",                  // Suppress Warning -- need to Review Later
         "@typescript-eslint/ban-types": "off",
