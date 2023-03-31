@@ -4,6 +4,8 @@ import {channel, IModulePatcher, PatchFunction} from "diagnostic-channel";
 import {EventEmitter} from "events";
 import {CopyStreamQuery, CopyToStreamQuery} from "pg-copy-streams";
 
+const publisherName = "postgres";
+
 // copy the pg.Result type: https://node-postgres.com/api/result
 export interface IPostgresResult {
     rowCount: number;
@@ -42,12 +44,12 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
             query: {},
             database: {
                 host: this.connectionParameters.host,
-                port: this.connectionParameters.port,
+                port: this.connectionParameters.port
             },
             result: null,
             error: null,
             duration: 0,
-            time: new Date(),
+            time: new Date()
         };
         const start = process.hrtime();
         let queryResult;
@@ -62,7 +64,7 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
                 data.result = res && { rowCount: res.rowCount, command: res.command };
                 data.error = err;
                 data.duration = Math.ceil((end[0] * 1e3) + (end[1] / 1e6));
-                channel.publish("postgres", data);
+                channel.publish(publisherName, data);
 
                 // emulate weird internal behavior in pg@6
                 // on success, the callback is called *before* query events are emitted
@@ -99,7 +101,7 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
                 if (values instanceof Array) {
                     data.query.preparable = {
                         text: config,
-                        args: values,
+                        args: values
                     };
                     callback = patchCallback(callback);
                 } else {
@@ -122,7 +124,7 @@ function postgres6PatchFunction(originalPg, originalPgPath) {
                 } else if (config.values instanceof Array) {
                     data.query.preparable = {
                         text: config.text,
-                        args: config.values,
+                        args: config.values
                     };
                 } else {
                     data.query.text = config.text;
@@ -165,12 +167,12 @@ function postgres8PatchFunction(originalPg, originalPgPath) {
             query: {},
             database: {
                 host: this.connectionParameters.host,
-                port: this.connectionParameters.port,
+                port: this.connectionParameters.port
             },
             result: null,
             error: null,
             duration: 0,
-            time: new Date(),
+            time: new Date()
         };
         const start = process.hrtime();
         let queryResult: Promise<any> | CopyStreamQuery | CopyToStreamQuery;
@@ -185,7 +187,7 @@ function postgres8PatchFunction(originalPg, originalPgPath) {
                 data.result = res && { rowCount: res.rowCount, command: res.command };
                 data.error = err;
                 data.duration = Math.ceil((end[0] * 1e3) + (end[1] / 1e6));
-                channel.publish("postgres", data);
+                channel.publish(publisherName, data);
 
                 if (err) {
                     if (cb) {
@@ -215,7 +217,7 @@ function postgres8PatchFunction(originalPg, originalPgPath) {
                 if (values instanceof Array) {
                     data.query.preparable = {
                         text: config,
-                        args: values,
+                        args: values
                     };
                     callbackProvided = typeof callback === "function";
                     callback = callbackProvided ? patchCallback(callback) : callback;
@@ -235,7 +237,7 @@ function postgres8PatchFunction(originalPg, originalPgPath) {
                 } else if (config.values instanceof Array) {
                     data.query.preparable = {
                         text: config.text,
-                        args: config.values,
+                        args: config.values
                     };
                 } else {
                     data.query.text = config.text;
@@ -303,12 +305,14 @@ function postgres8PatchFunction(originalPg, originalPgPath) {
 
 export const postgres6: IModulePatcher = {
     versionSpecifier: "6.*",
-    patch: postgres6PatchFunction,
+    patch: postgres6PatchFunction
 };
 
 export const postgres7: IModulePatcher = {
     versionSpecifier: ">=7.* <=8.*",
     patch: postgres8PatchFunction,
+    patch: postgres7PatchFunction,
+    publisherName: publisherName
 };
 
 export function enable() {

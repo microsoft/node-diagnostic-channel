@@ -37,25 +37,25 @@ const tediousPatchFunction: PatchFunction = (originalTedious: typeof tediousType
                 query: {},
                 database: {
                     host: null,
-                    port: null,
+                    port: null
                 },
                 result: null,
                 error: null,
-                duration: 0,
+                duration: 0
             };
             return channel.bindToContext(function(err: Error | null, rowCount?: number | null, rows?: any) {
                 const end = process.hrtime(start);
                 data = { ...data,
                     database: {
                         host: this.connection.config.server,
-                        port: this.connection.config.options.port,
+                        port: this.connection.config.options.port
                     },
                     result: !err && { rowCount, rows },
                     query: {
-                        text: this.parametersByName.statement.value,
+                        text: this.parametersByName.statement.value
                     },
                     error: err,
-                    duration: Math.ceil((end[0] * 1e3) + (end[1] / 1e6)),
+                    duration: Math.ceil((end[0] * 1e3) + (end[1] / 1e6))
                 };
                 channel.publish<ITediousData>("tedious", data);
                 origCallback.call(this, err, rowCount, rows);
@@ -71,7 +71,7 @@ const tediousPatchFunction: PatchFunction = (originalTedious: typeof tediousType
 
 export const tedious: IModulePatcher = {
     versionSpecifier: ">= 6.0.0 < 9.0.0",
-    patch: tediousPatchFunction,
+    patch: tediousPatchFunction
 };
 
 export function enable() {

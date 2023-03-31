@@ -61,7 +61,7 @@ describe("mongodb@>3.3", function() {
             const z2 = Zone.current.fork({name: "2"});
             z2.run(() =>
             collection.insertMany([
-                {a: 1}, {a: 2}, {a: 3},
+                {a: 1}, {a: 2}, {a: 3}
             ], function(err2, result) {
                 if (err2) {
                     done(err);

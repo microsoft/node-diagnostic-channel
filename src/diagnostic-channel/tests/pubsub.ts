@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
-import {channel} from "../src/channel";
+import { channel, trueFilter } from "../src/channel";
 
 import * as assert from "assert";
 
@@ -10,7 +10,7 @@ describe("pub/sub", function() {
     });
 
     it("should invoke subscribers", function() {
-        const testData = {test: true};
+        const testData = { test: true };
         let invokedData;
         channel.subscribe("test", (data) => {
             invokedData = data;
@@ -53,9 +53,9 @@ describe("pub/sub", function() {
     });
 
     it("should invoke subscribers in the same context as the publish", function() {
-        const c1 = {name: "1"};
-        const c2 = {name: "2"};
-        let context = {name: "root"};
+        const c1 = { name: "1" };
+        const c2 = { name: "2" };
+        let context = { name: "root" };
 
         const invocations = [];
         const subscribeFunction = () => {
@@ -75,9 +75,9 @@ describe("pub/sub", function() {
     });
 
     it("should preserve contexts when wrapping function is used", function() {
-        const c1 = {name: "1"};
-        const c2 = {name: "2"};
-        const croot = {name: "root"};
+        const c1 = { name: "1" };
+        const c2 = { name: "2" };
+        const croot = { name: "root" };
         let context = croot;
 
         channel.addContextPreservation((cb) => {
@@ -131,11 +131,11 @@ describe("pub/sub", function() {
         assert(!channel.shouldPublish("test"), "Filter returned false but shouldPublish was true");
     });
 
-    it ("should report a need for publishing if at least one subscriber reports true", function() {
+    it("should report a need for publishing if at least one subscriber reports true", function() {
         const filterRetVals = [false, false, true, false, false];
         const mkFilter = (index) => () => filterRetVals[index];
         for (let i = 0; i < filterRetVals.length; ++i) {
-            channel.subscribe("test", function() {/* empty */}, mkFilter(i));
+            channel.subscribe("test", function() {/* empty */ }, mkFilter(i));
         }
 
         assert.equal(channel.shouldPublish("test"), filterRetVals.some((v) => v));
@@ -191,5 +191,25 @@ describe("pub/sub", function() {
 
         assert.equal(calls.length, 2, "Wrong number of listeners invoked");
         assert.deepEqual(calls, [2, 1], "Wrong listeners removed");
+    });
+
+    it("should execute callback if module is patched before subscribing", function(done) {
+        channel.addPatchedModule("testCallback", "1.2.3");
+        channel.subscribe("testCallback", () => { return; }, trueFilter, (name, version) => {
+            assert.equal(name, "testCallback");
+            assert.equal(version, "1.2.3");
+            done();
+        });
+    });
+
+    it("should execute callback when module is patched", function() {
+        let callCount = 0;
+        const callback = (name, version) => {
+            callCount++;
+        };
+        channel.subscribe("something", () => { return; }, trueFilter, callback);
+        assert.equal(callCount, 0);
+        channel.addPatchedModule("something", "4.5.6");
+        assert.equal(callCount, 1);
     });
 });

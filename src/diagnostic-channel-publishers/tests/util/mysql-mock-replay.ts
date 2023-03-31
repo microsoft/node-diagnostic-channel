@@ -23,7 +23,7 @@ export function makeMysqlConnectionReplayFunction(mysqlCommunication): PatchFunc
                 Object.defineProperty(this, "_socket", {
                     get: function() { return connection; },
                     set: function() {/* empty */},
-                    configurable: true,
+                    configurable: true
                 });
 
                 connection.write = function() {
