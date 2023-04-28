@@ -17,8 +17,8 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 1. Fork this repo
 2. Clone your fork locally (`git clone https://github.com/<youruser>/node-diagnostic-channel
 3. Open a terminal and move into your local copy (`cd node-diagnostic-channel`)
-* Make sure you have `tsc`, `gulp`, `mocha`, and `docker` installed globally.
-4. Run `gulp init` to install dependencies in every subdirectory, and 
+* Make sure you have `tsc`, `grunt`, `mocha`, and `docker` installed globally.
+4. Run `grunt init` to install dependencies in every subdirectory, and 
 `docker-compose up -d; gulp test; docker-compose down` to run the test suites. Docker
 is useful to run the databases and other external services that are required by the
 modules that we are patching. If you don't want to install docker, you must install
