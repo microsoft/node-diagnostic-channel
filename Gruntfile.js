@@ -96,7 +96,7 @@ module.exports = function (grunt) {
         runNpmTasks('run clean', getDirectories());
     });
 
-    grunt.registerTask('init', ['install-sub', 'build-sub']);
+    grunt.registerTask('init', ['install-main', 'build-main', 'install-sub', 'build-sub']);
     grunt.registerTask('build', ['install-main', 'build-main']);
     grunt.registerTask('test', ['build-main', 'test-main']);
     grunt.registerTask('lint', ['lint']);
