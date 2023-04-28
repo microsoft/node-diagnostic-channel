@@ -41,5 +41,5 @@ jobs:
       run: |
         docker run -e 'POSTGRES_USER=${{ env.POSTGRES_USER }}' -e 'POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }}' -e 'POSTGRES_DB=postgres' -e 'POSTGRES_HOST=127.0.0.1' -p 5455:5432 -d postgres
     - run: npm install
-    - run: gulp test
+    - run: npm run test
 

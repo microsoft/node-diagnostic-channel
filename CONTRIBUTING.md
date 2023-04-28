@@ -19,7 +19,7 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 3. Open a terminal and move into your local copy (`cd node-diagnostic-channel`)
 * Make sure you have `tsc`, `grunt`, `mocha`, and `docker` installed globally.
 4. Run `grunt init` to install dependencies in every subdirectory, and 
-`docker-compose up -d; gulp test; docker-compose down` to run the test suites. Docker
+`docker-compose up -d; nmp run test; docker-compose down` to run the test suites. Docker
 is useful to run the databases and other external services that are required by the
 modules that we are patching. If you don't want to install docker, you must install
 PostgreSQL (and possibly more to come) and run a server on port 16200 before running
