@@ -1,5 +1,9 @@
 # Diagnostic Channel Publishers Change List
 
+### 1.0.6 April, 2023
+
+* Add support for cursor and streams in Postgres.
+
 ### 1.0.5 March, 2022
 
 * Integrate with latest changes in Azure SDK.
