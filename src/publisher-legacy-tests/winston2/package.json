@@ -18,8 +18,8 @@
   "devDependencies": {
     "@types/mocha": "^2.2.40",
     "@types/node": "~8.0.12",
-    "diagnostic-channel": "0.2.0",
-    "mocha": "^3.2.0",
+    "diagnostic-channel": "^0.0.0",
+    "mocha": "^10.2.0",
     "q": "1.5.0",
     "rimraf": "^2.6.1",
     "typescript": "4.1.2",
