@@ -111,7 +111,7 @@ describe("patchRequire", function() {
         const mock = {};
         const patchedRequire = makePatchingRequire({
             semver: [{
-                versionSpecifier: ">= 5.3.0 < 6.0.0",
+                versionSpecifier: ">= 7.0.0 < 8.0.0",
                 patch: function(originalModule) {
                     assert.equal(originalModule, originalSemver);
                     return mock;
@@ -128,7 +128,7 @@ describe("patchRequire", function() {
         const moduleModule = require("module");
         const patchedRequire = makePatchingRequire({
             semver: [{
-                versionSpecifier: ">= 5.3.0 < 6.0.0",
+                versionSpecifier: ">= 7.0.0 < 8.0.0",
                 patch: function(originalModule) {
                     return originalModule;
                 }
