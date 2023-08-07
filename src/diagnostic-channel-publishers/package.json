@@ -27,7 +27,7 @@
     "@types/mocha": "^8.2.2",
     "@types/node": "^8.5.0",
     "@types/pg": "7.4.11",
-    "@types/tedious": "^16.4.0",
+    "@types/tedious": "^4.0.9",
     "diagnostic-channel": "file:../diagnostic-channel",
     "mocha": "^10.2.0",
     "mongodb": "^3.6.6",
