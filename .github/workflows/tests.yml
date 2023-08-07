@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x]
+        node-version: [14.x, 16.x]
         mongodb-version: ['4.4']
     env:
       MYSQL_DATABASE: test_db
