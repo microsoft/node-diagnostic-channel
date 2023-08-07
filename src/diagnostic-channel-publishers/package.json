@@ -27,7 +27,7 @@
     "@types/mocha": "^8.2.2",
     "@types/node": "^8.5.0",
     "@types/pg": "7.4.11",
-    "@types/tedious": "^4.0.3",
+    "@types/tedious": "^16.4.0",
     "diagnostic-channel": "file:../diagnostic-channel",
     "mocha": "^10.2.0",
     "mongodb": "^3.6.6",
@@ -37,7 +37,7 @@
     "redis": "^3.0.2",
     "rimraf": "^2.6.1",
     "sinon": "1.17.6",
-    "tedious": "^8.0.1",
+    "tedious": "^16.1.0",
     "typescript": "4.1.2",
     "winston": "^3.2.1",
     "zone.js": "^0.8.5"
