@@ -1,5 +1,9 @@
 # Diagnostic Channel Change List
 
+### 1.1.1 August 2023
+
+* Update dependencies with security vulnerabilities
+
 ### 1.1.0 January 2022
 
 * Add callback to notify about patched modules
