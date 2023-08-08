@@ -1,5 +1,9 @@
 # Diagnostic Channel Publishers Change List
 
+### 1.0.7 August 2023
+
+* Update dependencies with security vulnerabilities.
+
 ### 1.0.6 April, 2023
 
 * Add support for cursor and streams in Postgres.
