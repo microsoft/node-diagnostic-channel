@@ -20,7 +20,7 @@
     "@types/node": "~8.0.12",
     "diagnostic-channel": "0.2.0",
     "mocha": "^3.2.0",
-    "mongodb": "3.2.7",
+    "mongodb": "^3.7.4",
     "q": "1.5.0",
     "rimraf": "^2.6.1",
     "typescript": "4.1.2",
