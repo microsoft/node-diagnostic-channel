@@ -20,7 +20,7 @@
     "@types/node": "~8.0.12",
     "@types/pg": "7.4.11",
     "diagnostic-channel": "^0.0.0",
-    "mocha": "^10.2.0",
+    "mocha": "^3.2.0",
     "pg": "^8.11.1",
     "q": "1.5.0",
     "rimraf": "^2.6.1",
