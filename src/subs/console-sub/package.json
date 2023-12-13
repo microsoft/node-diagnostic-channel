@@ -4,19 +4,13 @@
     "main": "console.sub.js",
     "scripts": {
         "build": "tsc",
-        "lint": "tslint -c tslint.json -p tsconfig.json"
+        "lint": "eslint ./ --fix"
     },
-    "devDependencies": {
+    "dependencies": {
         "applicationinsights": ">= 0.19.0",
-        "diagnostic-channel": "../../diagnostic-channel",
-        "diagnostic-channel-publishers": "../../diagnostic-channel-publishers",
-        "mocha": "^3.2.0",
-        "tslint": "^5.0.0",
+        "diagnostic-channel": "file:../../diagnostic-channel",
+        "diagnostic-channel-publishers": "file:../../diagnostic-channel-publishers",
         "typescript": "4.1.2"
-    },
-    "peerDependencies": {
-        "applicationinsights": ">= 0.19.0",
-        "diagnostic-channel": "*"
     },
     "license": "MIT"
 }

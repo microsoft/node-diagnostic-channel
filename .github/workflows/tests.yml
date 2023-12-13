@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x]
+        node-version: [14.x]
         mongodb-version: ['4.4']
     env:
       MYSQL_DATABASE: test_db
@@ -41,5 +41,5 @@ jobs:
       run: |
         docker run -e 'POSTGRES_USER=${{ env.POSTGRES_USER }}' -e 'POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }}' -e 'POSTGRES_DB=postgres' -e 'POSTGRES_HOST=127.0.0.1' -p 5455:5432 -d postgres
     - run: npm install
-    - run: gulp test
+    - run: npm run test
 
