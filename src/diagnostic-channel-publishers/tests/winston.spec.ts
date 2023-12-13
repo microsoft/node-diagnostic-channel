@@ -6,6 +6,11 @@ import { channel, IStandardEvent } from "diagnostic-channel";
 import { enable as enableWinston, IWinstonData } from "../src/winston.pub";
 
 function compareWinstonData(actual: IWinstonData, expected: IWinstonData): void {
+    // Null check for when we do not expect a message to have been send
+    if (actual === null && expected === null) {
+        return;
+    }
+
     assert.strictEqual(actual.message, expected.message, "messages are not equal");
     // // meta is an object, but we can always use the same reference
     assert.deepEqual(actual.meta, expected.meta, "meta objects are not equal");
@@ -68,6 +73,17 @@ describe("winston", () => {
             transports: [new winston.transports.Console()]
         });
         logger.info(expected.message, expected.meta);
+        compareWinstonData(actual, expected);
+    });
+
+    it("should not send messages when the configured level is lower than the message", () => {
+        const expected: IWinstonData = null;
+
+        const logger = new winston.createLogger({
+            level: 'warn',
+            transports: [new winston.transports.Console()]
+        });
+        logger.info('Test message');
         compareWinstonData(actual, expected);
     });
 
