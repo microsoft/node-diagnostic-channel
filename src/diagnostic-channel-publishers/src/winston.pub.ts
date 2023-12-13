@@ -92,10 +92,13 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
 
         // Grab highest sev logging level in case of custom logging levels
         const levels = opts?.levels ?? originalWinston.config.npm.levels;
-        const maxEntry = Object.entries(levels).reduce((a, b) => {
-            return (a && a[1] > b[1]) ? a : b;
-        });
-        return maxEntry[0];
+        let lastLevel;
+        for (const level in levels) {
+            if (levels.hasOwnProperty(level)) {
+                lastLevel = lastLevel === undefined || levels[level] > levels[lastLevel] ? level : lastLevel;
+            }
+        }
+        return lastLevel;
     }
 
     // Patch this function
@@ -115,7 +118,7 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
         result.add(new AppInsightsTransport(originalWinston, { level: getLogLevel(opts) }));
 
         const origConfigure = result.configure;
-        result.configure = function() {
+        result.configure = function () {
             origConfigure.apply(this, arguments);
             patchedConfigure.apply(this, arguments);
         };
@@ -124,7 +127,7 @@ const winston3PatchFunction: PatchFunction = (originalWinston) => {
     };
 
     const origRootConfigure = originalWinston.configure;
-    originalWinston.configure = function() {
+    originalWinston.configure = function () {
         origRootConfigure.apply(this, arguments);
         patchedConfigure.apply(this, arguments);
     };
