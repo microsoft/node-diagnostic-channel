@@ -1,5 +1,9 @@
 # Diagnostic Channel Publishers Change List
 
+### 1.0.8 January 2024
+
+* Fixed log level configuration for Winston 3
+
 ### 1.0.7 August 2023
 
 * Update dependencies with security vulnerabilities.
