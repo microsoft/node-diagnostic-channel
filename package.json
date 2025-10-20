@@ -11,8 +11,7 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "@azure/opentelemetry-instrumentation-azure-sdk": "^1.0.0-beta.1",
-    "@types/node": "^8.0.0"
+    "@types/node": "^16.0.0"
   },
   "devDependencies": {
     "eslint": "^8.46.0",
