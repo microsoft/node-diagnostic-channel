@@ -12,7 +12,7 @@ describe("patchRequire", function() {
     let originalRequire;
     before(() => {
         originalRequire = require("module").prototype.require;
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
     });
 
     afterEach(() => {
