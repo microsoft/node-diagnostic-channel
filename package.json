@@ -11,13 +11,16 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "@types/node": "^16.0.0"
+    "@types/node": "^20.0.0"
   },
   "devDependencies": {
     "eslint": "^8.46.0",
     "eslint-plugin-node": "^11.1.0",
     "grunt": "^1.6.1",
-    "typescript": "^4.9.0"
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   },
   "repository": {
     "type": "git",
