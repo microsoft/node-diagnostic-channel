@@ -17,12 +17,11 @@ import * as net from "net";
 import * as path from "path";
 
 enum Mode {
-    REPLAY,
-    RECORD,
+    REPLAY = "REPLAY",
+    RECORD = "RECORD",
 }
 
-/* tslint:disable-next-line:prefer-const */
-let mode: Mode = Mode.REPLAY;
+let mode: Mode = Mode.REPLAY as Mode;
 
 describe("mysql", function() {
     const server = net.createServer();
