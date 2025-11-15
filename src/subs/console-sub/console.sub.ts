@@ -20,7 +20,7 @@ export const subscriber = (event: IStandardEvent<consolePub.IConsoleData>) => {
         const severity = event.data.stderr
             ? SeverityLevel.Warning
             : SeverityLevel.Information;
-        ApplicationInsights.defaultClient.trackTrace({message: event.data.message, severity: severity});
+        ApplicationInsights.defaultClient.trackTrace({message: event.data.message, severity: severity as number});
     }
 };
 

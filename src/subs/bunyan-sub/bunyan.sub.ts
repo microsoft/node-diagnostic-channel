@@ -25,7 +25,7 @@ bunyanToAILevelMap[60] = SeverityLevel.Critical;
 export const subscriber = (event: IStandardEvent<bunyan.IBunyanData>) => {
     if (ApplicationInsights.defaultClient) {
         const AIlevel = bunyanToAILevelMap[event.data.level];
-        ApplicationInsights.defaultClient.trackTrace({message: event.data.result, severity: AIlevel});
+        ApplicationInsights.defaultClient.trackTrace({message: event.data.result, severity: AIlevel as number});
     }
 };
 
