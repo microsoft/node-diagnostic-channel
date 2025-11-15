@@ -47,12 +47,26 @@ function runNpmTask(taskName, directory) {
     return proc.status;
 }
 
-function runNpmTasks(taskName, dirs) {
+function runNpmTasks(taskName, dirs, continueOnError) {
+    var failures = [];
     for (var i = 0; i < dirs.length; i++) {
         var rc = runNpmTask(taskName, dirs[i]);
         if (rc !== 0) {
-            throw new Error(`$Error: command \`${taskName}\` in directory ${dirs[i]} failed with return code ${rc}`);
+            failures.push({ directory: dirs[i], returnCode: rc });
+            if (!continueOnError) {
+                throw new Error(`$Error: command \`${taskName}\` in directory ${dirs[i]} failed with return code ${rc}`);
+            }
         }
+    }
+    
+    if (failures.length > 0 && continueOnError) {
+        console.error('\n========================================');
+        console.error('SUMMARY: Some tasks failed:');
+        failures.forEach(function(failure) {
+            console.error(`  - ${taskName} in ${failure.directory} (exit code: ${failure.returnCode})`);
+        });
+        console.error('========================================\n');
+        throw new Error(`${failures.length} task(s) failed. See summary above.`);
     }
 }
 
@@ -85,7 +99,7 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('test-main', 'Test in main directories.', function (arg1, arg2) {
-        runNpmTasks('run test', getDirectories());
+        runNpmTasks('run test', getDirectories(), true); // Continue on error to run all tests
     });
 
     grunt.registerTask('lint', 'Lint in all directories', function (arg1, arg2) {
