@@ -5,12 +5,13 @@ import ApplicationInsights = require("applicationinsights");
 import {channel, IStandardEvent} from "diagnostic-channel";
 
 import {console as consolePub} from "diagnostic-channel-publishers";
+import {SeverityLevel} from "applicationinsights/out/Declarations/Contracts";
 
 export const subscriber = (event: IStandardEvent<consolePub.IConsoleData>) => {
     if (ApplicationInsights.defaultClient) {
         const severity = event.data.stderr
-            ? ApplicationInsights.Contracts.SeverityLevel.Warning
-            : ApplicationInsights.Contracts.SeverityLevel.Information;
+            ? SeverityLevel.Warning
+            : SeverityLevel.Information;
         ApplicationInsights.defaultClient.trackTrace({message: event.data.message, severity: severity});
     }
 };
