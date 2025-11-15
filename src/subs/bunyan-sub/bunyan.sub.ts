@@ -4,28 +4,20 @@ import ApplicationInsights = require("applicationinsights");
 import {channel, IStandardEvent} from "diagnostic-channel";
 import {bunyan} from "diagnostic-channel-publishers";
 
-// SeverityLevel enum values for Application Insights
-enum SeverityLevel {
-    Verbose = 0,
-    Information = 1,
-    Warning = 2,
-    Error = 3,
-    Critical = 4
-}
-
-// Mapping from bunyan levels defined at https://github.com/trentm/node-bunyan/blob/master/lib/bunyan.js#L256
-const bunyanToAILevelMap = {};
-bunyanToAILevelMap[10] = SeverityLevel.Verbose;
-bunyanToAILevelMap[20] = SeverityLevel.Verbose;
-bunyanToAILevelMap[30] = SeverityLevel.Information;
-bunyanToAILevelMap[40] = SeverityLevel.Warning;
-bunyanToAILevelMap[50] = SeverityLevel.Error;
-bunyanToAILevelMap[60] = SeverityLevel.Critical;
+// Mapping from bunyan levels to Application Insights severity strings
+// https://github.com/trentm/node-bunyan/blob/master/lib/bunyan.js#L256
+const bunyanToAILevelMap: {[key: number]: string} = {};
+bunyanToAILevelMap[10] = "Verbose";
+bunyanToAILevelMap[20] = "Verbose";
+bunyanToAILevelMap[30] = "Information";
+bunyanToAILevelMap[40] = "Warning";
+bunyanToAILevelMap[50] = "Error";
+bunyanToAILevelMap[60] = "Critical";
 
 export const subscriber = (event: IStandardEvent<bunyan.IBunyanData>) => {
     if (ApplicationInsights.defaultClient) {
         const AIlevel = bunyanToAILevelMap[event.data.level];
-        ApplicationInsights.defaultClient.trackTrace({message: event.data.result, severity: AIlevel as number});
+        ApplicationInsights.defaultClient.trackTrace({message: event.data.result, severity: AIlevel as any});
     }
 };
 
