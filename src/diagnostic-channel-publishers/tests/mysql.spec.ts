@@ -56,10 +56,16 @@ describe("mysql", function() {
             database: "test"
         });
 
+        // Add error handler to prevent uncaught connection errors
+        pool.on('error', (err: any) => {
+            // Errors will be handled by the query callbacks
+        });
+
         const z1 = Zone.current.fork({name: "1"});
         const z2 = Zone.current.fork({name: "2"});
 
         const promises = [];
+        let testCompleted = false;
 
         // We need to ensure that once we run out of connections in the pool, context is still preserved
         z1.run(() => {
@@ -107,12 +113,18 @@ describe("mysql", function() {
         });
 
         Q.all(promises).then(() => {
+            if (testCompleted) return;
+            testCompleted = true;
             assert.equal(events.length, 4);
 
             if (mode === Mode.RECORD) {
                 fs.writeFileSync(tracePath, JSON.stringify(mysqlCommunication));
             }
             done();
-        }).catch(done);
+        }).catch((err) => {
+            if (testCompleted) return;
+            testCompleted = true;
+            done(err);
+        });
     });
 });
