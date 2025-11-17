@@ -64,11 +64,13 @@ jobs:
         # Start MySQL service
         sudo systemctl start mysql
         sleep 10
-        # Wait for MySQL to be ready
-        sudo mysqladmin ping --silent
-        # Configure MySQL for compatibility - set root password and authentication
-        sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ env.MYSQL_PASSWORD }}';"
-        sudo mysql -e "FLUSH PRIVILEGES;"
+        # GitHub Actions MySQL comes with root having no password and auth_socket plugin
+        # Create root password without changing from existing auth method first
+        sudo mysql -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${{ env.MYSQL_PASSWORD }}');"
+        # Now switch to mysql_native_password
+        sudo mysql -u root -p${{ env.MYSQL_PASSWORD }} -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ env.MYSQL_PASSWORD }}'; FLUSH PRIVILEGES;"
+        # Test connection
+        mysqladmin -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ping
         # Create databases
         mysql -h 127.0.0.1 -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} -e 'CREATE DATABASE ${{ env.MYSQL_DATABASE }};'
         mysql -h 127.0.0.1 -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} -e 'CREATE DATABASE test;'
