@@ -9,6 +9,7 @@ on:
 jobs:
   basic-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false  # Continue running all Node.js versions even if one fails
       matrix:
@@ -34,6 +35,7 @@ jobs:
 
   integration:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false  # Continue running all Node.js versions even if one fails
       matrix:
@@ -57,27 +59,82 @@ jobs:
       with:
         mongodb-version: ${{ matrix.mongodb-version }}
     - name: Set up MySQL
+      timeout-minutes: 3
       run: |
-        sudo /etc/init.d/mysql start
-        mysql -e 'CREATE DATABASE ${{ env.MYSQL_DATABASE }};' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
+        # Configure MySQL for compatibility
+        sudo mysql -e "USE mysql; UPDATE user SET authentication_string=PASSWORD('${{ env.MYSQL_PASSWORD }}'), plugin='mysql_native_password' WHERE User='${{ env.MYSQL_USER }}'; FLUSH PRIVILEGES;"
+        sudo systemctl restart mysql
+        sleep 5
+        # Create databases
+        mysql -h 127.0.0.1 -e 'CREATE DATABASE ${{ env.MYSQL_DATABASE }};' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
+        mysql -h 127.0.0.1 -e 'CREATE DATABASE test;' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
     - name: Start SQL Server
+      timeout-minutes: 3
       run: |
         docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=${{ env.SQL_SERVER_PASSWORD }}' -p 14330:1433 -d mcr.microsoft.com/mssql/server:2019-latest
     - name: Start PostgreSQL
+      timeout-minutes: 3
       run: |
         docker run -e 'POSTGRES_USER=${{ env.POSTGRES_USER }}' -e 'POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }}' -e 'POSTGRES_DB=postgres' -e 'POSTGRES_HOST=127.0.0.1' -p 5455:5432 -d postgres:13
     - name: Wait for services
+      timeout-minutes: 5
       run: |
-        sleep 10
-        # Test connections
-        nc -z localhost 27017 || echo "MongoDB not ready"
-        nc -z localhost 3306 || echo "MySQL not ready"  
-        nc -z localhost 14330 || echo "SQL Server not ready"
-        nc -z localhost 5455 || echo "PostgreSQL not ready"
+        echo "Waiting for database services to be ready..."
+        
+        # Wait for MongoDB (up to 2 minutes)
+        for i in {1..24}; do
+          if nc -z localhost 27017; then
+            echo "MongoDB is ready"
+            break
+          fi
+          echo "Waiting for MongoDB... (attempt $i/24)"
+          sleep 5
+        done
+        
+        # Wait for MySQL (up to 2 minutes)  
+        for i in {1..24}; do
+          if nc -z 127.0.0.1 3306; then
+            echo "MySQL is ready"
+            # Test actual connection with credentials
+            if mysql -h 127.0.0.1 -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} -e "SELECT 1;" > /dev/null 2>&1; then
+              echo "MySQL authentication successful"
+              break
+            fi
+          fi
+          echo "Waiting for MySQL... (attempt $i/24)"
+          sleep 5
+        done
+        
+        # Wait for SQL Server (up to 2 minutes)
+        for i in {1..24}; do
+          if nc -z localhost 14330; then
+            echo "SQL Server is ready"
+            break
+          fi
+          echo "Waiting for SQL Server... (attempt $i/24)"
+          sleep 5
+        done
+        
+        # Wait for PostgreSQL (up to 2 minutes)
+        for i in {1..24}; do
+          if nc -z localhost 5455; then
+            echo "PostgreSQL is ready"
+            break
+          fi
+          echo "Waiting for PostgreSQL... (attempt $i/24)"
+          sleep 5
+        done
+        
+        echo "Service readiness check complete"
     - run: npm install
     - run: npm run build
     - name: Run full integration tests
+      timeout-minutes: 10
       run: |
         cd src/diagnostic-channel-publishers
+        echo "Current environment variables:"
+        env | grep -E "(MYSQL|NODE|DATABASE)" || true
+        echo "Testing Docker MySQL connectivity:"
+        nc -z localhost 3306 && echo "MySQL port is reachable" || echo "MySQL port is not reachable"
         npm test
 

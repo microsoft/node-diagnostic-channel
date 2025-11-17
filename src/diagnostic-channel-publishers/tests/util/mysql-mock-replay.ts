@@ -30,7 +30,7 @@ export function makeMysqlConnectionReplayFunction(mysqlCommunication): PatchFunc
                     const next = thread.shift();
                     if (next.send) {
                         if (thread[0].recv) {
-                            setTimeout(() => connection.emit("data", new Buffer(thread.shift().recv)), 0);
+                            setTimeout(() => connection.emit("data", Buffer.from(thread.shift().recv)), 0);
                         }
                         return true;
                     } else {
@@ -43,7 +43,7 @@ export function makeMysqlConnectionReplayFunction(mysqlCommunication): PatchFunc
                     // The mysql client expects the server to push data as the client connects, not only after a query from the client
                     if (thread[0].recv) {
                         setTimeout(() => {
-                            connection.emit("data", new Buffer(thread.shift().recv));
+                            connection.emit("data", Buffer.from(thread.shift().recv));
                         }, 0);
                     }
                 }, 0);

@@ -50,9 +50,9 @@ describe("mysql", function() {
 
         const pool = mysql.createPool({
             connectionLimit: 2,
-            host: "localhost",
-            user: "root",
-            password: "secret",
+            host: process.env.CI ? "127.0.0.1" : "localhost",  // Force IPv4 in CI
+            user: "root", 
+            password: process.env.CI ? "root" : "secret",  // Use CI password in CI environment
             database: "test"
         });
 
