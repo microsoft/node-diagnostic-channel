@@ -70,8 +70,8 @@ jobs:
         sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ env.MYSQL_PASSWORD }}';"
         sudo mysql -e "FLUSH PRIVILEGES;"
         # Create databases
-        mysql -h 127.0.0.1 -e 'CREATE DATABASE ${{ env.MYSQL_DATABASE }};' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
-        mysql -h 127.0.0.1 -e 'CREATE DATABASE test;' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
+        mysql -h 127.0.0.1 -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} -e 'CREATE DATABASE ${{ env.MYSQL_DATABASE }};'
+        mysql -h 127.0.0.1 -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} -e 'CREATE DATABASE test;'
     - name: Start SQL Server
       timeout-minutes: 3
       run: |
