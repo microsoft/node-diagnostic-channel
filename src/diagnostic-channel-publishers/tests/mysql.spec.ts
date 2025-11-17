@@ -17,12 +17,11 @@ import * as net from "net";
 import * as path from "path";
 
 enum Mode {
-    REPLAY,
-    RECORD,
+    REPLAY = "REPLAY",
+    RECORD = "RECORD",
 }
 
-/* tslint:disable-next-line:prefer-const */
-let mode: Mode = Mode.REPLAY;
+let mode: Mode = Mode.REPLAY as Mode;
 
 describe("mysql", function() {
     const server = net.createServer();
@@ -51,16 +50,22 @@ describe("mysql", function() {
 
         const pool = mysql.createPool({
             connectionLimit: 2,
-            host: "localhost",
-            user: "root",
-            password: "secret",
+            host: process.env.CI ? "127.0.0.1" : "localhost",  // Force IPv4 in CI
+            user: "root", 
+            password: process.env.CI ? "root" : "secret",  // Use CI password in CI environment
             database: "test"
+        });
+
+        // Add error handler to prevent uncaught connection errors
+        pool.on('error', (err: any) => {
+            // Errors will be handled by the query callbacks
         });
 
         const z1 = Zone.current.fork({name: "1"});
         const z2 = Zone.current.fork({name: "2"});
 
         const promises = [];
+        let testCompleted = false;
 
         // We need to ensure that once we run out of connections in the pool, context is still preserved
         z1.run(() => {
@@ -108,12 +113,18 @@ describe("mysql", function() {
         });
 
         Q.all(promises).then(() => {
+            if (testCompleted) return;
+            testCompleted = true;
             assert.equal(events.length, 4);
 
             if (mode === Mode.RECORD) {
                 fs.writeFileSync(tracePath, JSON.stringify(mysqlCommunication));
             }
             done();
-        }).catch(done);
+        }).catch((err) => {
+            if (testCompleted) return;
+            testCompleted = true;
+            done(err);
+        });
     });
 });

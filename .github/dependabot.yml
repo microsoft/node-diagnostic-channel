@@ -1,0 +1,104 @@
+
+version: 2
+updates:
+  # Root package.json
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+    
+  # Diagnostic channel core package
+  - package-ecosystem: "npm"
+    directory: "/src/diagnostic-channel"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+      
+  # Diagnostic channel publishers package
+  - package-ecosystem: "npm"
+    directory: "/src/diagnostic-channel-publishers"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+      
+  # Sample application
+  - package-ecosystem: "npm"
+    directory: "/sample"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+      
+  # Subscriber packages
+  - package-ecosystem: "npm"
+    directory: "/src/subs/bunyan-sub"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+      
+  - package-ecosystem: "npm"
+    directory: "/src/subs/console-sub"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+      
+  - package-ecosystem: "npm"
+    directory: "/src/subs/mongodb-sub"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+      
+  - package-ecosystem: "npm"
+    directory: "/src/subs/mysql-sub"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+      
+  - package-ecosystem: "npm"
+    directory: "/src/subs/redis-sub"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+      
+  # Publisher legacy tests
+  - package-ecosystem: "npm"
+    directory: "/src/publisher-legacy-tests/winston2"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+      
+  - package-ecosystem: "npm"
+    directory: "/src/publisher-legacy-tests/mongo3.2.7"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+      
+  - package-ecosystem: "npm"
+    directory: "/src/publisher-legacy-tests/pg6"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10

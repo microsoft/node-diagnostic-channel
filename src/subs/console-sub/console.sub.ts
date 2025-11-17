@@ -9,9 +9,9 @@ import {console as consolePub} from "diagnostic-channel-publishers";
 export const subscriber = (event: IStandardEvent<consolePub.IConsoleData>) => {
     if (ApplicationInsights.defaultClient) {
         const severity = event.data.stderr
-            ? ApplicationInsights.Contracts.SeverityLevel.Warning
-            : ApplicationInsights.Contracts.SeverityLevel.Information;
-        ApplicationInsights.defaultClient.trackTrace({message: event.data.message, severity: severity});
+            ? "Warning"
+            : "Information";
+        ApplicationInsights.defaultClient.trackTrace({message: event.data.message, severity: severity as any});
     }
 };
 
