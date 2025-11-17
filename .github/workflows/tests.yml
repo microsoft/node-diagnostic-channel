@@ -61,10 +61,14 @@ jobs:
     - name: Set up MySQL
       timeout-minutes: 3
       run: |
-        # Configure MySQL for compatibility
-        sudo mysql -e "USE mysql; UPDATE user SET authentication_string=PASSWORD('${{ env.MYSQL_PASSWORD }}'), plugin='mysql_native_password' WHERE User='${{ env.MYSQL_USER }}'; FLUSH PRIVILEGES;"
-        sudo systemctl restart mysql
-        sleep 5
+        # Start MySQL service
+        sudo systemctl start mysql
+        sleep 10
+        # Wait for MySQL to be ready
+        sudo mysqladmin ping --silent
+        # Configure MySQL for compatibility - set root password and authentication
+        sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ env.MYSQL_PASSWORD }}';"
+        sudo mysql -e "FLUSH PRIVILEGES;"
         # Create databases
         mysql -h 127.0.0.1 -e 'CREATE DATABASE ${{ env.MYSQL_DATABASE }};' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
         mysql -h 127.0.0.1 -e 'CREATE DATABASE test;' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
