@@ -41,7 +41,7 @@
     "tedious": "^8.0.1",
     "typescript": "4.9.5",
     "winston": "^3.2.1",
-    "zone.js": "^0.8.5"
+    "zone.js": "^0.15.1"
   },
   "peerDependencies": {
     "diagnostic-channel": "*"
