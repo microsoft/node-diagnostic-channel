@@ -7,7 +7,7 @@
     "build": "tsc && node copyTestAssets.js",
     "lint": "eslint ./ --fix",
     "clean": "rimraf ./dist",
-    "test": "npm run test:unit && npm run test:integration",
+    "test": "npm run test:unit",
     "test:unit": "mocha ./dist/tests/{console,winston,azure-coretracing,redis,*.unit}.spec.js",
     "test:integration": "mocha ./dist/tests/{mysql,mongodb,pg,tedious}.spec.js",
     "debug": "mocha --inspect-brk ./dist/tests/{*.js,**/*.js}"

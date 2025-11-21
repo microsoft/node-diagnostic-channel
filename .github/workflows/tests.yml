@@ -111,6 +111,7 @@ jobs:
         echo "Service readiness check complete"
     - run: npm install
     - run: npm run build
+    - run: npm run test
     - name: Run integration tests
       timeout-minutes: 10
       run: |
