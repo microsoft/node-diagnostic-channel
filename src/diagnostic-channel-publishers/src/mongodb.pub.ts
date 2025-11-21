@@ -17,7 +17,7 @@ export interface IMongoData {
     succeeded: boolean;
 }
 
-const mongodbPatchFunction: PatchFunction = function(originalMongo) {
+export const mongodbPatchFunction: PatchFunction = function(originalMongo) {
     const listener = originalMongo.instrument({
         operationIdGenerator: {
             next: function() {

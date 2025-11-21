@@ -6,7 +6,7 @@
         "lint": "tslint -c tslint.json -p tsconfig.json"
     },
     "dependencies": {
-        "applicationinsights": "^0.19.0",
+        "applicationinsights": "*",
         "bunyan-sub": "../src/subs/bunyan-sub",
         "console-sub": "../src/subs/console-sub",
         "diagnostic-channel": "../src/diagnostic-channel",

@@ -30,8 +30,8 @@ jobs:
       run: |
         cd src/diagnostic-channel-publishers
         npm run build
-        # Run only tests that don't require database connections
-        ./node_modules/.bin/mocha ./dist/tests/console.spec.js ./dist/tests/winston.spec.js ./dist/tests/azure-coretracing.spec.js
+        # Run only unit tests that don't require database connections
+        npm run test:unit
 
   integration:
     runs-on: ubuntu-latest
@@ -111,14 +111,13 @@ jobs:
         echo "Service readiness check complete"
     - run: npm install
     - run: npm run build
-    - name: Run full integration tests
+    - name: Run integration tests
       timeout-minutes: 10
       run: |
         cd src/diagnostic-channel-publishers
         echo "Current environment variables:"
         env | grep -E "(MYSQL|NODE|DATABASE)" || true
-        echo "Testing Docker MySQL connectivity:"
-        echo "MySQL tests disabled - running without MySQL tests"
-        # Run tests excluding MySQL and force exit
-        timeout 300 ./node_modules/.bin/mocha ./dist/tests/*.spec.js --grep "mysql" --invert --exit
+        echo "Running integration tests (real database connections)"
+        # Run integration tests that connect to real databases
+        npm run test:integration
 

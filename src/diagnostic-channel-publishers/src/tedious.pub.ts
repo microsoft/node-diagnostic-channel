@@ -28,7 +28,7 @@ export interface ITediousData {
     error?: Error;
 }
 
-const tediousPatchFunction: PatchFunction = (originalTedious: typeof tediousTypes) => {
+export const tediousPatchFunction: PatchFunction = (originalTedious: typeof tediousTypes) => {
     const originalMakeRequest: Function = (originalTedious.Connection.prototype as any).makeRequest;
     (originalTedious.Connection.prototype as any).makeRequest = function makeRequest() {
         function getPatchedCallback(origCallback: CompletionCallback) {

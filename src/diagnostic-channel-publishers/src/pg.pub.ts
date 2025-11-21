@@ -32,7 +32,7 @@ export interface IPostgresData {
 
 type PostgresCallback = (err: Error | null, res: IPostgresResult) => unknown;
 
-function postgres6PatchFunction(originalPg, originalPgPath) {
+export function postgres6PatchFunction(originalPg, originalPgPath) {
     const originalClientQuery = originalPg.Client.prototype.query;
     const diagnosticOriginalFunc = "__diagnosticOriginalFunc";
 
