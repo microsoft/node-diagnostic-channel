@@ -32,11 +32,11 @@
     "@types/sinon": "^17.0.3",
     "sinon": "^18.0.0",
     "q": "^1.5.1",
-    "@azure/core-tracing": "1.0.0-preview.13",
-    "@azure/opentelemetry-instrumentation-azure-sdk": "^1.0.0-beta.1",
-    "@opentelemetry/api": "^1.0.4",
-    "@opentelemetry/instrumentation": "^0.27.0",
-    "@opentelemetry/sdk-trace-base": "^1.0.1"
+    "@azure/core-tracing": "^1.1.2",
+    "@azure/opentelemetry-instrumentation-azure-sdk": "^1.0.0-beta.5",
+    "@opentelemetry/api": "^1.7.0",
+    "@opentelemetry/instrumentation": "^0.46.0",
+    "@opentelemetry/sdk-trace-base": "^1.18.1"
   },
   "engines": {
     "node": ">=16.0.0"

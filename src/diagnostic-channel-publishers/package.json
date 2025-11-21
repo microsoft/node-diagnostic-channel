@@ -10,6 +10,7 @@
     "test": "npm run test:unit",
     "test:unit": "mocha ./dist/tests/{console,winston,azure-coretracing,redis,*.unit}.spec.js",
     "test:integration": "mocha ./dist/tests/{mysql,mongodb,pg,tedious}.spec.js",
+    "test:all": "npm run test:unit && npm run test:integration",
     "debug": "mocha --inspect-brk ./dist/tests/{*.js,**/*.js}"
   },
   "homepage": "https://github.com/Microsoft/node-diagnostic-channel",
@@ -22,11 +23,6 @@
   },
   "description": "A collection of pre-built module patches that enable existing npm modules to publish diagnostic data",
   "devDependencies": {
-    "@azure/core-tracing": "1.0.0-preview.13",
-    "@azure/opentelemetry-instrumentation-azure-sdk": "^1.0.0-beta.1",
-    "@opentelemetry/api": "^1.0.4",
-    "@opentelemetry/instrumentation": "^0.27.0",
-    "@opentelemetry/sdk-trace-base": "^1.0.1",
     "@types/pg": "7.4.11",
     "@types/tedious": "^4.0.3",
     "diagnostic-channel": "file:../diagnostic-channel",
