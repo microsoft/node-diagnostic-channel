@@ -10,7 +10,6 @@
   ],
   "main": "Gruntfile.js",
   "scripts": {
-    "postinstall": "grunt init",
     "build": "grunt build",
     "lint": "eslint ./ --fix",
     "clean": "grunt clean",

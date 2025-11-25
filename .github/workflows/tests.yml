@@ -21,10 +21,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: Install dependencies
-      run: npm install --prefer-offline --no-audit
+      run: npm install --prefer-offline --no-audit --ignore-scripts
       timeout-minutes: 5
     - name: Build packages
-      run: npm run build
+      run: grunt build
       timeout-minutes: 5
     - name: Run unit tests (diagnostic-channel)
       run: |
@@ -114,10 +114,10 @@ jobs:
         
         echo "Service readiness check complete"
     - name: Install dependencies
-      run: npm install --prefer-offline --no-audit
+      run: npm install --prefer-offline --no-audit --ignore-scripts
       timeout-minutes: 5
     - name: Build packages
-      run: npm run build
+      run: grunt build
       timeout-minutes: 5
     - name: Run unit tests (always succeeds independently)
       run: |
