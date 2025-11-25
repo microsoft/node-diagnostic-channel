@@ -16,7 +16,7 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "@types/node": "18.15.13",
+    "@types/node": "24.10.1",
     "applicationinsights": "*",
     "zone.js": "~0.14.6"
   },
