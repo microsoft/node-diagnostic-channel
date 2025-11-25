@@ -16,6 +16,6 @@
         "redis-sub": "../src/subs/redis-sub"
     },
     "devDependencies": {
-        "tslint": "^5.0.0"
+        "tslint": "^6.1.3"
     }
 }
