@@ -24,7 +24,7 @@
   "description": "A collection of pre-built module patches that enable existing npm modules to publish diagnostic data",
   "devDependencies": {
     "@types/pg": "7.4.11",
-    "@types/tedious": "^4.0.3",
+    "@types/tedious": "^18.0.0",
     "diagnostic-channel": "file:../diagnostic-channel",
     "mongodb": "^3.6.6",
     "mysql": "^2.16.0",
