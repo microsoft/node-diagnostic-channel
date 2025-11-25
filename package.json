@@ -16,19 +16,19 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "@types/node": "18.15.13",
+    "@types/node": "24.10.1",
     "applicationinsights": "*",
     "zone.js": "~0.14.6"
   },
   "devDependencies": {
-    "eslint": "^8.46.0",
+    "eslint": "^9.39.1",
     "eslint-plugin-node": "^11.1.0",
     "grunt": "^1.6.1",
-    "typescript": "4.9.5",
+    "typescript": "5.9.3",
     "rimraf": "^5.0.0",
-    "mocha": "^10.0.0",
+    "mocha": "^11.7.5",
     "@types/mocha": "^10.0.0",
-    "@types/sinon": "^17.0.3",
+    "@types/sinon": "^21.0.0",
     "sinon": "^18.0.0",
     "q": "^1.5.1",
     "@azure/core-tracing": "^1.1.2",
