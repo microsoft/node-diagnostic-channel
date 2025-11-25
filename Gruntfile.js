@@ -6,19 +6,12 @@ var util = require('util');
 function getDirectories() {
     return [
         './src/diagnostic-channel',
-        './src/diagnostic-channel-publishers',
-        './src/publisher-legacy-tests/winston2',
-        './src/publisher-legacy-tests/mongo3.2.7'
+        './src/diagnostic-channel-publishers'
     ];
 }
 
 function getAdditionalDirectories() {
     return [
-        './src/subs/bunyan-sub',
-        './src/subs/console-sub',
-        './src/subs/mongodb-sub',
-        './src/subs/mysql-sub',
-        './src/subs/redis-sub',
         './sample'];
 }
 
@@ -86,8 +79,6 @@ module.exports = function (grunt) {
         runNpmTask('link diagnostic-channel', './src/diagnostic-channel-publishers');
         runNpmTask('install', './src/diagnostic-channel-publishers');
         runNpmTask('install', './src/diagnostic-channel');
-        runNpmTask('install', './src/publisher-legacy-tests/winston2');
-        runNpmTask('install', './src/publisher-legacy-tests/mongo3.2.7');
     });
 
     grunt.registerTask('build-sub', 'Build in sub directories.', function (arg1, arg2) {
@@ -110,7 +101,6 @@ module.exports = function (grunt) {
         runNpmTasks('run clean', getDirectories());
     });
 
-    grunt.registerTask('init', ['install-main', 'build-main', 'install-sub', 'build-sub']);
     grunt.registerTask('build', ['install-main', 'build-main']);
     grunt.registerTask('test', ['build-main', 'test-main']);
     grunt.registerTask('lint', ['lint']);

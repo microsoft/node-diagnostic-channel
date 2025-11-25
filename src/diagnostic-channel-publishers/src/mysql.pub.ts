@@ -28,7 +28,7 @@ export interface IMysqlData {
     time: Date;
 }
 
-const mysqlPatchFunction: PatchFunction = function(originalMysql, originalMysqlPath) {
+export const mysqlPatchFunction: PatchFunction = function(originalMysql, originalMysqlPath) {
     // The `name` passed in here is for debugging purposes,
     // to help distinguish which object is being patched.
     const patchObjectFunction = (obj: any, name: string) => {

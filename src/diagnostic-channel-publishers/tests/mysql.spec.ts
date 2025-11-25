@@ -25,22 +25,22 @@ let mode: Mode = Mode.REPLAY as Mode;
 
 describe("mysql", function() {
     const server = net.createServer();
+    const traceName = "mysql.trace.json";
+    const tracePath = path.join(__dirname, "util", traceName);
 
     before(() => {
-        enableMysql();
-    });
-    after(() => { server.close(); });
-
-    it("should fire events when we interact with it, and preserve context", function(done) {
-        const traceName = "mysql.trace.json";
-        const tracePath = path.join(__dirname, "util", traceName);
-
+        // Don't call enableMysql() here as it interferes with test patches
+        // Instead, register the test patch directly
         if (mode === Mode.RECORD) {
             channel.registerMonkeyPatch("mysql", {versionSpecifier: "*", patch: mysqlConnectionRecordPatchFunction});
         } else {
             const trace = require(tracePath);
             channel.registerMonkeyPatch("mysql", {versionSpecifier: "*", patch: makeMysqlConnectionReplayFunction(trace)});
         }
+    });
+    after(() => { server.close(); });
+
+    it("should fire events when we interact with it, and preserve context", function(done) {
         channel.addContextPreservation((cb) => Zone.current.wrap(cb, "context preservation"));
 
         const events: Array<IStandardEvent<IMysqlData>> = [];
@@ -50,9 +50,9 @@ describe("mysql", function() {
 
         const pool = mysql.createPool({
             connectionLimit: 2,
-            host: process.env.CI ? "127.0.0.1" : "localhost",  // Force IPv4 in CI
+            host: "localhost",
             user: "root", 
-            password: process.env.CI ? "root" : "secret",  // Use CI password in CI environment
+            password: "secret",
             database: "test"
         });
 
