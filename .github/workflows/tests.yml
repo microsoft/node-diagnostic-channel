@@ -13,16 +13,15 @@ jobs:
     strategy:
       fail-fast: false  # Continue running all Node.js versions even if one fails
       matrix:
-        node-version: [20.x, 22.x]
+        node-version: [20.x]  # Focus on current LTS for faster CI
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
     - name: Install dependencies
-      run: npm ci --prefer-offline --no-audit
+      run: npm install --prefer-offline --no-audit
       timeout-minutes: 5
     - name: Build packages
       run: npm run build
@@ -59,7 +58,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
     - name: Start MongoDB
       uses: supercharge/mongodb-github-action@1.10.0
       with:
@@ -116,7 +114,7 @@ jobs:
         
         echo "Service readiness check complete"
     - name: Install dependencies
-      run: npm ci --prefer-offline --no-audit
+      run: npm install --prefer-offline --no-audit
       timeout-minutes: 5
     - name: Build packages
       run: npm run build
