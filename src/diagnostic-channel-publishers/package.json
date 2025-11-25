@@ -26,7 +26,7 @@
     "@types/pg": "7.4.11",
     "@types/tedious": "^4.0.3",
     "diagnostic-channel": "file:../diagnostic-channel",
-    "mongodb": "^3.6.6",
+    "mongodb": "^7.0.0",
     "mysql": "^2.16.0",
     "pg": "^8.6.0",
     "redis": "^3.0.2",
