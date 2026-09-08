@@ -51,3 +51,12 @@ updates:
     commit-message:
       prefix: "deps(sample)"
     open-pull-requests-limit: 3
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    groups:
+      github-actions:
+        patterns: ["*"]
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
