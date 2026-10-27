@@ -1,5 +1,14 @@
 # Contributing
 
+## Archival notice
+
+This repository is being prepared for archival. Once archived, it will be read-only
+and will no longer accept issues or pull requests. Please use the
+[Microsoft OpenTelemetry Distro for Node.js](https://github.com/microsoft/opentelemetry-distro-javascript)
+(`@microsoft/opentelemetry`) for new instrumentation work and follow that project's
+contribution guidelines for changes to the distro. The instructions below are
+retained for reference.
+
 This project welcomes contributions and suggestions. Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.

@@ -1,8 +1,20 @@
 # diagnostic-channel
 
+## Archival notice
+
+This package's repository is being prepared for archival. Please migrate to the
+[Microsoft OpenTelemetry Distro for Node.js](https://github.com/microsoft/opentelemetry-distro-javascript)
+(`@microsoft/opentelemetry`) for application instrumentation and telemetry collection.
+See its [getting started guide](https://github.com/microsoft/opentelemetry-distro-javascript#getting-started)
+for supported Node.js versions, installation, and configuration.
+
+The distro is not a drop-in replacement for diagnostic-channel APIs. Custom
+publishers and subscribers need to be adapted to OpenTelemetry instrumentation
+and APIs. The documentation below is retained for reference for existing users.
+
 This package provides a channel to connect diagnostic event publishers and subscribers. It includes a way to preserve context for the published event too. What that context is and contains is deliberately left unspecified.
 
-## Usage
+## Legacy usage (reference)
 
 ### Subscribe to an event:
 

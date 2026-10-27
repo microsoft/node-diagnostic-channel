@@ -1,5 +1,23 @@
 # diagnostic-channel
 
+## Archival notice
+
+This repository is being prepared for archival. Please migrate from
+`diagnostic-channel` and `diagnostic-channel-publishers` to the
+[Microsoft OpenTelemetry Distro for Node.js](https://github.com/microsoft/opentelemetry-distro-javascript)
+(`@microsoft/opentelemetry`) for application instrumentation and telemetry collection.
+Once archived, this repository will be read-only.
+
+See the distro's [getting started guide](https://github.com/microsoft/opentelemetry-distro-javascript#getting-started)
+for supported Node.js versions, installation, and configuration, including startup
+requirements for instrumentation. For Azure Monitor and Application Insights, see
+the [Microsoft OpenTelemetry setup guide](https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=nodejs).
+
+The distro is not a drop-in replacement for the diagnostic-channel publisher and
+subscriber APIs. Custom publishers and subscribers need to be adapted to
+OpenTelemetry instrumentation and APIs. The documentation below is retained for
+reference for existing users.
+
 ## What?
 
 **diagnostic-channel** provides a shared channel for handling instrumentation
@@ -34,7 +52,7 @@ part of these efforts.
 [async_hooks]: https://github.com/nodejs/node/pull/11883
 
 
-# How to Use
+# Legacy usage (reference)
 
 If you're a module author you can produce output directly from your own
 modules for the shared channel. If you're patching someone else's module you'll
