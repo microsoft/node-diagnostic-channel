@@ -1,8 +1,22 @@
 # Diagnostic Channel Publishers
+
+## Archival notice
+
+This package's repository is being prepared for archival. Please migrate to the
+[Microsoft OpenTelemetry Distro for Node.js](https://github.com/microsoft/opentelemetry-distro-javascript)
+(`@microsoft/opentelemetry`) for application instrumentation and telemetry collection.
+See its [getting started guide](https://github.com/microsoft/opentelemetry-distro-javascript#getting-started)
+for supported Node.js versions, installation, and configuration.
+
+The distro uses OpenTelemetry instrumentation rather than diagnostic-channel
+patches and is not a drop-in replacement. Review its supported instrumentations
+and adapt any custom publishers and subscribers to OpenTelemetry APIs. The
+documentation below is retained for reference for existing users.
+
 Provides a set of patches for common Node.js modules to publish instrumentation
 data to the [diagnostic-channel](https://github.com/Microsoft/node-diagnostic-channel) channel.
 
-## Currently-supported modules
+## Legacy instrumented modules (reference)
 * [`@azure/*`](https://azure.github.io/azure-sdk/releases/latest/index.html#javascript) latest, Currently Cognitive Search, Communication Common and Cosmos DB SDKs are not supported.
 * [`redis`](https://github.com/NodeRedis/node_redis) v2.x, v3.x
 * [`mysql`](https://github.com/mysqljs/mysql) v2.x
